@@ -7,18 +7,23 @@
 import argparse
 import torch
 
+from server import Server
+
+
 def get_gpus():
     num_of_gpus = torch.cuda.device_count()
 
-    devices = []
+    devs = []
     for d in range(num_of_gpus):
-        devices.append(f'cuda:{d}')
+        devs.append(f'cuda:{d}')
 
-    return devices
+    return devs
 
 if __name__=='__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--num_users", type=int, default=10)
+    parser.add_argument("--local_epochs", type=int, default=10)
+    parser.add_argument("--global_epochs", type=int, default=10)
     args = parser.parse_args()
 
     devices = get_gpus()
@@ -26,7 +31,12 @@ if __name__=='__main__':
     print('Number of devices: ', len(devices))
     print('Number of users for training: ', args.num_users)
 
+    X = torch.arange(-5, 5, 0.1).view(-1, 1)
+    y = -5 * X + 0.1 * torch.randn(X.size())
 
+    s = Server(devices, args.num_users, args.global_epochs, args.local_epochs, X, y)
+    s.create_users()
+    s.train()
 
 
 
