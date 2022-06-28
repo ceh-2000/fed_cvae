@@ -1,3 +1,3 @@
 # gpu_guru
 
-This project demonstrates distributed training across multiple GPUs.
+This project demonstrate~~~~s distributed training across multiple GPUs.
