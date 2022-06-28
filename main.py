@@ -4,9 +4,29 @@
 # Name: Clare Heinbaugh
 # Date: 6/28/2022
 
+import argparse
 import torch
-available_gpus = [torch.cuda.device(i) for i in range(torch.cuda.device_count())]
-print(available_gpus)
+
+def get_gpus():
+    num_of_gpus = torch.cuda.device_count()
+
+    devices = []
+    for d in range(num_of_gpus):
+        devices.append(f'cuda:{d}')
+
+    return devices
+
+if __name__=='__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--num_users", type=int, default=10)
+    args = parser.parse_args()
+
+    devices = get_gpus()
+
+    print('Number of devices: ', len(devices))
+    print('Number of users for training: ', args.num_users)
+
+
 
 
 
