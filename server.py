@@ -30,7 +30,7 @@ class Server:
         factor = a / b
         start = math.floor(i * factor)
         end = math.floor((i + 1) * factor)
-        if i == self.num_users - 1:
+        if i == b - 1:
             return start, a + 1
         else:
             return start, end
@@ -45,7 +45,7 @@ class Server:
 
     def train(self):
         for e in range(self.glob_epochs):
-            for d in self.devices:
+            for d in range(self.num_devices):
                 start, end = self.start_and_end(self.num_users, self.num_devices, d)
                 cur_users = self.users[start:end]
                 for c in cur_users:
