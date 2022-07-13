@@ -18,6 +18,10 @@ This will install the necessary dependencies.
 ### Basic run
 python3 main.py --num_users 2
 
+### Logging
+1. Enable logging by adding the command line argument `--should_log True` to `python3 main.py`.
+2. Run `tensorboard --logdir=runs` and navigate to [http://localhost:6006/](http://localhost:6006/).
+
 ### Format
 1. Run `black .` from the repo root.
 2. Run `isort .` also from the repo root.

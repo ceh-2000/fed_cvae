@@ -21,11 +21,6 @@ class Server:
         self.y = y
         self.num_samples = self.X.shape[0]
 
-    def num_users_per_device(self):
-        if self.num_devices == 0:
-            return 0
-        return math.floor(self.num_users / self.num_devices)
-
     def start_and_end(self, a, b, i):
         factor = a / b
         start = math.floor(i * factor)
@@ -41,18 +36,23 @@ class Server:
             X_data = self.X[start:end]
             y_data = self.y[start:end]
 
-            self.users.append(User(X_data, y_data))
+            new_user = User(X_data, y_data)
+            self.users.append(new_user)
 
-    def train(self):
+    def train(self, writer):
         for e in range(self.glob_epochs):
-            for d in range(self.num_devices):
-                start, end = self.start_and_end(self.num_users, self.num_devices, d)
-                cur_users = self.users[start:end]
-                for c in cur_users:
-                    c.move_to_device(self.devices[d])
-                    print(f"Moved user to {self.devices[d]}")
-
             for u in self.users:
                 u.train(self.local_epochs)
 
+            self.evaluate(writer, e)
             print(f"Finished training all users for epoch {e}")
+
+    def evaluate(self, writer, e):
+        if writer:
+            writer.add_scalar(
+                "Global Accuracy/train", 50 + e, e
+            )
+
+    def test(self):
+        print("Finished testing server.")
+        pass

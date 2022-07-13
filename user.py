@@ -12,11 +12,6 @@ class User:
         self.loss_func = torch.nn.MSELoss()
         self.optimizer = torch.optim.SGD(self.model.parameters(), lr=0.1)
 
-    def move_to_device(self, device):
-        self.X.to(device)
-        self.y.to(device)
-        self.model.to(device)
-
     def train(self, local_epochs):
         for epoch in range(local_epochs):
             y1 = self.model(self.X)
