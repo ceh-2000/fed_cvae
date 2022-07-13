@@ -30,7 +30,8 @@ def run_job(args):
             num_users=args.num_users,
             glob_epochs=args.glob_epochs,
             local_epochs=args.local_epochs,
-            data_subsets=d.data,
+            data_subsets=d.train_data,
+            data_server=d.test_data,
         )
         s.create_users()
 
@@ -76,5 +77,6 @@ if __name__ == "__main__":
     print("Number of local epochs: ", args.local_epochs)
     print("Number of global epochs: ", args.glob_epochs)
     print("Logging? ", args.should_log)
+    print("_________________________________________________\n\n")
 
     run_job(args)

@@ -7,7 +7,9 @@ from user import User
 
 
 class Server:
-    def __init__(self, devices, num_users, glob_epochs, local_epochs, data_subsets):
+    def __init__(
+        self, devices, num_users, glob_epochs, local_epochs, data_subsets, data_server
+    ):
         self.devices = devices
         self.num_devices = len(self.devices)
 
@@ -20,21 +22,8 @@ class Server:
         self.server_model = MyModel().model
 
         self.data_subsets = data_subsets
-        self.populate_model_data()
-
-    def populate_model_data(self):
-        self.X_test = torch.index_select(
-            self.data_subsets[len(self.data_subsets) - 1].dataset.data,
-            0,
-            torch.IntTensor(self.data_subsets[len(self.data_subsets) - 1].indices),
-        )
-        self.y_test = torch.index_select(
-            self.data_subsets[len(self.data_subsets) - 1].dataset.targets,
-            0,
-            torch.IntTensor(self.data_subsets[len(self.data_subsets) - 1].indices),
-        )
-        print(self.X_test.shape)
-        print(self.y_test.shape)
+        self.X_test = data_server.data
+        self.y_test = data_server.targets
 
     def create_users(self):
         for u in range(self.num_users):

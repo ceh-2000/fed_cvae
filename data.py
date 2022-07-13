@@ -10,20 +10,20 @@ from torchvision.datasets import MNIST
 class Data:
     def __init__(self, dataset_name, num_users):
         # if dataset_name == 'mnist':
-        dataset = MNIST(root="data/mnist", download=True)
+        dataset_train = MNIST(root="data/mnist", download=True, train=True)
 
-        num_total_samples = len(dataset)
-        num_test_samples = 10000
-        num_train_samples = num_total_samples - num_test_samples
+        num_train_samples = len(dataset_train)
         num_user_samples = int(num_train_samples / num_users)
 
         data_split_sequence = []
         for u in range(num_users):
             data_split_sequence.append(num_user_samples)
-        data_split_sequence.append(num_test_samples)
 
         # Data is composed of dataset.Subset objects
-        self.data = random_split(dataset, data_split_sequence)
+        self.train_data = random_split(dataset_train, data_split_sequence)
+
+        dataset_test = MNIST(root="data/mnist", download=True, train=False)
+        self.test_data = dataset_test
 
 
 if __name__ == "__main__":
