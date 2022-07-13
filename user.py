@@ -7,6 +7,8 @@ class User:
     def __init__(self, X, y):
         self.X = X
         self.y = y
+        print(X.shape)
+        print(y.shape)
 
         self.model = MyModel().model
         self.loss_func = torch.nn.MSELoss()

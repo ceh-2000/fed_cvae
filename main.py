@@ -19,7 +19,7 @@ def get_gpus():
 
 def run_job(args):
     # Get the data
-    d = Data()
+    d = Data(args.dataset, args.num_users)
 
     for i in range(args.trials):
         torch.manual_seed(i)
@@ -30,8 +30,7 @@ def run_job(args):
             num_users=args.num_users,
             glob_epochs=args.glob_epochs,
             local_epochs=args.local_epochs,
-            X=d.X,
-            y=d.y,
+            data_subsets=d.data,
         )
         s.create_users()
 
@@ -45,7 +44,7 @@ def run_job(args):
             cur_run_name = f"runs/iter={i}_users={args.num_users}_glob_epochs={args.glob_epochs}_local_epochs={args.local_epochs}"
             writer = SummaryWriter(log_dir=cur_run_name)
 
-            s.train(writer)
+            # s.train(writer)
 
             # Make sure that all pending events have been written to disk.
             writer.flush()
@@ -60,6 +59,7 @@ if __name__ == "__main__":
     # Extract command line arguments
     parser = argparse.ArgumentParser()
     parser.add_argument("--trials", type=int, default=1)
+    parser.add_argument("--dataset", type=str, default="mnist")
     parser.add_argument("--num_users", type=int, default=10)
     parser.add_argument("--glob_epochs", type=int, default=10)
     parser.add_argument("--local_epochs", type=int, default=10)
@@ -70,9 +70,11 @@ if __name__ == "__main__":
     devices = get_gpus()
 
     print("Number of devices: ", len(devices))
+    print("Dataset name: ", args.dataset)
     print("Number of trials: ", args.trials)
     print("Number of users for training: ", args.num_users)
     print("Number of local epochs: ", args.local_epochs)
     print("Number of global epochs: ", args.glob_epochs)
+    print("Logging? ", args.should_log)
 
     run_job(args)

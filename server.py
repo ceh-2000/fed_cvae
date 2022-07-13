@@ -1,11 +1,13 @@
 import math
 
+import torch
+
 from model import MyModel
 from user import User
 
 
 class Server:
-    def __init__(self, devices, num_users, glob_epochs, local_epochs, X, y):
+    def __init__(self, devices, num_users, glob_epochs, local_epochs, data_subsets):
         self.devices = devices
         self.num_devices = len(self.devices)
 
@@ -17,26 +19,37 @@ class Server:
 
         self.server_model = MyModel().model
 
-        self.X = X
-        self.y = y
-        self.num_samples = self.X.shape[0]
+        self.data_subsets = data_subsets
+        self.populate_model_data()
 
-    def start_and_end(self, a, b, i):
-        factor = a / b
-        start = math.floor(i * factor)
-        end = math.floor((i + 1) * factor)
-        if i == b - 1:
-            return start, a + 1
-        else:
-            return start, end
+    def populate_model_data(self):
+        self.X_test = torch.index_select(
+            self.data_subsets[len(self.data_subsets) - 1].dataset.data,
+            0,
+            torch.IntTensor(self.data_subsets[len(self.data_subsets) - 1].indices),
+        )
+        self.y_test = torch.index_select(
+            self.data_subsets[len(self.data_subsets) - 1].dataset.targets,
+            0,
+            torch.IntTensor(self.data_subsets[len(self.data_subsets) - 1].indices),
+        )
+        print(self.X_test.shape)
+        print(self.y_test.shape)
 
     def create_users(self):
         for u in range(self.num_users):
-            start, end = self.start_and_end(self.num_samples, self.num_users, u)
-            X_data = self.X[start:end]
-            y_data = self.y[start:end]
+            X_user = torch.index_select(
+                self.data_subsets[u].dataset.data,
+                0,
+                torch.IntTensor(self.data_subsets[u].indices),
+            )
+            y_user = torch.index_select(
+                self.data_subsets[u].dataset.targets,
+                0,
+                torch.IntTensor(self.data_subsets[u].indices),
+            )
 
-            new_user = User(X_data, y_data)
+            new_user = User(X_user, y_user)
             self.users.append(new_user)
 
     def train(self, writer):
