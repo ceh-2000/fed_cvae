@@ -1,4 +1,5 @@
 import torch
+
 from model import MyModel
 
 
@@ -9,7 +10,7 @@ class User:
 
         self.model = MyModel().model
         self.loss_func = torch.nn.MSELoss()
-        self.optimizer = torch.optim.SGD(self.model.parameters(), lr = 0.1)
+        self.optimizer = torch.optim.SGD(self.model.parameters(), lr=0.1)
 
     def move_to_device(self, device):
         self.X.to(device)
@@ -24,5 +25,3 @@ class User:
             self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()
-
-

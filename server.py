@@ -50,18 +50,9 @@ class Server:
                 cur_users = self.users[start:end]
                 for c in cur_users:
                     c.move_to_device(self.devices[d])
-                    print(f'Moved user to {self.devices[d]}')
+                    print(f"Moved user to {self.devices[d]}")
 
             for u in self.users:
                 u.train(self.local_epochs)
 
-            print(f'Finished training all users for epoch {e}')
-
-
-
-
-
-
-
-
-
+            print(f"Finished training all users for epoch {e}")

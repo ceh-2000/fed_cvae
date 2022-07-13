@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/gpu_guru.iml" filepath="$PROJECT_DIR$/.idea/gpu_guru.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/fed_vae.iml" filepath="$PROJECT_DIR$/.idea/fed_vae.iml" />
     </modules>
   </component>
 </project>
