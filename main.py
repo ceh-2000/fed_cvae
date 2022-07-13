@@ -25,12 +25,19 @@ def run_job(args):
         torch.manual_seed(i)
 
         # Initialize the server which manages all users
-        s = Server(devices=devices, num_users=args.num_users, glob_epochs=args.glob_epochs,
-                   local_epochs=args.local_epochs,
-                   X=d.X, y=d.y)
+        s = Server(
+            devices=devices,
+            num_users=args.num_users,
+            glob_epochs=args.glob_epochs,
+            local_epochs=args.local_epochs,
+            X=d.X,
+            y=d.y,
+        )
         s.create_users()
 
-        print(f"[--------------------Starting training iteration {i}--------------------]")
+        print(
+            f"[--------------------Starting training iteration {i}--------------------]"
+        )
 
         # Before logging anything, we need to create a SummaryWriter instance.
         # Writer will output to ./runs/ directory by default.
@@ -47,8 +54,6 @@ def run_job(args):
             writer.close()
         else:
             s.train(None)
-
-
 
 
 if __name__ == "__main__":

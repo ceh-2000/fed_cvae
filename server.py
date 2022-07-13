@@ -49,9 +49,7 @@ class Server:
 
     def evaluate(self, writer, e):
         if writer:
-            writer.add_scalar(
-                "Global Accuracy/train", 50 + e, e
-            )
+            writer.add_scalar("Global Accuracy/train", 50 + e, e)
 
     def test(self):
         print("Finished testing server.")
