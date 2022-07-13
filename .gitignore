@@ -1,3 +1,5 @@
 /venv/
 /runs/
 /data/
+__pycache__
+.idea
