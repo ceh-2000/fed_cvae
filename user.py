@@ -1,24 +1,35 @@
-import torch
+from torch.nn import CrossEntropyLoss
+from torch.optim import Adam
 
 from model import MyModel
 
 
 class User:
-    def __init__(self, X, y):
-        self.X = X
-        self.y = y
-        print(X.shape)
-        print(y.shape)
+    def __init__(self, user_id, dataloader, num_channels, num_classes):
+        self.user_id = user_id
+        self.dataloader = dataloader
 
-        self.model = MyModel().model
-        self.loss_func = torch.nn.MSELoss()
-        self.optimizer = torch.optim.SGD(self.model.parameters(), lr=0.1)
+        self.num_channels = num_channels
+        self.num_classes = num_classes
+
+        self.model = MyModel(self.num_channels, self.num_classes).model
+        self.loss_func = CrossEntropyLoss()
+        self.optimizer = Adam(self.model.parameters(), lr=0.01)
+
+        print(f'Created user {user_id}')
 
     def train(self, local_epochs):
-        for epoch in range(local_epochs):
-            y1 = self.model(self.X)
-            loss = self.loss_func(y1, self.y)
+        self.model.train()
 
-            self.optimizer.zero_grad()
-            loss.backward()
-            self.optimizer.step()
+        for epoch in range(local_epochs):
+            for batch_idx, (X_batch, y_batch) in enumerate(self.dataloader):
+                # Forward pass through model
+                output = self.model(X_batch)
+
+                # Compute loss with pre-defined loss function
+                loss = self.loss_func(output, y_batch)
+
+                # Gradient descent
+                self.optimizer.zero_grad()
+                loss.backward()
+                self.optimizer.step()

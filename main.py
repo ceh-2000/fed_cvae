@@ -32,6 +32,8 @@ def run_job(args):
             local_epochs=args.local_epochs,
             data_subsets=d.train_data,
             data_server=d.test_data,
+            num_channels=d.num_channels,
+            num_classes=d.num_classes,
         )
         s.create_users()
 
@@ -45,7 +47,7 @@ def run_job(args):
             cur_run_name = f"runs/iter={i}_users={args.num_users}_glob_epochs={args.glob_epochs}_local_epochs={args.local_epochs}"
             writer = SummaryWriter(log_dir=cur_run_name)
 
-            # s.train(writer)
+            s.train(writer)
 
             # Make sure that all pending events have been written to disk.
             writer.flush()
@@ -55,6 +57,8 @@ def run_job(args):
         else:
             s.train(None)
 
+        s.test()
+
 
 if __name__ == "__main__":
     # Extract command line arguments
@@ -62,8 +66,8 @@ if __name__ == "__main__":
     parser.add_argument("--trials", type=int, default=1)
     parser.add_argument("--dataset", type=str, default="mnist")
     parser.add_argument("--num_users", type=int, default=10)
-    parser.add_argument("--glob_epochs", type=int, default=10)
-    parser.add_argument("--local_epochs", type=int, default=10)
+    parser.add_argument("--glob_epochs", type=int, default=3)
+    parser.add_argument("--local_epochs", type=int, default=5)
     parser.add_argument("--should_log", type=bool, default=False)
     args = parser.parse_args()
 

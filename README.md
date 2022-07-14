@@ -16,7 +16,10 @@ pip3 install -r requirements.txt
 This will install the necessary dependencies.
 
 ### Basic run
-python3 main.py --num_users 2
+Run the following from command line.
+```
+python3 main.py --trials 1 --dataset mnist --num_users 10 --glob_epochs 3 --local_epochs 5 --should_log True
+```
 
 ### Logging
 1. Enable logging by adding the command line argument `--should_log True` to `python3 main.py`.
