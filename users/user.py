@@ -1,22 +1,22 @@
 from torch.nn import CrossEntropyLoss
 from torch.optim import Adam
 
-from model import MyModel
+from models.model import MyModel
 
 
 class User:
-    def __init__(self, user_id, dataloader, num_channels, num_classes):
-        self.user_id = user_id
-        self.dataloader = dataloader
+    def __init__(self, params):
+        self.user_id = params["user_id"]
+        self.dataloader = params["dataloader"]
 
-        self.num_channels = num_channels
-        self.num_classes = num_classes
+        self.num_channels = params["num_channels"]
+        self.num_classes = params["num_classes"]
 
         self.model = MyModel(self.num_channels, self.num_classes).model
         self.loss_func = CrossEntropyLoss()
         self.optimizer = Adam(self.model.parameters(), lr=0.01)
 
-        print(f"Created user {user_id}")
+        print(f"Created user {self.user_id}")
 
     def train(self, local_epochs):
         self.model.train()

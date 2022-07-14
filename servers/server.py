@@ -3,40 +3,29 @@ import torch
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
 
-from model import MyModel
-from user import User
+from models.model import MyModel
+from users.user import User
 
 
 class Server:
-    def __init__(
-        self,
-        devices,
-        num_users,
-        glob_epochs,
-        local_epochs,
-        data_subsets,
-        data_server,
-        num_channels,
-        num_classes,
-        writer
-    ):
-        self.devices = devices
+    def __init__(self, params):
+        self.devices = params["devices"]
         self.num_devices = len(self.devices)
 
         self.users = []
-        self.num_users = num_users
+        self.num_users = params["num_users"]
 
-        self.glob_epochs = glob_epochs
-        self.local_epochs = local_epochs
+        self.glob_epochs = params["glob_epochs"]
+        self.local_epochs = params["local_epochs"]
 
-        self.data_subsets = data_subsets
-        self.dataloader = DataLoader(data_server, shuffle=True, batch_size=32)
+        self.data_subsets = params["data_subsets"]
+        self.dataloader = DataLoader(params["data_server"], shuffle=True, batch_size=32)
 
-        self.num_channels = num_channels
-        self.num_classes = num_classes
-        self.server_model = MyModel(num_channels, num_classes).model
+        self.num_channels = params["num_channels"]
+        self.num_classes = params["num_classes"]
+        self.server_model = MyModel(self.num_channels, self.num_classes).model
 
-        self.writer = writer
+        self.writer = params["writer"]
 
     def create_users(self):
         """
@@ -46,10 +35,12 @@ class Server:
         for u in range(self.num_users):
             dl = DataLoader(self.data_subsets[u], shuffle=True, batch_size=32)
             new_user = User(
-                user_id=u,
-                dataloader=dl,
-                num_channels=self.num_channels,
-                num_classes=self.num_classes,
+                {
+                    "user_id": u,
+                    "dataloader": dl,
+                    "num_channels": self.num_channels,
+                    "num_classes": self.num_classes,
+                }
             )
             self.users.append(new_user)
 

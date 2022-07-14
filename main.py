@@ -1,8 +1,10 @@
 import argparse
+
 import torch
-from data import Data
-from server import Server
 from torch.utils.tensorboard import SummaryWriter
+
+from data import Data
+from servers.server_fed_avg import ServerFedAvg
 
 
 def get_gpus():
@@ -30,17 +32,25 @@ def run_job(args):
             writer = SummaryWriter(log_dir=cur_run_name)
 
         # Initialize the server which manages all users
-        s = Server(
-            devices=devices,
-            num_users=args.num_users,
-            glob_epochs=args.glob_epochs,
-            local_epochs=args.local_epochs,
-            data_subsets=d.train_data,
-            data_server=d.test_data,
-            num_channels=d.num_channels,
-            num_classes=d.num_classes,
-            writer=writer
-        )
+        default_params = {
+            "devices": devices,
+            "num_users": args.num_users,
+            "glob_epochs": args.glob_epochs,
+            "local_epochs": args.local_epochs,
+            "data_subsets": d.train_data,
+            "data_server": d.test_data,
+            "num_channels": d.num_channels,
+            "num_classes": d.num_classes,
+            "writer": writer,
+        }
+
+        if args.algorithm == "fedavg":
+            s = ServerFedAvg(default_params)
+        else:
+            raise NotImplementedError(
+                "The specified algorithm has not been implemented."
+            )
+
         s.create_users()
 
         print(
@@ -62,6 +72,7 @@ if __name__ == "__main__":
     # Extract command line arguments
     parser = argparse.ArgumentParser()
     parser.add_argument("--trials", type=int, default=1)
+    parser.add_argument("--algorithm", type=str, default="fedavg")
     parser.add_argument("--dataset", type=str, default="mnist")
     parser.add_argument("--num_users", type=int, default=10)
     parser.add_argument("--glob_epochs", type=int, default=3)
@@ -74,6 +85,7 @@ if __name__ == "__main__":
 
     print("Number of devices: ", len(devices))
     print("Dataset name: ", args.dataset)
+    print("Algorithm: ", args.algorithm)
     print("Number of trials: ", args.trials)
     print("Number of users for training: ", args.num_users)
     print("Number of local epochs: ", args.local_epochs)
