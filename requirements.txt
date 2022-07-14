@@ -8,3 +8,5 @@ setuptools==59.5.0
 tensorboard~=2.9.1
 torch~=1.10.2
 torchvision~=0.11.3
+pandas~=1.4.3
+seaborn~=0.11.2
