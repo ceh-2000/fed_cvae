@@ -19,7 +19,13 @@ def get_gpus():
 
 def run_job(args):
     # Get the data
-    d = Data(args.dataset, args.num_users)
+    d = Data(
+        args.dataset,
+        args.num_users,
+        alpha=args.alpha,
+        sample_ratio=args.sample_ratio,
+        visualize=True if args.alpha is not None else False,
+    )
 
     for i in range(args.trials):
         torch.manual_seed(i)
@@ -44,7 +50,7 @@ def run_job(args):
         # Before logging anything, we need to create a SummaryWriter instance.
         # Writer will output to ./runs/ directory by default.
         if args.should_log:
-            cur_run_name = f"runs/iter={i}_users={args.num_users}_glob_epochs={args.glob_epochs}_local_epochs={args.local_epochs}"
+            cur_run_name = f"runs/iter={i}_users={args.num_users}_glob_epochs={args.glob_epochs}_local_epochs={args.local_epochs}_alpha={args.alpha}_sample_ratio={args.sample_ratio}"
             writer = SummaryWriter(log_dir=cur_run_name)
 
             s.train(writer)
@@ -66,6 +72,8 @@ if __name__ == "__main__":
     parser.add_argument("--trials", type=int, default=1)
     parser.add_argument("--dataset", type=str, default="mnist")
     parser.add_argument("--num_users", type=int, default=10)
+    parser.add_argument("--alpha", type=float, default=None)
+    parser.add_argument("--sample_ratio", type=float, default=1)
     parser.add_argument("--glob_epochs", type=int, default=3)
     parser.add_argument("--local_epochs", type=int, default=5)
     parser.add_argument("--should_log", type=bool, default=False)
@@ -76,6 +84,11 @@ if __name__ == "__main__":
 
     print("Number of devices: ", len(devices))
     print("Dataset name: ", args.dataset)
+    print(
+        "Level of heterogeneity (alpha):",
+        args.alpha if args.alpha is not None else "perfectly homogeneous",
+    )
+    print("Portion of the dataset used:", args.sample_ratio)
     print("Number of trials: ", args.trials)
     print("Number of users for training: ", args.num_users)
     print("Number of local epochs: ", args.local_epochs)

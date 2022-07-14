@@ -12,13 +12,13 @@ Install Python 3.9 and `pip`. We recommend using the package pyenv, which is des
 Create and enter a new virtual environment and run:
 ```
 pip3 install -r requirements.txt
-``` 
+```
 This will install the necessary dependencies.
 
 ### Basic run
 Run the following from command line.
 ```
-python3 main.py --trials 1 --dataset mnist --num_users 10 --glob_epochs 3 --local_epochs 5 --should_log True
+python3 main.py --trials 1 --dataset mnist --num_users 10 --glob_epochs 3 --local_epochs 1 --should_log True
 ```
 
 ### Logging
