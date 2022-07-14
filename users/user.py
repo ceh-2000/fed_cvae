@@ -12,7 +12,7 @@ class User:
         self.num_channels = params["num_channels"]
         self.num_classes = params["num_classes"]
 
-        self.model = MyModel(self.num_channels, self.num_classes).model
+        self.model = MyModel(self.num_channels, self.num_classes)
         self.loss_func = CrossEntropyLoss()
         self.optimizer = Adam(self.model.parameters(), lr=0.01)
 

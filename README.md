@@ -18,7 +18,7 @@ This will install the necessary dependencies.
 ### Basic run
 Run the following from command line.
 ```
-python3 main.py --trials 1 --dataset mnist --num_users 10 --glob_epochs 3 --local_epochs 1 --should_log True
+python3 main.py --algorithm fedavg --dataset mnist --num_users 10 --alpha 0.1 --sample_ratio 0.5 --glob_epochs 5 --local_epochs 1 --should_log True
 ```
 
 ### Logging

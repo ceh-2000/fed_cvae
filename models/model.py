@@ -1,7 +1,8 @@
+from torch import nn
 from torch.nn import Conv2d, Flatten, Linear, MaxPool2d, ReLU, Sequential
 
 
-class MyModel:
+class MyModel(nn.Module):
     def __init__(self, input_channels, output_size):
         super().__init__()
         self.model = Sequential(

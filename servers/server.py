@@ -23,7 +23,7 @@ class Server:
 
         self.num_channels = params["num_channels"]
         self.num_classes = params["num_classes"]
-        self.server_model = MyModel(self.num_channels, self.num_classes).model
+        self.server_model = MyModel(self.num_channels, self.num_classes)
 
         self.writer = params["writer"]
 
