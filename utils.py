@@ -19,20 +19,15 @@ def average_weights(model_list):
     Average all of the weights for a list of given models
 
     :param model_list: List of models to average
-    :return: A new model with averaged weights of the dummy models
+    :return: An averaged state dictionary
     """
-
-    # Create a placeholder for the new, averaged model
-    dummy_model = copy.deepcopy(model_list[0])
 
     # Extract state dictionaries for all models in model_list
     weight_objects = []
     for w in model_list:
-        weight_objects.append(copy.deepcopy(model_list[w]).state_dict())
+        weight_objects.append(copy.deepcopy(w.state_dict()))
 
     # Average the weights from models
     avg_model_state_dict = avg_weights(weight_objects)
 
-    dummy_model.load_state_dict(copy.deepcopy(avg_model_state_dict))
-
-    return dummy_model
+    return avg_model_state_dict

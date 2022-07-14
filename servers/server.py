@@ -79,6 +79,8 @@ class Server:
             if self.writer:
                 self.writer.add_scalar("Global Accuracy/test", accuracy, e)
 
+        self.server_model.train()
+
     def test(self):
         self.evaluate(self.glob_epochs)
         print("Finished testing server.")

@@ -1,3 +1,6 @@
+import copy
+import sys
+
 from torch.utils.data import DataLoader
 
 from servers.server import Server
@@ -31,15 +34,23 @@ class ServerFedAvg(Server):
         Train the global server model and local user models.
         After each epoch average the weights of all users.
         """
+
         for e in range(self.glob_epochs):
             self.evaluate(e)
+
+            # Train and save user models to a list
+            models = []
             for u in self.users:
                 u.train(self.local_epochs)
+                models.append(u.model)
 
-            # models = []
-            # for u in self.users:
-            #     models.append(u.model)
-            # self.server_model = average_weights(models)
+            # Average the weights of the user models and send to server
+            state_dict = average_weights(models)
+            self.server_model.load_state_dict(copy.deepcopy(state_dict))
+
+            # Replace local user model with server model
+            for u in self.users:
+                u.model.load_state_dict(copy.deepcopy(state_dict))
 
             print(f"Finished training all users for epoch {e}")
             print("__________________________________________")
