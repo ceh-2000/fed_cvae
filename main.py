@@ -1,10 +1,8 @@
 import argparse
-
 import torch
-from torch.utils.tensorboard import SummaryWriter
-
 from data import Data
 from server import Server
+from torch.utils.tensorboard import SummaryWriter
 
 
 def get_gpus():
@@ -24,6 +22,13 @@ def run_job(args):
     for i in range(args.trials):
         torch.manual_seed(i)
 
+        writer = None
+        if args.should_log:
+            # Before logging anything, we need to create a SummaryWriter instance.
+            # Writer will output to ./runs/ directory by default.
+            cur_run_name = f"runs/iter={i}_users={args.num_users}_glob_epochs={args.glob_epochs}_local_epochs={args.local_epochs}"
+            writer = SummaryWriter(log_dir=cur_run_name)
+
         # Initialize the server which manages all users
         s = Server(
             devices=devices,
@@ -34,6 +39,7 @@ def run_job(args):
             data_server=d.test_data,
             num_channels=d.num_channels,
             num_classes=d.num_classes,
+            writer=writer
         )
         s.create_users()
 
@@ -41,23 +47,15 @@ def run_job(args):
             f"[--------------------Starting training iteration {i}--------------------]"
         )
 
-        # Before logging anything, we need to create a SummaryWriter instance.
-        # Writer will output to ./runs/ directory by default.
+        s.train()
+        s.test()
+
         if args.should_log:
-            cur_run_name = f"runs/iter={i}_users={args.num_users}_glob_epochs={args.glob_epochs}_local_epochs={args.local_epochs}"
-            writer = SummaryWriter(log_dir=cur_run_name)
-
-            s.train(writer)
-
             # Make sure that all pending events have been written to disk.
             writer.flush()
 
             # Close writer when finished.
             writer.close()
-        else:
-            s.train(None)
-
-        s.test()
 
 
 if __name__ == "__main__":

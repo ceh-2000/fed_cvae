@@ -20,7 +20,5 @@ class MyModel:
             Linear(98, output_size),
         )
 
-
-
     def forward(self, X):
         return self.model(X)

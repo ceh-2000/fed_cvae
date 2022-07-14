@@ -8,7 +8,7 @@ from torchvision.transforms import Compose, Normalize, ToTensor
 
 class Data:
     def __init__(self, dataset_name, num_users):
-        if dataset_name == 'mnist':
+        if dataset_name == "mnist":
             dataset_train = MNIST(
                 root="data/mnist",
                 download=True,
@@ -39,4 +39,6 @@ class Data:
             self.num_channels = 1
             self.num_classes = 10
         else:
-            raise NotImplementedError("Only mnist has been implemented. Please implement other datasets.")
+            raise NotImplementedError(
+                "Only mnist has been implemented. Please implement other datasets."
+            )

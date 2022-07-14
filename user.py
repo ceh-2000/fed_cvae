@@ -16,7 +16,7 @@ class User:
         self.loss_func = CrossEntropyLoss()
         self.optimizer = Adam(self.model.parameters(), lr=0.01)
 
-        print(f'Created user {user_id}')
+        print(f"Created user {user_id}")
 
     def train(self, local_epochs):
         self.model.train()

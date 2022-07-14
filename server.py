@@ -18,6 +18,7 @@ class Server:
         data_server,
         num_channels,
         num_classes,
+        writer
     ):
         self.devices = devices
         self.num_devices = len(self.devices)
@@ -35,6 +36,8 @@ class Server:
         self.num_classes = num_classes
         self.server_model = MyModel(num_channels, num_classes).model
 
+        self.writer = writer
+
     def create_users(self):
         """
         Every user gets an id, dataloader corresponding to their unique, private data, and info about the data
@@ -50,25 +53,22 @@ class Server:
             )
             self.users.append(new_user)
 
-    def train(self, writer):
+    def train(self):
         """
         Train the global server model and local user models
-
-        :param writer: Logger
         """
         for e in range(self.glob_epochs):
-            self.evaluate(writer, e)
+            self.evaluate(e)
             for u in self.users:
                 u.train(self.local_epochs)
 
             print(f"Finished training all users for epoch {e}")
             print("__________________________________________")
 
-    def evaluate(self, writer, e):
+    def evaluate(self, e):
         """
         Evaluate the global server model by comparing the predicted global labels to the actual test labels
 
-        :param writer: Logger
         :param e: Global epoch number
         """
         with torch.no_grad():
@@ -85,10 +85,9 @@ class Server:
             accuracy = round(total_correct / len(self.dataloader.dataset) * 100, 2)
             print(f"Server model accuracy was: {accuracy}% on epoch {e}")
 
-            if writer:
-                writer.add_scalar("Global Accuracy/test", accuracy, e)
+            if self.writer:
+                self.writer.add_scalar("Global Accuracy/test", accuracy, e)
 
     def test(self):
-        self.evaluate(None, self.glob_epochs)
+        self.evaluate(self.glob_epochs)
         print("Finished testing server.")
-        pass
