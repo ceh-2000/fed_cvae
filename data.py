@@ -1,6 +1,11 @@
 """
 Read in the data from a specified data source
 """
+import io
+import sys
+
+import torchvision.utils
+from PIL import Image
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -21,6 +26,7 @@ class Data:
         self,
         dataset_name,
         num_users,
+        writer,
         sample_ratio=1.0,
         alpha=None,
         normalize=True,
@@ -41,6 +47,7 @@ class Data:
         self.alpha = alpha
         self.sample_ratio = sample_ratio
         self.num_users = num_users
+        self.writer = writer
 
         if self.dataset_name == "mnist":
             # MNIST is black and white, so number of channels is 1
@@ -210,13 +217,24 @@ class Data:
         plt.xlabel("User ID", fontweight="bold")
         plt.ylabel("Class label", fontweight="bold")
 
-        plt.show()
+        if self.writer:
+            img_buf = io.BytesIO()
+            plt.savefig(img_buf, format='png')
 
+            im = Image.open(img_buf)
+
+            # Save the image to tensorboard
+            im_tensor = ToTensor()(im).unsqueeze(0)
+            grid = torchvision.utils.make_grid(im_tensor)
+            self.writer.add_image('Data distribution', grid, 0)
+
+        plt.show()
 
 if __name__ == "__main__":
     MNIST_data = Data(
         "MNIST",
         num_users=20,
+        writer=None,
         sample_ratio=0.5,
         alpha=1,
         normalize=True,
