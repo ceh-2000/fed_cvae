@@ -56,7 +56,11 @@ class Server:
         if self.user_fraction == 1:
             return self.users
 
-        sampled_user_idxs = np.random.choice([i for i in range(self.num_users)], size = self.num_users_per_round, replace = False)
+        sampled_user_idxs = np.random.choice(
+            [i for i in range(self.num_users)],
+            size=self.num_users_per_round,
+            replace=False,
+        )
         selected_users = np.array(self.users)[sampled_user_idxs]
 
         return selected_users
