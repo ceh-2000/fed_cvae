@@ -200,7 +200,7 @@ class Data:
         )
         df["user"] = [i for i in range(self.num_users)] * self.num_classes
 
-        size_max = len(df["num_samples"]) * 5
+        size_max = df["num_samples"].max() / (10 * self.sample_ratio)
         sns.set_style("whitegrid")
         sns.scatterplot(
             x="user",

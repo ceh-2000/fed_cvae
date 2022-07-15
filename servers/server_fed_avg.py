@@ -1,33 +1,12 @@
 import copy
-import sys
-
-from torch.utils.data import DataLoader
 
 from servers.server import Server
-from users.user_fed_avg import UserFedAvg
 from utils import average_weights
 
 
 class ServerFedAvg(Server):
     def __init__(self, base_params):
         super().__init__(base_params)
-
-    def create_users(self):
-        """
-        Every user gets an id, dataloader corresponding to their unique, private data, and info about the data
-        This is a stored in a list of users.
-        """
-        for u in range(self.num_users):
-            dl = DataLoader(self.data_subsets[u], shuffle=True, batch_size=32)
-            new_user = UserFedAvg(
-                {
-                    "user_id": u,
-                    "dataloader": dl,
-                    "num_channels": self.num_channels,
-                    "num_classes": self.num_classes,
-                }
-            )
-            self.users.append(new_user)
 
     def train(self):
         """
