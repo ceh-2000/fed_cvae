@@ -23,7 +23,3 @@ class UserOneShot(User):
                 total_correct += np.sum((y_pred == y_batch).numpy())
 
         return round(total_correct / len(self.dataloader.dataset) * 100, 2)
-
-
-
-

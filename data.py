@@ -4,12 +4,12 @@ Read in the data from a specified data source
 import io
 import sys
 
-import torchvision.utils
-from PIL import Image
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
+import torchvision.utils
+from PIL import Image
 from torch import manual_seed, randperm
 from torch.utils.data import Subset, random_split
 from torchvision.datasets import MNIST
@@ -21,7 +21,6 @@ manual_seed(1693)
 
 
 class Data:
-
     def __init__(
         self,
         dataset_name,
@@ -108,7 +107,6 @@ class Data:
                 "Only mnist has been implemented. Please implement other datasets."
             )
 
-
     def split_data_dirichlet(self, dataset_train, visualize):
         """Split the dataset according to proportionsk sampled from a Dirichlet distribution, with alpha controlling the level of heterogeneity.
 
@@ -117,8 +115,6 @@ class Data:
 
         :return: user data splits as a list of torch.dataset.Subset objects
         """
-
-        # TODO: do something special here if sample_ratio < 1... we'll need to make sure we only consider the dataset indices that we're actually using!
 
         # Getting indices for each class
         if self.sample_ratio == 1:
@@ -219,16 +215,17 @@ class Data:
 
         if self.writer:
             img_buf = io.BytesIO()
-            plt.savefig(img_buf, format='png')
+            plt.savefig(img_buf, format="png")
 
             im = Image.open(img_buf)
 
             # Save the image to tensorboard
             im_tensor = ToTensor()(im).unsqueeze(0)
             grid = torchvision.utils.make_grid(im_tensor)
-            self.writer.add_image('Data distribution', grid, 0)
+            self.writer.add_image("Data distribution", grid, 0)
 
         plt.show()
+
 
 if __name__ == "__main__":
     MNIST_data = Data(

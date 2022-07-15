@@ -15,6 +15,9 @@ class Server:
         self.users = []
         self.num_users = params["num_users"]
 
+        self.user_fraction = params["user_fraction"]
+        self.num_users_per_round = int(self.user_fraction * self.num_users)
+
         self.glob_epochs = params["glob_epochs"]
         self.local_epochs = params["local_epochs"]
 
@@ -44,13 +47,33 @@ class Server:
             )
             self.users.append(new_user)
 
+    def sample_users(self):
+        """
+        Sample a portion of users for training according to the indicated sample fraction
+
+        :return: The chosen users
+        """
+        if self.user_fraction == 1:
+            return self.users
+
+        sampled_user_idxs = np.random.choice(
+            [i for i in range(self.num_users)],
+            size=self.num_users_per_round,
+            replace=False,
+        )
+        selected_users = np.array(self.users)[sampled_user_idxs]
+
+        return selected_users
+
     def train(self):
         """
         Train the global server model and local user models
         """
         for e in range(self.glob_epochs):
             self.evaluate(e)
-            for u in self.users:
+
+            selected_users = self.sample_users()
+            for u in selected_users:
                 u.train(self.local_epochs)
 
             print(f"Finished training all users for epoch {e}")

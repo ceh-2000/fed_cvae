@@ -9,13 +9,16 @@ from servers.server import Server
 from users.user import User
 from users.user_one_shot import UserOneShot
 
+
 class ServerOneShot(Server):
     def __init__(self, base_params, user_sampling_method, user_data_split, K):
         super().__init__(base_params)
         self.user_sampling_method = user_sampling_method
         self.user_data_split = user_data_split
         self.K = K
-        self.dataloader = DataLoader(base_params["data_server"], shuffle=True, batch_size=1)
+        self.dataloader = DataLoader(
+            base_params["data_server"], shuffle=True, batch_size=1
+        )
 
     def create_users(self):
         """
@@ -26,10 +29,13 @@ class ServerOneShot(Server):
         using a `UserOneShot` object.
         """
         for u in range(self.num_users):
-            if self.user_sampling_method == 'validation':
+            if self.user_sampling_method == "validation":
                 # Split the data into
-                train_data_len = int(len(self.data_subsets[u])*self.user_data_split)
-                data = random_split(self.data_subsets[u], [train_data_len, len(self.data_subsets[u]) - train_data_len])
+                train_data_len = int(len(self.data_subsets[u]) * self.user_data_split)
+                data = random_split(
+                    self.data_subsets[u],
+                    [train_data_len, len(self.data_subsets[u]) - train_data_len],
+                )
                 train_dl = DataLoader(data[0], shuffle=True, batch_size=32)
                 valid_dl = DataLoader(data[1], shuffle=True, batch_size=32)
                 new_user = UserOneShot(
@@ -39,7 +45,7 @@ class ServerOneShot(Server):
                         "num_channels": self.num_channels,
                         "num_classes": self.num_classes,
                     },
-                    valid_dl
+                    valid_dl,
                 )
             else:
                 # Normal user generation (don't need to use special user class)
@@ -62,17 +68,18 @@ class ServerOneShot(Server):
             accs = []
             for u in self.users:
                 accs.append(u.evaluate())
-            return accs.sort(reverse=True)[:self.K]
+            return accs.sort(reverse=True)[: self.K]
         elif self.user_sampling_method == "data":
             datas = []
             for u in self.users:
                 datas.append(len(u.dataloader.dataset))
-            return datas.sort(reverse=True)[:self.K]
+            return datas.sort(reverse=True)[: self.K]
         elif self.user_sampling_method == "all":
             return self.users
         else:
-            raise NotImplementedError("The specified method for sampling users for one shot FL has not been implemented.")
-
+            raise NotImplementedError(
+                "The specified method for sampling users for one shot FL has not been implemented."
+            )
 
     def train(self):
         """
@@ -107,7 +114,7 @@ class ServerOneShot(Server):
             if y_pred_ensemble == int(y[0]):
                 num_correct += 1
 
-        accuracy = round(num_correct/total*100, 2)
+        accuracy = round(num_correct / total * 100, 2)
         if self.writer:
             self.writer.add_scalar("Global Accuracy/test", accuracy, e)
 
@@ -116,5 +123,3 @@ class ServerOneShot(Server):
     def test(self):
         self.evaluate(1)
         print("Finished testing server.")
-
-

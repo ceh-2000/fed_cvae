@@ -42,6 +42,7 @@ def run_job(args):
     default_params = {
         "devices": devices,
         "num_users": args.num_users,
+        "user_fraction": args.user_fraction,
         "glob_epochs": args.glob_epochs,
         "local_epochs": args.local_epochs,
         "data_subsets": d.train_data,
@@ -54,17 +55,15 @@ def run_job(args):
     if args.algorithm == "fedavg":
         s = ServerFedAvg(default_params)
     elif args.algorithm == "oneshot":
-        s = ServerOneShot(default_params, args.one_shot_sampling, args.user_data_split, args.K)
-    else:
-        raise NotImplementedError(
-            "The specified algorithm has not been implemented."
+        s = ServerOneShot(
+            default_params, args.one_shot_sampling, args.user_data_split, args.K
         )
+    else:
+        raise NotImplementedError("The specified algorithm has not been implemented.")
 
     s.create_users()
 
-    print(
-        f"_________________________________________________\n\n"
-    )
+    print(f"_________________________________________________\n\n")
 
     s.train()
     s.test()
@@ -82,20 +81,78 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
     # General command line arguments for all models
-    parser.add_argument("--algorithm", type=str, help="Name of algorithm to use to train global model", default="fedavg")
+    parser.add_argument(
+        "--algorithm",
+        type=str,
+        help="Name of algorithm to use to train global model",
+        default="fedavg",
+    )
     parser.add_argument("--dataset", type=str, help="Name of dataset", default="mnist")
-    parser.add_argument("--num_users", type=int, help="Number of users to divide data between", default=10)
-    parser.add_argument("--alpha", type=float, help="Measure of heterogeneity (higher is more homogeneous, lower is more heterogenous)", default=None)
-    parser.add_argument("--sample_ratio", type=float, help="Fraction of training data to make available to users", default=1)
-    parser.add_argument("--glob_epochs", type=int, help="Number of global epochs server model should train for", default=3)
-    parser.add_argument("--local_epochs", type=int, help="Number of local epochs users should train for", default=5)
-    parser.add_argument("--should_log", type=bool, help="Turn logging to tensorboard on/off", default=False)
-    parser.add_argument("--seed", type=int, help="Seed to ensure same results", default=1693)
+    parser.add_argument(
+        "--num_users",
+        type=int,
+        help="Number of users to divide data between",
+        default=10,
+    )
+    parser.add_argument(
+        "--alpha",
+        type=float,
+        help="Measure of heterogeneity (higher is more homogeneous, lower is more heterogenous)",
+        default=None,
+    )
+    parser.add_argument(
+        "--sample_ratio",
+        type=float,
+        help="Fraction of training data to make available to users",
+        default=1,
+    )
+    parser.add_argument(
+        "--glob_epochs",
+        type=int,
+        help="Number of global epochs server model should train for",
+        default=3,
+    )
+    parser.add_argument(
+        "--local_epochs",
+        type=int,
+        help="Number of local epochs users should train for",
+        default=5,
+    )
+    parser.add_argument(
+        "--should_log",
+        type=bool,
+        help="Turn logging to tensorboard on/off",
+        default=False,
+    )
+    parser.add_argument(
+        "--seed", type=int, help="Seed to ensure same results", default=1693
+    )
+    parser.add_argument(
+        "--user_fraction",
+        type=float,
+        default=1.0,
+        help="Fraction of users that we should sample each round",
+    )
 
     # Command line arguments for specific models
-    parser.add_argument("--one_shot_sampling", type=str, help="Method to sample users for one shot ensembling", default="random")
-    parser.add_argument("--user_data_split", type=float, help="The ratio of training to validation data for users", default=0.9)
-    parser.add_argument("--K", type=int, help="Number of users to select for one shot ensembling", default=2)
+    parser.add_argument(
+        "--one_shot_sampling",
+        type=str,
+        help="Method to sample users for one shot ensembling",
+        default="random",
+    )
+    parser.add_argument(
+        "--user_data_split",
+        type=float,
+        help="The ratio of training to validation data for users",
+        default=0.9,
+    )
+    parser.add_argument(
+        "--K",
+        type=int,
+        help="Number of users to select for one shot ensembling",
+        default=2,
+    )
 
     args = parser.parse_args()
 
@@ -113,6 +170,7 @@ if __name__ == "__main__":
     )
     print("Portion of the dataset used:", args.sample_ratio)
     print("Number of users for training:", args.num_users)
+    print("Fraction of users sampled for each communication round:", args.user_fraction)
     print("Number of local epochs:", args.local_epochs)
     print("Number of global epochs:", args.glob_epochs)
     print("Logging?", args.should_log)
@@ -123,7 +181,7 @@ if __name__ == "__main__":
     print("MODEL SPECIFIC COMMAND LINE ARGUMENTS")
     print("One shot sampling method:", args.one_shot_sampling)
     print("Ratio of user training to validation data:", args.user_data_split)
-    print("Number of users to select for one shot ensembling", args.K)
+    print("Number of users to select for one shot ensembling:", args.K)
 
     print("_________________________________________________\n")
 
