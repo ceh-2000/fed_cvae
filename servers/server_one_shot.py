@@ -1,15 +1,19 @@
+import random
+
+import torch
+import torch.nn.functional as F
 from torch.utils.data import DataLoader, random_split
 
 from servers.server import Server
 from users.user import User
 from users.user_one_shot import UserOneShot
 
-
 class ServerOneShot(Server):
-    def __init__(self, base_params, user_sampling_method, user_data_split):
+    def __init__(self, base_params, user_sampling_method, user_data_split, K):
         super().__init__(base_params)
         self.user_sampling_method = user_sampling_method
         self.user_data_split = user_data_split
+        self.K = K
 
     def create_users(self):
         """
@@ -50,13 +54,20 @@ class ServerOneShot(Server):
 
     def sample_users(self):
         if self.user_sampling_method == "random":
-            pass
+            # Sample uniformly without replacement from all users to get K elements
+            return random.sample(self.users, self.K)
         elif self.user_sampling_method == "validation":
-            pass
+            accs = []
+            for u in self.users:
+                accs.append(u.evaluate())
+            return accs.sort(reverse=True)[:self.K]
         elif self.user_sampling_method == "data":
-            pass
+            datas = []
+            for u in self.users:
+                datas.append(len(u.dataloader.dataset))
+            return datas.sort(reverse=True)[:self.K]
         elif self.user_sampling_method == "all":
-            pass
+            return self.users
         else:
             raise NotImplementedError("The specified method for sampling users for one shot FL has not been implemented.")
 
@@ -74,7 +85,16 @@ class ServerOneShot(Server):
         sampled_users = self.sample_users()
 
         # Ensemble results using a forward pass on the test set with majority vote
+        num_correct = []
+        total = len(self.dataloader.dataset)
+        for batch_idx, (X_batch, y_batch) in enumerate(self.dataloader):
+            predictions = []
+            for s in sampled_users:
+                test_logits = s.model(X_batch)
+                pred_probs = F.softmax(input=test_logits, dim=1)
+                y_pred = torch.argmax(pred_probs, dim=1)
 
+                print(y_pred)
 
 
 

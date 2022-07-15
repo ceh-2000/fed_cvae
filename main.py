@@ -53,8 +53,8 @@ def run_job(args):
 
     if args.algorithm == "fedavg":
         s = ServerFedAvg(default_params)
-    elif args.algorithm == "one_shot":
-        s = ServerOneShot(default_params, args.one_shot_sampling, args.user_data_split)
+    elif args.algorithm == "oneshot":
+        s = ServerOneShot(default_params, args.one_shot_sampling, args.user_data_split, args.K)
     else:
         raise NotImplementedError(
             "The specified algorithm has not been implemented."
@@ -95,6 +95,7 @@ if __name__ == "__main__":
     # Command line arguments for specific models
     parser.add_argument("--one_shot_sampling", type=str, help="Method to sample users for one shot ensembling", default="random")
     parser.add_argument("--user_data_split", type=float, help="The ratio of training to validation data for users", default=0.9)
+    parser.add_argument("--K", type=int, help="Number of users to select for one shot ensembling", default=2)
 
     args = parser.parse_args()
 
@@ -122,6 +123,7 @@ if __name__ == "__main__":
     print("MODEL SPECIFIC COMMAND LINE ARGUMENTS")
     print("One shot sampling method:", args.one_shot_sampling)
     print("Ratio of user training to validation data:", args.user_data_split)
+    print("Number of users to select for one shot ensembling", args.K)
 
     print("_________________________________________________\n")
 
