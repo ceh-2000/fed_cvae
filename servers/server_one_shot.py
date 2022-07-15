@@ -1,5 +1,6 @@
 import random
 
+import numpy as np
 import torch
 import torch.nn.functional as F
 from torch.utils.data import DataLoader, random_split
@@ -14,6 +15,7 @@ class ServerOneShot(Server):
         self.user_sampling_method = user_sampling_method
         self.user_data_split = user_data_split
         self.K = K
+        self.dataloader = DataLoader(base_params["data_server"], shuffle=True, batch_size=1)
 
     def create_users(self):
         """
@@ -81,20 +83,38 @@ class ServerOneShot(Server):
         for u in self.users:
             u.train(self.local_epochs)
 
+        print(f"Finished training all users for epoch 1.")
+        print("__________________________________________")
+
+    def evaluate(self, e):
         # Sample some or all users
         sampled_users = self.sample_users()
 
         # Ensemble results using a forward pass on the test set with majority vote
-        num_correct = []
+        num_correct = 0
         total = len(self.dataloader.dataset)
-        for batch_idx, (X_batch, y_batch) in enumerate(self.dataloader):
-            predictions = []
+        for _, (X, y) in enumerate(self.dataloader):
+            batch_pred = []
             for s in sampled_users:
-                test_logits = s.model(X_batch)
+                test_logits = s.model(X)
                 pred_probs = F.softmax(input=test_logits, dim=1)
-                y_pred = torch.argmax(pred_probs, dim=1)
+                y_pred = torch.argmax(pred_probs, dim=1).tolist()
+                batch_pred.append(int(y_pred[0]))
 
-                print(y_pred)
+            batch_pred = np.array(batch_pred).T
+            y_pred_ensemble = np.bincount(batch_pred).argmax()
 
+            if y_pred_ensemble == int(y[0]):
+                num_correct += 1
+
+        accuracy = round(num_correct/total*100, 2)
+        if self.writer:
+            self.writer.add_scalar("Global Accuracy/test", accuracy, e)
+
+        print(f"Server model accuracy was: {accuracy}% on epoch {e}")
+
+    def test(self):
+        self.evaluate(1)
+        print("Finished testing server.")
 
 
