@@ -41,6 +41,7 @@ def run_job(args):
     default_params = {
         "devices": devices,
         "num_users": args.num_users,
+        "user_fraction": args.user_fraction,
         "glob_epochs": args.glob_epochs,
         "local_epochs": args.local_epochs,
         "data_subsets": d.train_data,
@@ -53,15 +54,11 @@ def run_job(args):
     if args.algorithm == "fedavg":
         s = ServerFedAvg(default_params)
     else:
-        raise NotImplementedError(
-            "The specified algorithm has not been implemented."
-        )
+        raise NotImplementedError("The specified algorithm has not been implemented.")
 
     s.create_users()
 
-    print(
-        f"_________________________________________________\n\n"
-    )
+    print(f"_________________________________________________\n\n")
 
     s.train()
     s.test()
@@ -77,15 +74,57 @@ def run_job(args):
 if __name__ == "__main__":
     # Extract command line arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument("--seed", type=int, default=1693)
-    parser.add_argument("--algorithm", type=str, default="fedavg")
-    parser.add_argument("--dataset", type=str, default="mnist")
-    parser.add_argument("--num_users", type=int, default=10)
-    parser.add_argument("--alpha", type=float, default=None)
-    parser.add_argument("--sample_ratio", type=float, default=1)
-    parser.add_argument("--glob_epochs", type=int, default=3)
-    parser.add_argument("--local_epochs", type=int, default=5)
-    parser.add_argument("--should_log", type=bool, default=False)
+    parser.add_argument(
+        "--seed", type=int, default=1693, help="random seed for model training"
+    )
+    parser.add_argument(
+        "--algorithm",
+        type=str,
+        default="fedavg",
+        help="which algorithm should be used?",
+    )
+    parser.add_argument(
+        "--dataset", type=str, default="mnist", help="which dataset should be used?"
+    )
+    parser.add_argument(
+        "--num_users", type=int, default=10, help="how many users should be used?"
+    )
+    parser.add_argument(
+        "--user_fraction",
+        type=float,
+        default=1.0,
+        help="what fraction of users should we sample each round?",
+    )
+    parser.add_argument(
+        "--alpha",
+        type=float,
+        default=None,
+        help="level of data heterogeneity across users",
+    )
+    parser.add_argument(
+        "--sample_ratio",
+        type=float,
+        default=1,
+        help="what portion of the dataset should be used",
+    )
+    parser.add_argument(
+        "--glob_epochs",
+        type=int,
+        default=3,
+        help="number of global communication rounds",
+    )
+    parser.add_argument(
+        "--local_epochs",
+        type=int,
+        default=5,
+        help="number of local epochs between communication rounds for users",
+    )
+    parser.add_argument(
+        "--should_log",
+        type=bool,
+        default=False,
+        help="should we log results to tensorboard?",
+    )
     args = parser.parse_args()
 
     # Get available gpus
@@ -100,6 +139,7 @@ if __name__ == "__main__":
     )
     print("Portion of the dataset used:", args.sample_ratio)
     print("Number of users for training: ", args.num_users)
+    print("Fraction of users sampled for each communication round:", args.user_fraction)
     print("Number of local epochs: ", args.local_epochs)
     print("Number of global epochs: ", args.glob_epochs)
     print("Logging? ", args.should_log)
