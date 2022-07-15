@@ -41,6 +41,7 @@ def run_job(args):
     default_params = {
         "devices": devices,
         "num_users": args.num_users,
+        "user_fraction": args.user_fraction,
         "glob_epochs": args.glob_epochs,
         "local_epochs": args.local_epochs,
         "data_subsets": d.train_data,
@@ -101,6 +102,7 @@ if __name__ == "__main__":
     )
     print("Portion of the dataset used:", args.sample_ratio)
     print("Number of users for training: ", args.num_users)
+    print("Fraction of users sampled for each communication round:", args.user_fraction)
     print("Number of local epochs: ", args.local_epochs)
     print("Number of global epochs: ", args.glob_epochs)
     print("Logging? ", args.should_log)

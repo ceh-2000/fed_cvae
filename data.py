@@ -118,8 +118,6 @@ class Data:
         :return: user data splits as a list of torch.dataset.Subset objects
         """
 
-        # TODO: do something special here if sample_ratio < 1... we'll need to make sure we only consider the dataset indices that we're actually using!
-
         # Getting indices for each class
         if self.sample_ratio == 1:
             targets = dataset_train.targets.numpy()

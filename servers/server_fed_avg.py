@@ -38,19 +38,26 @@ class ServerFedAvg(Server):
         for e in range(self.glob_epochs):
             self.evaluate(e)
 
-            # Train and save user models to a list
+            # Sample users for training
+            selected_users = self.sample_users()
+
+            # Replace local user model weights with server model weights for SELECTED users
+            server_model_weights = copy.deepcopy(self.server_model.state_dict())
+            for u in selected_users:
+                u.model.load_state_dict(server_model_weights)
+
+            # Train SELECTED user models
+            for u in selected_users:
+                u.train(self.local_epochs)
+
+            # Save ALL user models to a list
             models = []
             for u in self.users:
-                u.train(self.local_epochs)
                 models.append(u.model)
 
-            # Average the weights of the user models and send to server
+            # Average the weights of ALL user models and save in server
             state_dict = average_weights(models)
             self.server_model.load_state_dict(copy.deepcopy(state_dict))
 
-            # Replace local user model with server model
-            for u in self.users:
-                u.model.load_state_dict(copy.deepcopy(state_dict))
-
-            print(f"Finished training all users for epoch {e}")
+            print(f"Finished training {len(selected_users)} users for epoch {e}")
             print("__________________________________________")
