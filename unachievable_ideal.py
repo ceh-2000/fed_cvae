@@ -1,26 +1,28 @@
 import numpy as np
 import torch
-from torch.utils.data import DataLoader
+import torch.nn.functional as F
 from torch.nn import CrossEntropyLoss
 from torch.optim import Adam
+from torch.utils.data import DataLoader
+
 from models.model import MyModel
-import torch.nn.functional as F
+
 
 class UnachievableIdeal:
     def __init__(self, params):
-        self.epochs = params['glob_epoch']
+        self.epochs = params["glob_epoch"]
 
-        self.train_data = DataLoader(params['train_data'], shuffle=True, batch_size=32)
-        self.test_data = DataLoader(params['test_data'], shuffle=True, batch_size=32)
+        self.train_data = DataLoader(params["train_data"], shuffle=True, batch_size=32)
+        self.test_data = DataLoader(params["test_data"], shuffle=True, batch_size=32)
 
-        self.num_channels = params['num_channels']
-        self.num_classes = params['num_classes']
+        self.num_channels = params["num_channels"]
+        self.num_classes = params["num_classes"]
 
         self.model = MyModel(self.num_channels, self.num_classes)
         self.loss_func = CrossEntropyLoss()
         self.optimizer = Adam(self.model.parameters(), lr=0.01)
 
-        self.writer = params['writer']
+        self.writer = params["writer"]
 
     def train(self):
         self.model.train()
@@ -55,4 +57,3 @@ class UnachievableIdeal:
 
             if self.writer:
                 self.writer.add_scalar("Global Accuracy/test", accuracy)
-

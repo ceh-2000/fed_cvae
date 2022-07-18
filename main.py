@@ -18,6 +18,7 @@ def get_gpus():
 
     return devs
 
+
 def run_job(args):
     torch.manual_seed(args.seed)
 
@@ -59,7 +60,7 @@ def run_job(args):
             "test_data": d.test_data,
             "num_channels": d.num_channels,
             "num_classes": d.num_classes,
-            "writer": writer
+            "writer": writer,
         }
         i = UnachievableIdeal(params)
 
@@ -89,7 +90,9 @@ def run_job(args):
                 default_params, args.one_shot_sampling, args.user_data_split, args.K
             )
         else:
-            raise NotImplementedError("The specified algorithm has not been implemented.")
+            raise NotImplementedError(
+                "The specified algorithm has not been implemented."
+            )
 
         s.create_users()
 

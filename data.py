@@ -99,7 +99,9 @@ class Data:
                 if self.alpha is None:
                     self.train_data = random_split(dataset_train, data_split_sequence)
                 else:
-                    self.train_data = self.split_data_dirichlet(dataset_train, visualize)
+                    self.train_data = self.split_data_dirichlet(
+                        dataset_train, visualize
+                    )
 
             # We ALWAYS keep the full test set for final model evaluation
             dataset_test = MNIST(
