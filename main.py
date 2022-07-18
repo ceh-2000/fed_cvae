@@ -25,7 +25,17 @@ def run_job(args):
     if args.should_log:
         # Before logging anything, we need to create a SummaryWriter instance.
         # Writer will output to ./runs/ directory by default.
-        cur_run_name = f"runs/users={args.num_users}_glob_epochs={args.glob_epochs}_local_epochs={args.local_epochs}_alpha={args.alpha}_sample_ratio={args.sample_ratio}"
+        cur_run_name = f"runs/algorithm={args.algorithm}_users={args.num_users}_local_epochs={args.local_epochs}_alpha={args.alpha}_sample_ratio={args.sample_ratio}"
+
+        # Adding in algo-specific hyperparams
+        if args.algorithm == "fedavg":
+            cur_run_name = cur_run_name + f"_glob_epochs={args.glob_epochs}"
+        elif args.algorithm in "oneshot":
+            cur_run_name = (
+                cur_run_name
+                + f"_glob_epochs=1_sampling={args.one_shot_sampling}_K={args.K if args.one_shot_sampling != 'all' else 'all'}"
+            )
+
         writer = SummaryWriter(log_dir=cur_run_name)
 
     # Get the data
@@ -69,10 +79,10 @@ def run_job(args):
     s.test()
 
     if args.should_log:
-        # Make sure that all pending events have been written to disk.
+        # Make sure that all pending events have been written to disk
         writer.flush()
 
-        # Close writer when finished.
+        # Close writer when finished
         writer.close()
 
 
@@ -178,10 +188,19 @@ if __name__ == "__main__":
 
     print()
 
-    print("MODEL SPECIFIC COMMAND LINE ARGUMENTS")
-    print("One shot sampling method:", args.one_shot_sampling)
-    print("Ratio of user training to validation data:", args.user_data_split)
-    print("Number of users to select for one shot ensembling:", args.K)
+    if args.algorithm != "fedavg":
+        print("MODEL SPECIFIC COMMAND LINE ARGUMENTS")
+
+        if args.algorithm == "oneshot":
+            print("One shot sampling method:", args.one_shot_sampling)
+            print(
+                "Portion of data used for training:",
+                args.user_data_split if args.one_shot_sampling == "validation" else 1,
+            )
+            print(
+                "Number of users to select for one shot ensembling:",
+                args.K if args.one_shot_sampling != "all" else "all",
+            )
 
     print("_________________________________________________\n")
 

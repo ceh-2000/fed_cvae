@@ -25,6 +25,5 @@ class UserOneShot(User):
         accuracy = round(
             total_correct / len(self.validation_data_loader.dataset) * 100, 2
         )
-        print(self.user_id, accuracy)
 
         return accuracy
