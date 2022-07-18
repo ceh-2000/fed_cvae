@@ -33,7 +33,7 @@ python3 main.py --algorithm oneshot --num_users 5 --alpha 1.0 --sample_ratio 0.1
 - `data` (choose the K users with the most data)
 - `all` (ensemble all user models)
 
-You can also adjust model specific parameters `--K` to adjust how many users are sampled for ensembling and `--user_data_split` to adjust the user train/validation split.
+You can also adjust model specific parameters `--K` to adjust how many users are sampled for ensembling and `--user_data_split` to adjust the user train/validation split. Note that you need to choose a K <= number of users.
 
 
 ### Logging
