@@ -34,12 +34,12 @@ class Data:
     ):
         """Read in the data, split training data into user subsets, and read in server test data.
 
-        :param dataset_name:
-        :param num_users:
-        :param sample_ratio:
-        :param alpha:
-        :param normalize:
-        :param resize:
+        :param dataset_name: The name of the dataset to use
+        :param num_users: The number of users/clients
+        :param sample_ratio: The portion of training data to distribute to users
+        :param alpha: The level of heterogeneity (i.e., non-IIDness)
+        :param normalize: Boolean to control image normalization as preprocessing
+        :param resize: Boolean to control image resizing as preprocessing
         """
 
         self.dataset_name = dataset_name.lower()

@@ -37,7 +37,7 @@ class ServerFedAvg(Server):
                 models.append(u.model)
 
             # Average the weights of ALL user models and save in server
-            state_dict = average_weights(models, self.user_data_amts)
+            state_dict = average_weights(models, data_amts = self.user_data_amts)
             self.server_model.load_state_dict(copy.deepcopy(state_dict))
 
             print(f"Finished training {len(selected_users)} users for epoch {e}")
