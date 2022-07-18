@@ -68,12 +68,16 @@ class ServerOneShot(Server):
             accs = []
             for u in self.users:
                 accs.append(u.evaluate())
-            return accs.sort(reverse=True)[: self.K]
+            accs_sorted = np.argsort(accs)
+            np_users = np.array(self.users)
+            return list(np_users[accs_sorted[-self.K :]])
         elif self.user_sampling_method == "data":
             datas = []
             for u in self.users:
                 datas.append(len(u.dataloader.dataset))
-            return datas.sort(reverse=True)[: self.K]
+            datas_sorted = np.argsort(datas)
+            np_users = np.array(self.users)
+            return list(np_users[datas_sorted[-self.K :]])
         elif self.user_sampling_method == "all":
             return self.users
         else:
@@ -100,19 +104,20 @@ class ServerOneShot(Server):
         # Ensemble results using a forward pass on the test set with majority vote
         num_correct = 0
         total = len(self.dataloader.dataset)
-        for _, (X, y) in enumerate(self.dataloader):
-            batch_pred = []
-            for s in sampled_users:
-                test_logits = s.model(X)
-                pred_probs = F.softmax(input=test_logits, dim=1)
-                y_pred = torch.argmax(pred_probs, dim=1).tolist()
-                batch_pred.append(int(y_pred[0]))
+        with torch.no_grad():
+            for X, y in self.dataloader:
+                batch_pred = []
+                for s in sampled_users:
+                    test_logits = s.model(X)
+                    pred_probs = F.softmax(input=test_logits, dim=1)
+                    y_pred = torch.argmax(pred_probs, dim=1).tolist()
+                    batch_pred.append(int(y_pred[0]))
 
-            batch_pred = np.array(batch_pred).T
-            y_pred_ensemble = np.bincount(batch_pred).argmax()
+                batch_pred = np.array(batch_pred).T
+                y_pred_ensemble = np.bincount(batch_pred).argmax()
 
-            if y_pred_ensemble == int(y[0]):
-                num_correct += 1
+                if y_pred_ensemble == int(y[0]):
+                    num_correct += 1
 
         accuracy = round(num_correct / total * 100, 2)
         if self.writer:

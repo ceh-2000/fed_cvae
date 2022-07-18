@@ -22,4 +22,9 @@ class UserOneShot(User):
                 y_pred = torch.argmax(pred_probs, dim=1)
                 total_correct += np.sum((y_pred == y_batch).numpy())
 
-        return round(total_correct / len(self.dataloader.dataset) * 100, 2)
+        accuracy = round(
+            total_correct / len(self.validation_data_loader.dataset) * 100, 2
+        )
+        print(self.user_id, accuracy)
+
+        return accuracy
