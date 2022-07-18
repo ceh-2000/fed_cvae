@@ -6,6 +6,7 @@ from torch.utils.tensorboard import SummaryWriter
 from data import Data
 from servers.server_fed_avg import ServerFedAvg
 from servers.server_one_shot import ServerOneShot
+from unachievable_ideal import UnachievableIdeal
 
 
 def get_gpus():
@@ -17,7 +18,6 @@ def get_gpus():
 
     return devs
 
-
 def run_job(args):
     torch.manual_seed(args.seed)
 
@@ -28,7 +28,9 @@ def run_job(args):
         cur_run_name = f"runs/algorithm={args.algorithm}_users={args.num_users}_local_epochs={args.local_epochs}_alpha={args.alpha}_sample_ratio={args.sample_ratio}"
 
         # Adding in algo-specific hyperparams
-        if args.algorithm == "fedavg":
+        if args.algorithm == "central":
+            cur_run_name = f"runs/central_model_sampling_ratio={args.sample_ratio}_number_of_epochs={args.glob_epochs}"
+        elif args.algorithm == "fedavg":
             cur_run_name = cur_run_name + f"_glob_epochs={args.glob_epochs}"
         elif args.algorithm in "oneshot":
             cur_run_name = (
@@ -43,40 +45,58 @@ def run_job(args):
         args.dataset,
         args.num_users,
         writer,
+        args.algorithm == "central",
         alpha=args.alpha,
         sample_ratio=args.sample_ratio,
         visualize=True if args.alpha is not None else False,
     )
 
-    # Initialize the server which manages all users
-    default_params = {
-        "devices": devices,
-        "num_users": args.num_users,
-        "user_fraction": args.user_fraction,
-        "glob_epochs": args.glob_epochs,
-        "local_epochs": args.local_epochs,
-        "data_subsets": d.train_data,
-        "data_server": d.test_data,
-        "num_channels": d.num_channels,
-        "num_classes": d.num_classes,
-        "writer": writer,
-    }
+    # Train in a centralized manner to generate the "unachievable ideal"
+    if args.algorithm == "central":
+        params = {
+            "glob_epoch": args.glob_epochs,
+            "train_data": d.train_data,
+            "test_data": d.test_data,
+            "num_channels": d.num_channels,
+            "num_classes": d.num_classes,
+            "writer": writer
+        }
+        i = UnachievableIdeal(params)
 
-    if args.algorithm == "fedavg":
-        s = ServerFedAvg(default_params)
-    elif args.algorithm == "oneshot":
-        s = ServerOneShot(
-            default_params, args.one_shot_sampling, args.user_data_split, args.K
-        )
+        i.train()
+        i.test()
+
+    # Distribute training across user devices
     else:
-        raise NotImplementedError("The specified algorithm has not been implemented.")
+        # Initialize the server which manages all users
+        default_params = {
+            "devices": devices,
+            "num_users": args.num_users,
+            "user_fraction": args.user_fraction,
+            "glob_epochs": args.glob_epochs,
+            "local_epochs": args.local_epochs,
+            "data_subsets": d.train_data,
+            "data_server": d.test_data,
+            "num_channels": d.num_channels,
+            "num_classes": d.num_classes,
+            "writer": writer,
+        }
 
-    s.create_users()
+        if args.algorithm == "fedavg":
+            s = ServerFedAvg(default_params)
+        elif args.algorithm == "oneshot":
+            s = ServerOneShot(
+                default_params, args.one_shot_sampling, args.user_data_split, args.K
+            )
+        else:
+            raise NotImplementedError("The specified algorithm has not been implemented.")
 
-    print(f"_________________________________________________\n\n")
+        s.create_users()
 
-    s.train()
-    s.test()
+        print(f"_________________________________________________\n\n")
+
+        s.train()
+        s.test()
 
     if args.should_log:
         # Make sure that all pending events have been written to disk
