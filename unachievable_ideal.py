@@ -5,7 +5,7 @@ from torch.nn import CrossEntropyLoss
 from torch.optim import Adam
 from torch.utils.data import DataLoader
 
-from models.model import MyModel
+from models.classifier import Classifier
 
 
 class UnachievableIdeal:
@@ -18,7 +18,7 @@ class UnachievableIdeal:
         self.num_channels = params["num_channels"]
         self.num_classes = params["num_classes"]
 
-        self.model = MyModel(self.num_channels, self.num_classes)
+        self.model = Classifier(self.num_channels, self.num_classes)
         self.loss_func = CrossEntropyLoss()
         self.optimizer = Adam(self.model.parameters(), lr=0.01)
 
