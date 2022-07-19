@@ -5,7 +5,7 @@ from torch.nn import CrossEntropyLoss
 from torch.optim import Adam
 from torch.utils.data import DataLoader
 
-from models.model import MyModel
+from models.classifier import Classifier
 
 
 class UnachievableIdeal:
@@ -18,9 +18,9 @@ class UnachievableIdeal:
         self.num_channels = params["num_channels"]
         self.num_classes = params["num_classes"]
 
-        self.model = MyModel(self.num_channels, self.num_classes)
+        self.model = Classifier(self.num_channels, self.num_classes)
         self.loss_func = CrossEntropyLoss()
-        self.optimizer = Adam(self.model.parameters(), lr=0.01)
+        self.optimizer = Adam(self.model.parameters(), lr=0.001)
 
         self.writer = params["writer"]
 
@@ -28,6 +28,7 @@ class UnachievableIdeal:
         self.model.train()
 
         for epoch in range(self.epochs):
+            self.evaluate(epoch)
             for batch_idx, (X_batch, y_batch) in enumerate(self.train_data):
                 # Forward pass through model
                 output = self.model(X_batch)
@@ -40,7 +41,7 @@ class UnachievableIdeal:
                 loss.backward()
                 self.optimizer.step()
 
-    def test(self):
+    def evaluate(self, e):
         with torch.no_grad():
             self.model.eval()
 
@@ -53,7 +54,11 @@ class UnachievableIdeal:
                 total_correct += np.sum((y_pred == y_batch).numpy())
 
             accuracy = round(total_correct / len(self.test_data.dataset) * 100, 2)
-            print(f"Accuracy was: {accuracy}%")
+            print(f"Model accuracy was: {accuracy}% on epoch {e}")
 
             if self.writer:
-                self.writer.add_scalar("Global Accuracy/test", accuracy)
+                self.writer.add_scalar("Global Accuracy/test", accuracy, e)
+
+    def test(self):
+        self.evaluate(self.epochs)
+        print("Finished testing server.")

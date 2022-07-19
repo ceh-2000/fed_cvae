@@ -22,7 +22,7 @@ def avg_weights(w, data_amts):
     return w_avg
 
 
-def average_weights(model_list, data_amts = None):
+def average_weights(model_list, data_amts=None):
     """
     Take a (weighted) average of all the weights for a given list of models
 
@@ -38,6 +38,6 @@ def average_weights(model_list, data_amts = None):
         weight_objects.append(copy.deepcopy(w.state_dict()))
 
     # Average the weights from models
-    avg_model_state_dict = avg_weights(weight_objects, data_amts = data_amts)
+    avg_model_state_dict = avg_weights(weight_objects, data_amts=data_amts)
 
     return avg_model_state_dict
