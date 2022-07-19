@@ -14,7 +14,7 @@ class User:
 
         self.model = Classifier(self.num_channels, self.num_classes)
         self.loss_func = CrossEntropyLoss()
-        self.optimizer = Adam(self.model.parameters(), lr=0.01)
+        self.optimizer = Adam(self.model.parameters(), lr=0.001)
 
         print(f"Created user {self.user_id}")
 
