@@ -1,7 +1,6 @@
 from torch import nn
 
-
-class VAE(nn.Module):
+class Decoder(nn.Module):
     def __init__(self):
         super().__init__()
         self.model = None
