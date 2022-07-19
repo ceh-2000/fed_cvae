@@ -3,7 +3,7 @@ import torch
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
 
-from models.model import MyModel
+from models.classifier import Classifier
 from users.user import User
 
 
@@ -26,7 +26,7 @@ class Server:
 
         self.num_channels = params["num_channels"]
         self.num_classes = params["num_classes"]
-        self.server_model = MyModel(self.num_channels, self.num_classes)
+        self.server_model = Classifier(self.num_channels, self.num_classes)
 
         self.writer = params["writer"]
 
