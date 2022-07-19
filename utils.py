@@ -3,22 +3,32 @@ import copy
 import torch
 
 
-def avg_weights(w):
-    """Helper method to returns the average of a list of weights."""
+def avg_weights(w, data_amts):
+    """Helper method to return the (possibly weighted) average of a list of weights"""
+
+    # If data amounts are given, we take a weighted average... else, we average w/uniform weight
+    if data_amts is not None:
+        num_data_pts = sum(data_amts)
+        weights_for_avging = [amt / num_data_pts for amt in data_amts]
+    else:
+        weights_for_avging = [1 / len(w) for i in range(len(w))]
+
     w_avg = copy.deepcopy(w[0])
     for key in w_avg.keys():
+        w_avg[key] = torch.mul(w_avg[key], weights_for_avging[0])
         for i in range(1, len(w)):
-            w_avg[key] += w[i][key]
-        w_avg[key] = torch.div(w_avg[key], len(w))
+            w_avg[key] += torch.mul(w[i][key], weights_for_avging[i])
 
     return w_avg
 
 
-def average_weights(model_list):
+def average_weights(model_list, data_amts = None):
     """
-    Average all of the weights for a list of given models
+    Take a (weighted) average of all the weights for a given list of models
 
     :param model_list: List of models to average
+    :param data_amts: List of number of local data points for each model
+
     :return: An averaged state dictionary
     """
 
@@ -28,6 +38,6 @@ def average_weights(model_list):
         weight_objects.append(copy.deepcopy(w.state_dict()))
 
     # Average the weights from models
-    avg_model_state_dict = avg_weights(weight_objects)
+    avg_model_state_dict = avg_weights(weight_objects, data_amts = data_amts)
 
     return avg_model_state_dict

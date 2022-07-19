@@ -3,7 +3,7 @@ from torch.nn import Conv2d, Flatten, Linear, MaxPool2d, ReLU, Sequential
 
 
 class MyModel(nn.Module):
-    def __init__(self, input_channels, output_size):
+    def __init__(self, input_channels, num_classes):
         super().__init__()
         self.model = Sequential(
             Conv2d(
@@ -18,7 +18,7 @@ class MyModel(nn.Module):
             ReLU(),
             MaxPool2d((2, 2)),
             Flatten(),
-            Linear(98, output_size),
+            Linear(98, num_classes),
         )
 
     def forward(self, X):

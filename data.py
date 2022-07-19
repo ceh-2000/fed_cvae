@@ -43,6 +43,7 @@ class Data:
         :param alpha: Parameter used to control heterogeneity
         :param normalize: Whether images should normalized in the transform
         :param resize: Size images should be resized too
+        :param visualize: Boolean to visualize data distribution
         """
 
         self.dataset_name = dataset_name.lower()
