@@ -130,9 +130,9 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--should_log",
-        type=bool,
+        type=int,
         help="Turn logging to tensorboard on/off",
-        default=False,
+        default=0,
     )
     parser.add_argument(
         "--seed", type=int, help="Seed to ensure same results", default=1693
@@ -165,6 +165,7 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
+    args.should_log = bool(args.should_log)
 
     # Get available gpus
     devices = get_gpus()
