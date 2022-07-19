@@ -2,10 +2,9 @@ from torch import nn
 from torchsummary import summary
 
 class Encoder(nn.Module):
-    def __init__(self, num_channels, image_size):
+    """ Basic CNN without the fully connected layers on the end """
+    def __init__(self, num_channels):
         super().__init__()
-
-        assert image_size % 16 == 0, "Input size must be divisible by 16"
 
         self.model = nn.Sequential(
             nn.Conv2d(num_channels, 32, 4, 2, 1),  # B,  32, input_size / 2, input_size / 2
@@ -26,6 +25,8 @@ class Encoder(nn.Module):
     def forward(self, X):
         return self.model(X)
 
+
 if __name__ == "__main__":
     img_size = 32
-    summary(Encoder(1, img_size).model, (1, img_size, img_size))
+    num_channels = 1
+    summary(Encoder(num_channels, img_size).model, (num_channels, img_size, img_size))
