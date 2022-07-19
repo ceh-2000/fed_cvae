@@ -1,5 +1,6 @@
 from torch import nn
 
+
 class View(nn.Module):
     """Class to change the size of a PyTorch tensor."""
 

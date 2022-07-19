@@ -1,22 +1,21 @@
 import torch
 from torch import nn
+from torch.autograd import Variable
+from torch.distributions.multivariate_normal import MultivariateNormal
 
 from models.decoder import ConditionalDecoder
 from models.encoder import Encoder
-from torch.distributions.multivariate_normal import MultivariateNormal
-from torch.autograd import Variable
-from torchsummary import summary
-
 from models.linear_predict import LinearPredict
 
 
-class BetaVAE(nn.Module):
+class CVAE(nn.Module):
     """
     A slight modification of the model proposed in original Beta-VAE paper (Higgins et al, ICLR, 2017).
 
     Compatible with input images that are of spatial dimension divisible by 16, includes a classifier as a component
     of the pipeline, and allows image generation conditional on a chosen class.
     """
+
     def __init__(self, num_classes, num_channels, z_dim, image_size):
         super().__init__()
         self.num_classes = num_classes
@@ -34,9 +33,14 @@ class BetaVAE(nn.Module):
         )
 
         # Define neural models needed for this implementation
-        self.encoder = Encoder(num_channels = self.num_channels)
-        self.lin_pred = LinearPredict(image_size = self.image_size, z_dim = self.z_dim)
-        self.decoder = ConditionalDecoder(image_size = self.image_size, num_classes=self.num_classes, num_channels=self.num_channels, z_dim=self.z_dim)
+        self.encoder = Encoder(num_channels=self.num_channels)
+        self.lin_pred = LinearPredict(image_size=self.image_size, z_dim=self.z_dim)
+        self.decoder = ConditionalDecoder(
+            image_size=self.image_size,
+            num_classes=self.num_classes,
+            num_channels=self.num_channels,
+            z_dim=self.z_dim,
+        )
 
     def kaiming_init(self, m):
         if isinstance(m, (nn.Linear, nn.Conv2d)):
@@ -54,19 +58,21 @@ class BetaVAE(nn.Module):
                 self.kaiming_init(m)
 
     def reparametrize(self, mu, logvar):
-        """ Re-paramaterization trick to make our CVAE fully-differentiable """
+        """Re-paramaterization trick to make our CVAE fully-differentiable"""
         std = logvar.div(2).exp()
         eps = Variable(std.data.new(std.size()).normal_())
         return mu + std * eps
 
     def sample_z(self, num_samples, dist, uniform_width=(-1, 1)):
-        """ Sample latent vectors """
+        """Sample latent vectors"""
         if dist == "mvn":  # multivariate normal
             z = self.mvn_dist.sample((num_samples,))
         elif dist == "uniform":  # uniform
             z = torch.FloatTensor(num_samples, self.z_dim).uniform_(*uniform_width)
         else:
-            raise NotImplementedError('Only multivariate normal (mvn) and uniform (uniform) distributions supported.')
+            raise NotImplementedError(
+                "Only multivariate normal (mvn) and uniform (uniform) distributions supported."
+            )
 
         return z
 
@@ -78,14 +84,13 @@ class BetaVAE(nn.Module):
         logvar = distributions[:, self.z_dim :]
 
         # Re-paramaterization trick, sample latent vector z
-        z = self.reparametrize(
-            mu, logvar
-        )
+        z = self.reparametrize(mu, logvar)
 
         # Decode latent vector + class info into a reconstructed image
         x_recon = self.decoder(z, y_hot)
 
         return x_recon, mu, logvar
+
 
 if __name__ == "__main__":
     # Create new instance of model
@@ -94,22 +99,20 @@ if __name__ == "__main__":
     num_channels = 1
     z_dim = 50
 
-    model = BetaVAE(num_classes, num_channels, z_dim, img_size)
+    model = CVAE(num_classes, num_channels, z_dim, img_size)
 
     # Generate dummy data
     X = torch.rand((2, 1, 32, 32))
-    y_hot = torch.Tensor([[0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
-                     [0, 0, 1, 0, 0, 0, 0, 0, 0, 0]])
+    y_hot = torch.Tensor(
+        [[0, 1, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 1, 0, 0, 0, 0, 0, 0, 0]]
+    )
 
-    print('X:', X.shape)
-    print('y one-hot-encoded:', y_hot.shape)
+    print("X:", X.shape)
+    print("y one-hot-encoded:", y_hot.shape)
     print()
 
     # Run model forward pass
     x_recon, mu, logvar = model(X, y_hot)
-    print('X reconstruction:', x_recon.shape)
-    print('mu:', mu.shape)
-    print('logvar:', logvar.shape)
-
-
-
+    print("X reconstruction:", x_recon.shape)
+    print("mu:", mu.shape)
+    print("logvar:", logvar.shape)
