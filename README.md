@@ -16,10 +16,17 @@ pip3 install -r requirements.txt
 This will install the necessary dependencies.
 
 ### Algorithms
+#### Unachievable Ideal
+Run the following from command line.
+```
+python3 main.py --algorithm central --dataset mnist --sample_ratio 0.1 --glob_epochs 5 --should_log 1
+```
+Because we are not training this model in a distributed manner, global epochs just refers to the number of epochs for our centralized model.
+
 #### FedAvg
 Run the following from command line.
 ```
-python3 main.py --algorithm fedavg --dataset mnist --num_users 10 --alpha 0.1 --sample_ratio 0.5 --glob_epochs 5 --local_epochs 1 --should_log 1
+python3 main.py --algorithm fedavg --dataset mnist --num_users 10 --alpha 0.1 --sample_ratio 0.1 --glob_epochs 5 --local_epochs 1 --should_log 1
 ```
 
 #### One-shot ensembled FL

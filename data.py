@@ -26,6 +26,7 @@ class Data:
         dataset_name,
         num_users,
         writer,
+        central,
         sample_ratio=1.0,
         alpha=None,
         normalize=True,
@@ -34,12 +35,15 @@ class Data:
     ):
         """Read in the data, split training data into user subsets, and read in server test data.
 
-        :param dataset_name: The name of the dataset to use
-        :param num_users: The number of users/clients
-        :param sample_ratio: The portion of training data to distribute to users
-        :param alpha: The level of heterogeneity (i.e., non-IIDness)
-        :param normalize: Boolean to control image normalization as preprocessing
-        :param resize: Boolean to control image resizing as preprocessing
+        :param dataset_name: Name of the dataset of interest
+        :param num_users: Number of users for distributed training
+        :param writer: Logger
+        :param central: Boolean for whether we want centralized or distributed training
+        :param sample_ratio: How much of the training data to use
+        :param alpha: Parameter used to control heterogeneity
+        :param normalize: Whether images should normalized in the transform
+        :param resize: Size images should be resized too
+        :param visualize: Boolean to visualize data distribution
         """
 
         self.dataset_name = dataset_name.lower()
@@ -88,10 +92,17 @@ class Data:
                 data_split_sequence.append(num_user_samples)
 
             # Data is composed of dataset.Subset objects
-            if self.alpha is None:
-                self.train_data = random_split(dataset_train, data_split_sequence)
+            if central:
+                self.train_data = dataset_train
+
+            # Only partition into user datasets if we don't want centralized learning
             else:
-                self.train_data = self.split_data_dirichlet(dataset_train, visualize)
+                if self.alpha is None:
+                    self.train_data = random_split(dataset_train, data_split_sequence)
+                else:
+                    self.train_data = self.split_data_dirichlet(
+                        dataset_train, visualize
+                    )
 
             # We ALWAYS keep the full test set for final model evaluation
             dataset_test = MNIST(
