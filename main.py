@@ -198,22 +198,30 @@ if __name__ == "__main__":
     print("Number of devices:", len(devices))
     print("Dataset name:", args.dataset)
     print("Algorithm:", args.algorithm)
-    print(
-        "Level of heterogeneity (alpha):",
-        args.alpha if args.alpha is not None else "perfectly homogeneous",
-    )
     print("Portion of the dataset used:", args.sample_ratio)
-    print("Number of users for training:", args.num_users)
-    print("Fraction of users sampled for each communication round:", args.user_fraction)
-    print("Number of local epochs:", args.local_epochs)
-    print("Number of global epochs:", args.glob_epochs)
     print("Logging?", args.should_log)
     print("Seed:", args.seed)
 
+    if args.algorithm != "central":
+        print(
+            "Level of heterogeneity (alpha):",
+            args.alpha if args.alpha is not None else "perfectly homogeneous",
+        )
+        print("Number of users for training:", args.num_users)
+        print("Number of local epochs:", args.local_epochs)
+    if args.algorithm in ["fedavg", "fedprox"]:
+        print("Number of global epochs:", args.glob_epochs)
+        print("Fraction of users sampled for each communication round:", args.user_fraction)
+    if args.algorithm in ["oneshot"]:
+        print("Number of global epochs:", 1)
+    if args.algorithm == "central":
+        print("Number of epochs:", args.glob_epochs)
+
     print()
 
-    if args.algorithm != "fedavg":
+    if args.algorithm in ["fedprox", "oneshot"]:
         print("MODEL SPECIFIC COMMAND LINE ARGUMENTS")
+        print()
 
         if args.algorithm == "oneshot":
             print("One shot sampling method:", args.one_shot_sampling)
