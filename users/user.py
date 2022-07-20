@@ -1,5 +1,5 @@
 from torch.nn import CrossEntropyLoss
-from torch.optim import Adam
+from torch.optim import SGD
 
 from models.classifier import Classifier
 
@@ -14,7 +14,7 @@ class User:
 
         self.model = Classifier(self.num_channels, self.num_classes)
         self.loss_func = CrossEntropyLoss()
-        self.optimizer = Adam(self.model.parameters(), lr=0.001)
+        self.optimizer = SGD(self.model.parameters(), lr=0.001)
 
         print(f"Created user {self.user_id}")
 
