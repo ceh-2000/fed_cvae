@@ -211,7 +211,10 @@ if __name__ == "__main__":
         print("Number of local epochs:", args.local_epochs)
     if args.algorithm in ["fedavg", "fedprox"]:
         print("Number of global epochs:", args.glob_epochs)
-        print("Fraction of users sampled for each communication round:", args.user_fraction)
+        print(
+            "Fraction of users sampled for each communication round:",
+            args.user_fraction,
+        )
     if args.algorithm in ["oneshot"]:
         print("Number of global epochs:", 1)
     if args.algorithm == "central":
