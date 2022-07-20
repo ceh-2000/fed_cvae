@@ -27,16 +27,13 @@ class ServerFedAvg(Server):
             for u in selected_users:
                 u.model.load_state_dict(server_model_weights)
 
-            # Train SELECTED user models
+            # Train SELECTED user models and save model weights
+            models = []
             for u in selected_users:
                 u.train(self.local_epochs)
-
-            # Save ALL user models to a list
-            models = []
-            for u in self.users:
                 models.append(u.model)
 
-            # Average the weights of ALL user models and save in server
+            # Average the weights of SELECTED user models and save in server
             state_dict = average_weights(models, data_amts=self.user_data_amts)
             self.server_model.load_state_dict(copy.deepcopy(state_dict))
 

@@ -5,8 +5,10 @@ from utils import average_weights
 
 
 class ServerFedProx(Server):
-    def __init__(self, base_params):
+    def __init__(self, base_params, mu = 0.001):
         super().__init__(base_params)
+
+        self.mu = mu
 
     def train(self):
         """
@@ -26,17 +28,15 @@ class ServerFedProx(Server):
             server_model_weights = copy.deepcopy(self.server_model.state_dict())
             for u in selected_users:
                 u.model.load_state_dict(server_model_weights)
+                u.global_model = copy.deepcopy(self.server_model)
 
-            # Train SELECTED user models
-            for u in selected_users:
-                u.train(self.local_epochs)
-
-            # Save ALL user models to a list
+            # Train SELECTED user models and save model weights
             models = []
-            for u in self.users:
+            for u in selected_users:
+                u.train(self.local_epochs, self.mu)
                 models.append(u.model)
 
-            # Average the weights of ALL user models and save in server
+            # Average the weights of SELECTED user models and save in server
             state_dict = average_weights(models, data_amts=self.user_data_amts)
             self.server_model.load_state_dict(copy.deepcopy(state_dict))
 
