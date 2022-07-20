@@ -34,7 +34,9 @@ def run_job(args):
             cur_run_name = f"runs/central_model_sampling_ratio={args.sample_ratio}_number_of_epochs={args.glob_epochs}"
         elif args.algorithm == "fedavg":
             cur_run_name = cur_run_name + f"_glob_epochs={args.glob_epochs}"
-        elif args.algorithm in "oneshot":
+        elif args.algorithm == "fedprox":
+            cur_run_name = cur_run_name + f"_glob_epochs={args.glob_epochs}_mu={args.mu}"
+        elif args.algorithm == "oneshot":
             cur_run_name = (
                 cur_run_name
                 + f"_glob_epochs=1_sampling={args.one_shot_sampling}_K={args.K if args.one_shot_sampling != 'all' else 'all'}"
@@ -218,6 +220,7 @@ if __name__ == "__main__":
 
     if args.algorithm != "fedavg":
         print("MODEL SPECIFIC COMMAND LINE ARGUMENTS")
+        print()
 
         if args.algorithm == "oneshot":
             print("One shot sampling method:", args.one_shot_sampling)
