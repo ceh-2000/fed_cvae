@@ -5,8 +5,8 @@ from torch.utils.tensorboard import SummaryWriter
 
 from data import Data
 from servers.server_fed_avg import ServerFedAvg
-from servers.server_one_shot import ServerOneShot
 from servers.server_fed_prox import ServerFedProx
+from servers.server_one_shot import ServerOneShot
 from unachievable_ideal import UnachievableIdeal
 
 
@@ -35,7 +35,9 @@ def run_job(args):
         elif args.algorithm == "fedavg":
             cur_run_name = cur_run_name + f"_glob_epochs={args.glob_epochs}"
         elif args.algorithm == "fedprox":
-            cur_run_name = cur_run_name + f"_glob_epochs={args.glob_epochs}_mu={args.mu}"
+            cur_run_name = (
+                cur_run_name + f"_glob_epochs={args.glob_epochs}_mu={args.mu}"
+            )
         elif args.algorithm == "oneshot":
             cur_run_name = (
                 cur_run_name
@@ -191,7 +193,12 @@ if __name__ == "__main__":
         help="Number of users to select for one shot ensembling",
         default=2,
     )
-    parser.add_argument("--mu", type=float, help="Weight on the proximal term in the local objective (FedProx)", default=1.0)
+    parser.add_argument(
+        "--mu",
+        type=float,
+        help="Weight on the proximal term in the local objective (FedProx)",
+        default=1.0,
+    )
 
     args = parser.parse_args()
     args.should_log = bool(args.should_log)

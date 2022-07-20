@@ -1,5 +1,6 @@
-from users.user import User
 from torch import sum as torch_sum
+
+from users.user import User
 
 
 class UserFedProx(User):
@@ -18,8 +19,8 @@ class UserFedProx(User):
 
         loss = 0
         for p1, p2 in zip(local_model.parameters(), global_model.parameters()):
-          square_diff = (p1 - p2) ** 2
-          loss += torch_sum(square_diff)
+            square_diff = (p1 - p2) ** 2
+            loss += torch_sum(square_diff)
 
         return loss
 
@@ -33,7 +34,9 @@ class UserFedProx(User):
 
                 # Compute loss
                 class_loss = self.loss_func(output, y_batch)
-                reg_loss = self.proximal_loss(self.model, self.global_model) #proximal term on objective
+                reg_loss = self.proximal_loss(
+                    self.model, self.global_model
+                )  # proximal term on objective
                 total_loss = class_loss + (self.mu / 2) * reg_loss
 
                 # Gradient descent

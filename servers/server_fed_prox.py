@@ -1,4 +1,5 @@
 import copy
+
 from torch.utils.data import DataLoader
 
 from servers.server import Server
@@ -26,7 +27,7 @@ class ServerFedProx(Server):
                     "num_channels": self.num_channels,
                     "num_classes": self.num_classes,
                 },
-                self.mu
+                self.mu,
             )
             self.users.append(new_user)
 
