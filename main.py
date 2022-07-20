@@ -7,6 +7,7 @@ from data import Data
 from servers.server_fed_avg import ServerFedAvg
 from servers.server_fed_prox import ServerFedProx
 from servers.server_one_shot import ServerOneShot
+from servers.server_fed_vae import ServerFedVAE
 from unachievable_ideal import UnachievableIdeal
 
 
@@ -54,6 +55,7 @@ def run_job(args):
         args.algorithm == "central",
         alpha=args.alpha,
         sample_ratio=args.sample_ratio,
+        resize=32 if args.dataset=="mnist" and args.algorithm=="fedvae" else None,
         visualize=True if args.alpha is not None else False,
     )
 
@@ -96,6 +98,8 @@ def run_job(args):
             )
         elif args.algorithm == "fedprox":
             s = ServerFedProx(default_params, args.mu)
+        elif args.algorithm == "fedvae":
+            s = ServerFedVAE(default_params, args.z_dim, d.image_size)
         else:
             raise NotImplementedError(
                 "The specified algorithm has not been implemented."
@@ -199,6 +203,12 @@ if __name__ == "__main__":
         help="Weight on the proximal term in the local objective (FedProx)",
         default=1.0,
     )
+    parser.add_argument(
+        "--z_dim",
+        type=int,
+        help="Latent vector dimension for VAE",
+        default=50
+    )
 
     args = parser.parse_args()
     args.should_log = bool(args.should_log)
@@ -239,8 +249,11 @@ if __name__ == "__main__":
                 "Number of users to select for one shot ensembling:",
                 args.K if args.one_shot_sampling != "all" else "all",
             )
-        if args.algorithm == "fedprox":
+        elif args.algorithm == "fedprox":
             print("Weight on the proximal objective term (mu):", args.mu)
+        elif args.algorithm == "fedvae":
+            print("Latent vector dimension for VAE:", args.z_dim)
+
 
     print("_________________________________________________\n")
 

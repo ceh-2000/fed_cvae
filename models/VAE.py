@@ -94,7 +94,7 @@ class CVAE(nn.Module):
 
 if __name__ == "__main__":
     # Create new instance of model
-    img_size = 28
+    img_size = 32
     num_classes = 10
     num_channels = 1
     z_dim = 50

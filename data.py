@@ -57,6 +57,7 @@ class Data:
             # Number of classes is 10 because there are 10 digits
             self.num_channels = 1
             self.num_classes = 10
+            self.image_size = 28
 
             transform_list = []
 
@@ -64,6 +65,7 @@ class Data:
             transform_list.append(ToTensor())
             if resize is not None:
                 transform_list.append(Resize(resize))
+                self.image_size = resize
             if normalize:
                 transform_list.append(Normalize((0.1307,), (0.3081,)))
 

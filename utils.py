@@ -1,7 +1,7 @@
 import copy
 
 import torch
-
+from sklearn.preprocessing import OneHotEncoder
 
 def avg_weights(w, data_amts):
     """Helper method to return the (possibly weighted) average of a list of weights"""
@@ -41,3 +41,22 @@ def average_weights(model_list, data_amts=None):
     avg_model_state_dict = avg_weights(weight_objects, data_amts=data_amts)
 
     return avg_model_state_dict
+
+def one_hot_encode(y, num_classes):
+    """One-hot encode a classification in vector form
+    Ex. 10 classes, y = 5 --> [0, 0, 0, 0, 0, 1, 0, 0, 0, 0]
+
+    :param y: Torch tensor of classifications.
+    :param num_classes: Integer number of classes in dataset.
+    :return: Torch tensor of the one-hot encoded representation of y.
+    """
+
+    values = y.detach().numpy()
+    onehot_encoder = OneHotEncoder(
+        sparse=False, categories=[[i for i in range(0, num_classes)]]
+    )
+    integer_encoded = values.reshape(len(values), 1)
+    onehot_encoded = onehot_encoder.fit_transform(integer_encoded)
+
+    return torch.tensor(onehot_encoded)
+
