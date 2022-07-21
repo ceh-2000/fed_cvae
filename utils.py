@@ -2,6 +2,7 @@ import copy
 
 import torch
 from sklearn.preprocessing import OneHotEncoder
+from torch.utils.data import Dataset
 
 def avg_weights(w, data_amts):
     """Helper method to return the (possibly weighted) average of a list of weights"""
@@ -59,4 +60,18 @@ def one_hot_encode(y, num_classes):
     onehot_encoded = onehot_encoder.fit_transform(integer_encoded)
 
     return torch.tensor(onehot_encoded)
+
+
+class CustomMnistDataset(Dataset):
+    """Custom Mnist Dataset."""
+
+    def __init__(self, X, y):
+        self.X = X
+        self.y = y
+
+    def __len__(self):
+        return self.X.shape[0]
+
+    def __getitem__(self, idx):
+        pass
 

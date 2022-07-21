@@ -5,10 +5,10 @@ from torch.utils.data import DataLoader
 
 from servers.server import Server
 from users.user_fed_vae import UserFedVAE
-from utils import average_weights, one_hot_encode
+from utils import average_weights, one_hot_encode, CustomMnistDataset
 import torch
-import random
-
+from torch.nn import CrossEntropyLoss
+from torch.optim import Adam
 
 class ServerFedVAE(Server):
     def __init__(self, base_params, z_dim, image_size, beta):
@@ -20,6 +20,7 @@ class ServerFedVAE(Server):
         self.decoder = None
 
         self.num_train_samples = 1000
+        self.classifier_epochs = 10
 
     def create_users(self):
         for u in range(self.num_users):
@@ -48,33 +49,61 @@ class ServerFedVAE(Server):
         """
         return average_weights(decoders)
 
+    def sample_y(self):
+        """
+        Helper method to sample one-hot-encoded targets
+
+        :return: one-hot-encoded y's
+        """
+        y = np.arange(self.num_classes)
+        y_sample = np.random.choice(y, size=self.num_train_samples)
+        print(y_sample.shape)
+
+        y_s = torch.from_numpy(y_sample)
+        y_hot = one_hot_encode(y_s, self.num_classes)
+
+        return y_hot
+
     def generate_data_from_aggregated_decoder(self):
         # Sample z's + y's from uniform distribution
         z_sample = self.users[0].model.sample_z(self.num_train_samples, "uniform")
         print(z_sample.shape)
 
-        classes = np.arange(self.num_classes)
-        classes_hot = one_hot_encode(classes, self.num_classes)
-        y_hot_sample = random.choices(classes_hot, k=self.num_train_samples)
+        y_hot_sample = self.sample_y()
+        print(y_hot_sample.shape)
 
         with torch.no_grad():
             X_sample = self.decoder(z_sample, y_hot_sample)
 
-
         # Put images and labels in wrapper pytoch dataset (e.g. override _get_item())
+        dataset = CustomMnistDataset(X_sample, y_hot_sample)
 
         # Put dataset into pytorch dataloader and return dataloader
+        dataloader = DataLoader(dataset, shuffle=True, batch_size=32)
 
-        pass
+        return dataloader
 
     def train_classifier(self):
         # Optionally reinitialize the classifier weights every global epoch
 
-        # Sample z's + y's and pass them through the aggregated decoder to generate samples
-
         # Train classifier on these images as normal
+        loss_func = CrossEntropyLoss()
+        optimizer = Adam(self.server_model.parameters(), lr=0.001)
 
-        pass
+        self.server_model.train()
+
+        for epoch in range(self.classifier_epochs):
+            for batch_idx, (X_batch, y_batch) in enumerate(self.dataloader):
+                # Forward pass through model
+                output = self.server_model(X_batch)
+
+                # Compute loss with pre-defined loss function
+                loss = loss_func(output, y_batch)
+
+                # Gradient descent
+                optimizer.zero_grad()
+                loss.backward()
+                optimizer.step()
 
     def train(self):
         for e in range(self.glob_epochs):
@@ -93,21 +122,22 @@ class ServerFedVAE(Server):
             # Update the server decoder
             self.decoder = copy.deepcopy(selected_users[0].model.decoder)
 
+            # Generate a dataloader holding the dataset of generated images and labels
             self.classifier_dataloader = self.generate_data_from_aggregated_decoder()
+
 
             self.train_classifier()
 
             print(f"Finished training all users for epoch {e}")
             print("__________________________________________")
 
+
 if __name__ == "__main__":
-    y = torch.arange(10)
+    num_classes = 10
+    y = np.arange(num_classes)
+    y_sample = np.random.choice(y, size = 100)
+    print(y_sample.shape)
 
-    y_hot = one_hot_encode(y, 10)
-
-    y_hot_sample = torch.random.choice(y_hot, k = 10)
-
-    final_y = torch.Tensor(10, 10)
-    torch.cat(y_hot_sample, out=final_y)
-
-    print(final_y)
+    y_s = torch.from_numpy(y_sample)
+    y_hot = one_hot_encode(y_s, num_classes)
+    print(y_hot.shape)
