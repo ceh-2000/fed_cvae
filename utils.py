@@ -2,7 +2,8 @@ import copy
 
 import torch
 from sklearn.preprocessing import OneHotEncoder
-from torch.utils.data import Dataset
+from torch.utils.data import DataLoader, Dataset
+
 
 def avg_weights(w, data_amts):
     """Helper method to return the (possibly weighted) average of a list of weights"""
@@ -43,6 +44,7 @@ def average_weights(model_list, data_amts=None):
 
     return avg_model_state_dict
 
+
 def one_hot_encode(y, num_classes):
     """One-hot encode a classification in vector form
     Ex. 10 classes, y = 5 --> [0, 0, 0, 0, 0, 1, 0, 0, 0, 0]
@@ -62,8 +64,8 @@ def one_hot_encode(y, num_classes):
     return torch.tensor(onehot_encoded)
 
 
-class CustomMnistDataset(Dataset):
-    """Custom Mnist Dataset."""
+class WrapperDataset(Dataset):
+    """Wrapper dataset to put into a dataloader."""
 
     def __init__(self, X, y):
         self.X = X
@@ -73,5 +75,18 @@ class CustomMnistDataset(Dataset):
         return self.X.shape[0]
 
     def __getitem__(self, idx):
-        pass
+        return self.X[idx], self.y[idx]
 
+
+if __name__ == "__main__":
+    X = torch.randn(100, 1, 32, 32)
+    y = torch.randn(
+        100,
+    )
+
+    dataset = WrapperDataset(X, y)
+
+    dl = DataLoader(dataset, shuffle=True, batch_size=32)
+
+    for d in dl:
+        print(d[0].shape, d[1].shape)

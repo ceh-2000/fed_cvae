@@ -1,16 +1,23 @@
 import copy
 
+import torch.nn.functional as F
+
 from models.VAE import CVAE
 from users.user import User
 from utils import one_hot_encode
-import torch.nn.functional as F
+
 
 class UserFedVAE(User):
     def __init__(self, base_params, z_dim, image_size, beta):
         super().__init__(base_params)
 
         self.z_dim = z_dim
-        self.model = CVAE(num_classes=self.num_classes, num_channels=self.num_channels, z_dim=z_dim, image_size=image_size)
+        self.model = CVAE(
+            num_classes=self.num_classes,
+            num_channels=self.num_channels,
+            z_dim=z_dim,
+            image_size=image_size,
+        )
 
         self.beta = beta
 
@@ -78,10 +85,8 @@ class UserFedVAE(User):
 
                 # Calculate losses
                 recon_loss = self.reconstruction_loss(X_batch, X_recon)
-                total_kld, dim_wise_kld, mean_kld = self.kl_divergence(mu, logvar)
-                total_loss = (
-                        recon_loss + self.beta * total_kld
-                )
+                total_kld = self.kl_divergence(mu, logvar)
+                total_loss = recon_loss + self.beta * total_kld
 
                 # Update net params
                 self.optimizer.zero_grad()

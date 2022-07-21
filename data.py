@@ -61,7 +61,7 @@ class Data:
 
             # Establishing transforms
             transform_list.append(ToTensor())
-            transform_list.append(Resize(32)) # Everyone gets resized to 32
+            transform_list.append(Resize(32))  # Everyone gets resized to 32
             if normalize:
                 transform_list.append(Normalize((0.1307,), (0.3081,)))
 

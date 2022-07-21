@@ -49,7 +49,14 @@ python3 main.py --algorithm oneshot --num_users 5 --alpha 1.0 --sample_ratio 0.1
 
 You can also adjust model specific parameters `--K` to adjust how many users are sampled for ensembling and `--user_data_split` to adjust the user train/validation split. Note that you need to choose a K <= number of users.
 
-
+#### FedVAE
+Run the following from command line.
+```
+python3 main.py --algorithm fedvae --num_users 5 --alpha 1.0 --sample_ratio 0.1 --glob_epochs 5 --local_epochs 5 --should_log 1 --z_dim 50 --beta 1.0 --num_train_samples 1000 --classifier_epochs 5
+```
+You can adjust model specific parameers `--z_dim` to change the latent vector dimension and `--beta` to change the weight of the KL divergence loss.
+Modify `--num_train_samples` to change how many samples are generated and `--classifier_epochs` to adjust the server model train time.
+ 
 ### Logging
 1. Enable logging by adding the command line argument `--should_log 1` to `python3 main.py`.
 2. Run `tensorboard --logdir=runs` and navigate to [http://localhost:6006/](http://localhost:6006/).

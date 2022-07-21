@@ -6,8 +6,8 @@ from torch.utils.tensorboard import SummaryWriter
 from data import Data
 from servers.server_fed_avg import ServerFedAvg
 from servers.server_fed_prox import ServerFedProx
-from servers.server_one_shot import ServerOneShot
 from servers.server_fed_vae import ServerFedVAE
+from servers.server_one_shot import ServerOneShot
 from unachievable_ideal import UnachievableIdeal
 
 
@@ -46,7 +46,8 @@ def run_job(args):
             )
         elif args.algorithm == "fedvae":
             cur_run_name = (
-                cur_run_name + f"_glob_epochs={args.glob_epochs}_z_dim={args.z_dim}_beta={args.beta}"
+                cur_run_name
+                + f"_glob_epochs={args.glob_epochs}_z_dim={args.z_dim}_beta={args.beta}_num_train_samples={args.num_train_samples}_classifier_epochs={args.classifier_epochs}"
             )
 
         writer = SummaryWriter(log_dir=cur_run_name)
@@ -102,7 +103,14 @@ def run_job(args):
         elif args.algorithm == "fedprox":
             s = ServerFedProx(default_params, args.mu)
         elif args.algorithm == "fedvae":
-            s = ServerFedVAE(default_params, args.z_dim, d.image_size, args.beta)
+            s = ServerFedVAE(
+                default_params,
+                args.z_dim,
+                d.image_size,
+                args.beta,
+                args.num_train_samples,
+                args.classifier_epochs,
+            )
         else:
             raise NotImplementedError(
                 "The specified algorithm has not been implemented."
@@ -207,16 +215,25 @@ if __name__ == "__main__":
         default=1.0,
     )
     parser.add_argument(
-        "--z_dim",
-        type=int,
-        help="Latent vector dimension for VAE",
-        default=50
+        "--z_dim", type=int, help="Latent vector dimension for VAE", default=50
     )
     parser.add_argument(
         "--beta",
         type=float,
         help="Weight on the KL divergence term for FedVAE",
-        default=1.0
+        default=1.0,
+    )
+    parser.add_argument(
+        "--num_train_samples",
+        type=int,
+        help="Number of images and labels to generate for server classifier training",
+        default=500,  # For MNIST, that's ~50 per class
+    )
+    parser.add_argument(
+        "--classifier_epochs",
+        type=int,
+        help="Number of epochs to train classifier in server",
+        default=5,
     )
 
     args = parser.parse_args()
@@ -263,7 +280,14 @@ if __name__ == "__main__":
         elif args.algorithm == "fedvae":
             print("Latent vector dimension for VAE:", args.z_dim)
             print("Weight on the KL divergence term (beta):", args.beta)
-
+            print(
+                "Number of images and labels to generate for server classifier training:",
+                args.num_train_samples,
+            )
+            print(
+                "Number of epochs to train classifier in server:",
+                args.classifier_epochs,
+            )
 
     print("_________________________________________________\n")
 
