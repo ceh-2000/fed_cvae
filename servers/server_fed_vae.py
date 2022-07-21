@@ -37,9 +37,3 @@ class ServerFedVAE(Server):
 
             print(f"Finished training all users for epoch {e}")
             print("__________________________________________")
-
-    def evaluate(self, e):
-        print(e)
-
-    def test(self):
-        pass

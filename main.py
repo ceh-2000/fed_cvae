@@ -55,7 +55,6 @@ def run_job(args):
         args.algorithm == "central",
         alpha=args.alpha,
         sample_ratio=args.sample_ratio,
-        resize=32 if args.dataset=="mnist" and args.algorithm=="fedvae" else None,
         visualize=True if args.alpha is not None else False,
     )
 

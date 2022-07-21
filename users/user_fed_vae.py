@@ -18,8 +18,6 @@ class UserFedVAE(User):
                 y_hot = one_hot_encode(y_batch, self.num_classes)
 
                 x_recon, mu, logvar = self.model(X_batch, y_hot)
-                print(x_recon.shape, mu.shape, logvar.shape)
-
 
 
                 # # Forward pass through model
