@@ -5,6 +5,7 @@ from torch.utils.tensorboard import SummaryWriter
 
 from data import Data
 from servers.server_fed_avg import ServerFedAvg
+from servers.server_fed_prox import ServerFedProx
 from servers.server_one_shot import ServerOneShot
 from unachievable_ideal import UnachievableIdeal
 
@@ -33,7 +34,11 @@ def run_job(args):
             cur_run_name = f"runs/central_model_sampling_ratio={args.sample_ratio}_number_of_epochs={args.glob_epochs}"
         elif args.algorithm == "fedavg":
             cur_run_name = cur_run_name + f"_glob_epochs={args.glob_epochs}"
-        elif args.algorithm in "oneshot":
+        elif args.algorithm == "fedprox":
+            cur_run_name = (
+                cur_run_name + f"_glob_epochs={args.glob_epochs}_mu={args.mu}"
+            )
+        elif args.algorithm == "oneshot":
             cur_run_name = (
                 cur_run_name
                 + f"_glob_epochs=1_sampling={args.one_shot_sampling}_K={args.K if args.one_shot_sampling != 'all' else 'all'}"
@@ -89,6 +94,8 @@ def run_job(args):
             s = ServerOneShot(
                 default_params, args.one_shot_sampling, args.user_data_split, args.K
             )
+        elif args.algorithm == "fedprox":
+            s = ServerFedProx(default_params, args.mu)
         else:
             raise NotImplementedError(
                 "The specified algorithm has not been implemented."
@@ -186,6 +193,12 @@ if __name__ == "__main__":
         help="Number of users to select for one shot ensembling",
         default=2,
     )
+    parser.add_argument(
+        "--mu",
+        type=float,
+        help="Weight on the proximal term in the local objective (FedProx)",
+        default=1.0,
+    )
 
     args = parser.parse_args()
     args.should_log = bool(args.should_log)
@@ -236,6 +249,8 @@ if __name__ == "__main__":
                 "Number of users to select for one shot ensembling:",
                 args.K if args.one_shot_sampling != "all" else "all",
             )
+        if args.algorithm == "fedprox":
+            print("Weight on the proximal objective term (mu):", args.mu)
 
     print("_________________________________________________\n")
 

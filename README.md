@@ -29,6 +29,13 @@ Run the following from command line.
 python3 main.py --algorithm fedavg --dataset mnist --num_users 10 --alpha 0.1 --sample_ratio 0.1 --glob_epochs 5 --local_epochs 1 --should_log 1
 ```
 
+#### FedProx
+Run the following from command line.
+```
+python3 main.py --algorithm fedavg --dataset mnist --num_users 10 --alpha 0.1 --sample_ratio 0.1 --glob_epochs 5 --local_epochs 1 --should_log 1 --mu 1
+```
+The `mu` argument controls the weight on the proximal term in the local objective for users.
+
 #### One-shot ensembled FL
 Run the following from command line.
 ```
