@@ -5,11 +5,12 @@ from users.user_fed_vae import UserFedVAE
 
 
 class ServerFedVAE(Server):
-    def __init__(self, base_params, z_dim, image_size):
+    def __init__(self, base_params, z_dim, image_size, beta):
         super().__init__(base_params)
 
         self.z_dim = z_dim
         self.image_size = image_size
+        self.beta = beta
 
     def create_users(self):
         for u in range(self.num_users):
@@ -23,7 +24,8 @@ class ServerFedVAE(Server):
                     "num_classes": self.num_classes,
                 },
                 self.z_dim,
-                self.image_size
+                self.image_size,
+                self.beta
             )
             self.users.append(new_user)
 

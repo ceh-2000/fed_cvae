@@ -44,6 +44,10 @@ def run_job(args):
                 cur_run_name
                 + f"_glob_epochs=1_sampling={args.one_shot_sampling}_K={args.K if args.one_shot_sampling != 'all' else 'all'}"
             )
+        elif args.algorithm == "fedvae":
+            cur_run_name = (
+                cur_run_name + f"_glob_epochs={args.glob_epochs}_z_dim={args.z_dim}_beta={args.beta}"
+            )
 
         writer = SummaryWriter(log_dir=cur_run_name)
 
@@ -98,7 +102,7 @@ def run_job(args):
         elif args.algorithm == "fedprox":
             s = ServerFedProx(default_params, args.mu)
         elif args.algorithm == "fedvae":
-            s = ServerFedVAE(default_params, args.z_dim, d.image_size)
+            s = ServerFedVAE(default_params, args.z_dim, d.image_size, args.beta)
         else:
             raise NotImplementedError(
                 "The specified algorithm has not been implemented."
@@ -208,6 +212,12 @@ if __name__ == "__main__":
         help="Latent vector dimension for VAE",
         default=50
     )
+    parser.add_argument(
+        "--beta",
+        type=float,
+        help="Weight on the KL divergence term for FedVAE",
+        default=1.0
+    )
 
     args = parser.parse_args()
     args.should_log = bool(args.should_log)
@@ -252,6 +262,7 @@ if __name__ == "__main__":
             print("Weight on the proximal objective term (mu):", args.mu)
         elif args.algorithm == "fedvae":
             print("Latent vector dimension for VAE:", args.z_dim)
+            print("Weight on the KL divergence term (beta):", args.beta)
 
 
     print("_________________________________________________\n")
