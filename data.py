@@ -29,8 +29,7 @@ class Data:
         central,
         sample_ratio=1.0,
         alpha=None,
-        normalize=True,
-        resize=None,
+        normalize=False,
         visualize=False,
     ):
         """Read in the data, split training data into user subsets, and read in server test data.
@@ -42,7 +41,6 @@ class Data:
         :param sample_ratio: How much of the training data to use
         :param alpha: Parameter used to control heterogeneity
         :param normalize: Whether images should normalized in the transform
-        :param resize: Size images should be resized too
         :param visualize: Boolean to visualize data distribution
         """
 
@@ -57,13 +55,13 @@ class Data:
             # Number of classes is 10 because there are 10 digits
             self.num_channels = 1
             self.num_classes = 10
+            self.image_size = 32
 
             transform_list = []
 
             # Establishing transforms
             transform_list.append(ToTensor())
-            if resize is not None:
-                transform_list.append(Resize(resize))
+            transform_list.append(Resize(32))  # Everyone gets resized to 32
             if normalize:
                 transform_list.append(Normalize((0.1307,), (0.3081,)))
 
@@ -246,7 +244,6 @@ if __name__ == "__main__":
         sample_ratio=0.5,
         alpha=1,
         normalize=True,
-        resize=32,
         visualize=True,
     )
     print(sum([len(MNIST_data.train_data[i]) for i in range(MNIST_data.num_users)]))
