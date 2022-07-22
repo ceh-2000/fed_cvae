@@ -258,7 +258,7 @@ if __name__ == "__main__":
         )
         print("Number of users for training:", args.num_users)
         print("Number of local epochs:", args.local_epochs)
-    if args.algorithm in ["fedavg", "fedprox"]:
+    if args.algorithm in ["fedavg", "fedprox", "fedvae"]:
         print("Number of global epochs:", args.glob_epochs)
         print(
             "Fraction of users sampled for each communication round:",
@@ -271,7 +271,7 @@ if __name__ == "__main__":
 
     print()
 
-    if args.algorithm in ["fedprox", "oneshot"]:
+    if args.algorithm in ["fedprox", "oneshot", "fedvae"]:
         print("MODEL SPECIFIC COMMAND LINE ARGUMENTS")
         print()
 
