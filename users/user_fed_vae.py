@@ -97,5 +97,5 @@ class UserFedVAE(User):
 
     def update_decoder(self, decoder_state_dict):
         """Helper method to swap out the current decoder for a new decoder ensuring it is a new object with a deep copy."""
-        
+
         self.model.decoder.load_state_dict(copy.deepcopy(decoder_state_dict))

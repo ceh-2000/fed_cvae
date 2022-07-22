@@ -7,10 +7,11 @@ from torch.optim import Adam
 from torch.utils.data import DataLoader
 from torchvision.utils import make_grid
 
+from models.decoder import ConditionalDecoder
 from servers.server import Server
 from users.user_fed_vae import UserFedVAE
 from utils import WrapperDataset, average_weights, one_hot_encode
-from models.decoder import ConditionalDecoder
+
 
 class ServerFedVAE(Server):
     def __init__(
@@ -22,7 +23,9 @@ class ServerFedVAE(Server):
         self.image_size = image_size
         self.beta = beta
 
-        self.decoder = ConditionalDecoder(self.image_size, self.num_classes, self.num_channels, self.z_dim)
+        self.decoder = ConditionalDecoder(
+            self.image_size, self.num_classes, self.num_channels, self.z_dim
+        )
 
         self.classifier_loss_func = CrossEntropyLoss()
         self.classifier_optimizer = Adam(self.server_model.parameters(), lr=0.001)
@@ -131,9 +134,7 @@ class ServerFedVAE(Server):
             print(f"Aggregated decoders for epoch {e}")
 
             # Qualitative image check - both the server and a misc user!
-            self.qualitative_check(
-                e, self.decoder, "Novel images server decoder"
-            )
+            self.qualitative_check(e, self.decoder, "Novel images server decoder")
             self.qualitative_check(
                 e, self.users[0].model.decoder, "Novel images user 0 decoder"
             )
