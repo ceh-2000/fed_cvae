@@ -51,14 +51,42 @@ class ServerFedVAE(Server):
             )
             self.users.append(new_user)
 
-    def aggregate_decoders(self, decoders):
+    def aggregate_decoders(self, decoders, distill = False):
         """
         Helper method to aggregate the decoders into a shared model
 
         :param decoders: List of decoders from selected user models
+        :param distill: Boolean that controls whether we aggregate with KD or not
 
         :return: aggregated decoder
         """
+
+        if distill:
+            # Get label distributions from individual users
+
+            # In data.py, save the targets as counts for each class and pass this to UserFedVAE
+
+            # Average the decoder weights as before using the average_weights function
+
+            # Load the state_dict model into the server decoder
+
+            # Sample from z as before (uniform or multivariate normal)
+
+            # Use np.random.choice to choose y's according to label distribution
+            # This is the value for p: https://numpy.org/doc/stable/reference/random/generated/numpy.random.choice.html
+
+            # Choose 100 z's and y's
+
+            # Forward pass all 100 z's and y's through the user decoder (teacher) and get the images
+
+            # Store the x_recons for all users and target y's and z's in a new wrapper dataset
+            # The inputs are a concatenated y+z and the target is x_recon
+
+            # Train using the wrapper dataset on the aggregated server decoder and the loss is reconstruction loss
+            # comparing server_x to user_x
+
+            # Return result
+            pass
 
         return average_weights(decoders)
 
