@@ -138,15 +138,15 @@ class ServerFedVAE(Server):
                 e, self.users[0].model.decoder, "Novel images user 0 decoder"
             )
 
-            # # Generate a dataloader holding the generated images and labels
-            # self.classifier_dataloader = self.generate_data_from_aggregated_decoder()
-            # print(
-            #     f"Generated {len(self.classifier_dataloader.dataset)} samples to train server classifier for epoch {e}."
-            # )
-            #
-            # # Train the server model's classifier
-            # self.train_classifier()
-            # print(f"Trained server classifier for epoch {e}.")
+            # Generate a dataloader holding the generated images and labels
+            self.classifier_dataloader = self.generate_data_from_aggregated_decoder()
+            print(
+                f"Generated {len(self.classifier_dataloader.dataset)} samples to train server classifier for epoch {e}."
+            )
+
+            # Train the server model's classifier
+            self.train_classifier()
+            print(f"Trained server classifier for epoch {e}.")
 
             print("__________________________________________")
 
