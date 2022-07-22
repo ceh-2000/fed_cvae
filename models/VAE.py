@@ -58,7 +58,7 @@ class CVAE(nn.Module):
                 self.kaiming_init(m)
 
     def reparametrize(self, mu, logvar):
-        """Re-paramaterization trick to make our CVAE fully-differentiable"""
+        """ Re-paramaterization trick to make our CVAE fully-differentiable """
         std = logvar.div(2).exp()
         eps = Variable(std.data.new(std.size()).normal_())
         return mu + std * eps

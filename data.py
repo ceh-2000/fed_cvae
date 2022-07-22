@@ -29,7 +29,7 @@ class Data:
         central,
         sample_ratio=1.0,
         alpha=None,
-        normalize=True,
+        normalize=False,
         visualize=False,
     ):
         """Read in the data, split training data into user subsets, and read in server test data.

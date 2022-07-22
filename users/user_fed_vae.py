@@ -1,6 +1,7 @@
 import copy
 
 import torch.nn.functional as F
+from torch.optim import Adam
 
 from models.VAE import CVAE
 from users.user import User
@@ -18,6 +19,7 @@ class UserFedVAE(User):
             z_dim=z_dim,
             image_size=image_size,
         )
+        self.optimizer = Adam(self.model.parameters(), lr=0.001)
 
         self.beta = beta
 
