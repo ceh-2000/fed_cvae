@@ -10,7 +10,7 @@ from torchvision.utils import make_grid
 from servers.server import Server
 from users.user_fed_vae import UserFedVAE
 from utils import WrapperDataset, average_weights, one_hot_encode
-
+from models.decoder import ConditionalDecoder
 
 class ServerFedVAE(Server):
     def __init__(
@@ -22,7 +22,7 @@ class ServerFedVAE(Server):
         self.image_size = image_size
         self.beta = beta
 
-        self.decoder = None
+        self.decoder = ConditionalDecoder(self.image_size, self.num_classes, self.num_channels, self.z_dim)
 
         self.classifier_loss_func = CrossEntropyLoss()
         self.classifier_optimizer = Adam(self.server_model.parameters(), lr=0.001)
@@ -56,6 +56,7 @@ class ServerFedVAE(Server):
 
         :return: aggregated decoder
         """
+
         return average_weights(decoders)
 
     def sample_y(self):
@@ -70,7 +71,7 @@ class ServerFedVAE(Server):
         y_s = torch.from_numpy(y_sample)
         y_hot = one_hot_encode(y_s, self.num_classes)
 
-        return y_sample, y_hot
+        return y_s, y_hot
 
     def generate_data_from_aggregated_decoder(self):
         # Sample z's + y's from uniform distribution
@@ -110,6 +111,13 @@ class ServerFedVAE(Server):
             self.evaluate(e)
 
             selected_users = self.sample_users()
+
+            # Send aggregated decoder to selected users
+            decoder_state_dict = copy.deepcopy(self.decoder.state_dict())
+            for u in selected_users:
+                u.update_decoder(decoder_state_dict)
+
+            # Train selected users and collect their decoder weights
             decoders = []
             for u in selected_users:
                 u.train(self.local_epochs)
@@ -117,32 +125,28 @@ class ServerFedVAE(Server):
 
             print(f"Finished training user models for epoch {e}")
 
-            # Pass aggregated decoder back to all users
-            decoder_state_dict = self.aggregate_decoders(decoders)
-            for u in selected_users:
-                u.update_decoder(decoder_state_dict)
-
             # Update the server decoder
-            self.decoder = copy.deepcopy(selected_users[0].model.decoder)
+            avg_state_dict = self.aggregate_decoders(decoders)
+            self.decoder.load_state_dict(avg_state_dict)
             print(f"Aggregated decoders for epoch {e}")
 
-            # Qualitative image check
+            # Qualitative image check - both the server and a misc user!
             self.qualitative_check(
                 e, self.decoder, "Novel images server decoder"
-            )  # Swap out decoder for any decoder
+            )
             self.qualitative_check(
                 e, self.users[0].model.decoder, "Novel images user 0 decoder"
             )
 
-            # Generate a dataloader holding the dataset of generated images and labels
-            self.classifier_dataloader = self.generate_data_from_aggregated_decoder()
-            print(
-                f"Generated {len(self.classifier_dataloader.dataset)} samples to train server classifier for epoch {e}."
-            )
-
-            # Train the server model's classifier
-            self.train_classifier()
-            print(f"Trained server classifier for epoch {e}.")
+            # # Generate a dataloader holding the generated images and labels
+            # self.classifier_dataloader = self.generate_data_from_aggregated_decoder()
+            # print(
+            #     f"Generated {len(self.classifier_dataloader.dataset)} samples to train server classifier for epoch {e}."
+            # )
+            #
+            # # Train the server model's classifier
+            # self.train_classifier()
+            # print(f"Trained server classifier for epoch {e}.")
 
             print("__________________________________________")
 
