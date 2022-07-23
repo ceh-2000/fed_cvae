@@ -144,7 +144,7 @@ class WrapperDecoderDataset(Dataset):
         return self.X.shape[0]
 
     def __getitem__(self, idx):
-        return self.X[idx], self.y[idx], self.y[idx]
+        return self.X[idx], self.y[idx], self.z[idx]
 
 if __name__ == "__main__":
     X = torch.randn(100, 1, 32, 32)

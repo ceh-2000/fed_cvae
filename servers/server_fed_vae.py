@@ -115,13 +115,14 @@ class ServerFedVAE(Server):
         dl = DataLoader(dataset, shuffle=True, batch_size=32)
 
         self.decoder.train()
+
         for epoch in range(3):
-            for batch_idx, (X_batch, y_batch, z_batch) in enumerate(dl):
+            for X_batch, y_batch, z_batch in dl:
                 X_server = self.decoder(z_batch, y_batch)
                 recon_loss = reconstruction_loss(self.num_channels, X_batch, X_server)
 
                 self.kd_optimizer.zero_grad()
-                recon_loss.backward()
+                recon_loss.backward(retain_graph = True)
                 self.kd_optimizer.step()
 
         return self.decoder.state_dict()
