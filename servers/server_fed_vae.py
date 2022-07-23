@@ -10,7 +10,7 @@ from torchvision.utils import make_grid
 from models.decoder import ConditionalDecoder
 from servers.server import Server
 from users.user_fed_vae import UserFedVAE
-from utils import WrapperDataset, average_weights, one_hot_encode
+from utils import WrapperClassifierDataset, WrapperDecoderDataset, average_weights, one_hot_encode, reconstruction_loss
 
 
 class ServerFedVAE(Server):
@@ -26,6 +26,7 @@ class ServerFedVAE(Server):
         self.decoder = ConditionalDecoder(
             self.image_size, self.num_classes, self.num_channels, self.z_dim
         )
+        self.kd_optimizer = Adam(self.decoder.parameters(), lr=0.001)
 
         self.classifier_loss_func = CrossEntropyLoss()
         self.classifier_optimizer = Adam(self.server_model.parameters(), lr=0.001)
@@ -34,9 +35,28 @@ class ServerFedVAE(Server):
         self.classifier_epochs = classifier_epochs
         self.num_samples_per_class = 5
 
+    def compute_pmf(self, u):
+        """
+        Helper function to get probabilities for user target values
+
+        :param u: User ID
+        :return: Probability distribution of target data for a given user
+        """
+
+        all_targets = self.data_subsets[u].dataset.dataset.targets
+        indices = self.data_subsets[u].dataset.indices
+        targets = all_targets[indices]
+        _, counts = torch.unique(targets, return_counts=True)
+        pmf = counts / torch.sum(counts)
+
+        return pmf
+
     def create_users(self):
         for u in range(self.num_users):
+
             dl = DataLoader(self.data_subsets[u], shuffle=True, batch_size=32)
+            pmf = self.compute_pmf(u)
+
 
             new_user = UserFedVAE(
                 {
@@ -48,10 +68,11 @@ class ServerFedVAE(Server):
                 self.z_dim,
                 self.image_size,
                 self.beta,
+                pmf
             )
             self.users.append(new_user)
 
-    def aggregate_decoders(self, decoders, distill = False):
+    def average_decoders(self, decoders):
         """
         Helper method to aggregate the decoders into a shared model
 
@@ -60,35 +81,50 @@ class ServerFedVAE(Server):
 
         :return: aggregated decoder
         """
-
-        if distill:
-            # Get label distributions from individual users
-
-            # In data.py, save the targets as counts for each class and pass this to UserFedVAE
-
-            # Average the decoder weights as before using the average_weights function
-
-            # Load the state_dict model into the server decoder
-
-            # Sample from z as before (uniform or multivariate normal)
-
-            # Use np.random.choice to choose y's according to label distribution
-            # This is the value for p: https://numpy.org/doc/stable/reference/random/generated/numpy.random.choice.html
-
-            # Choose 100 z's and y's
-
-            # Forward pass all 100 z's and y's through the user decoder (teacher) and get the images
-
-            # Store the x_recons for all users and target y's and z's in a new wrapper dataset
-            # The inputs are a concatenated y+z and the target is x_recon
-
-            # Train using the wrapper dataset on the aggregated server decoder and the loss is reconstruction loss
-            # comparing server_x to user_x
-
-            # Return result
-            pass
-
         return average_weights(decoders)
+
+    def aggregate_decoders(self, users):
+        """
+        Aggregate decoder using knowledge distillation
+
+        :param users: List of selected users to use as teacher models
+        """
+
+        # Number of samples per user
+        len_data = int(self.num_train_samples / len(users))
+
+        X_vals = torch.Tensor()
+        y_vals = torch.Tensor()
+        z_vals = torch.Tensor()
+
+        for u in users:
+            z = u.model.sample_z(len_data, "uniform")
+
+            # Sample y's according to each user's target distribution
+            classes = np.arange(self.num_classes)
+            y = torch.from_numpy(np.random.choice(classes, size = len_data, p = u.pmf))
+            y_hot = one_hot_encode(y, self.num_classes)
+
+            X = u.model.decoder(z, y_hot)
+
+            X_vals = torch.cat((X_vals, X), 0)
+            y_vals = torch.cat((y_vals, y_hot), 0)
+            z_vals = torch.cat((z_vals, z), 0)
+
+        dataset = WrapperDecoderDataset(X_vals, y_vals, z_vals)
+        dl = DataLoader(dataset, shuffle=True, batch_size=32)
+
+        self.decoder.train()
+        for epoch in range(3):
+            for batch_idx, (X_batch, y_batch, z_batch) in enumerate(dl):
+                X_server = self.decoder(z_batch, y_batch)
+                recon_loss = reconstruction_loss(self.num_channels, X_batch, X_server)
+
+                self.kd_optimizer.zero_grad()
+                recon_loss.backward()
+                self.kd_optimizer.step()
+
+        return self.decoder.state_dict()
 
     def sample_y(self):
         """
@@ -114,7 +150,7 @@ class ServerFedVAE(Server):
             X_sample = torch.sigmoid(X_sample)
 
         # Put images and labels in wrapper pytoch dataset (e.g. override _get_item())
-        dataset = WrapperDataset(X_sample, y_sample)
+        dataset = WrapperClassifierDataset(X_sample, y_sample)
 
         # Put dataset into pytorch dataloader and return dataloader
         dataloader = DataLoader(dataset, shuffle=True, batch_size=32)
@@ -143,11 +179,6 @@ class ServerFedVAE(Server):
 
             selected_users = self.sample_users()
 
-            # Send aggregated decoder to selected users
-            decoder_state_dict = copy.deepcopy(self.decoder.state_dict())
-            for u in selected_users:
-                u.update_decoder(decoder_state_dict)
-
             # Train selected users and collect their decoder weights
             decoders = []
             for u in selected_users:
@@ -157,8 +188,16 @@ class ServerFedVAE(Server):
             print(f"Finished training user models for epoch {e}")
 
             # Update the server decoder
-            avg_state_dict = self.aggregate_decoders(decoders)
+            avg_state_dict = self.average_decoders(decoders)
             self.decoder.load_state_dict(avg_state_dict)
+
+            # Use weight averaging and knowledge distillation to aggregate decoders
+            decoder_state_dict = self.aggregate_decoders(selected_users)
+
+            # Send aggregated decoder to selected users
+            for u in selected_users:
+                u.update_decoder(decoder_state_dict)
+
             print(f"Aggregated decoders for epoch {e}")
 
             # Qualitative image check - both the server and a misc user!

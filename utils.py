@@ -3,6 +3,7 @@ import copy
 import torch
 from sklearn.preprocessing import OneHotEncoder
 from torch.utils.data import DataLoader, Dataset
+import torch.nn.functional as F
 
 
 def avg_weights(w, data_amts):
@@ -64,7 +65,61 @@ def one_hot_encode(y, num_classes):
     return torch.tensor(onehot_encoded)
 
 
-class WrapperDataset(Dataset):
+def reconstruction_loss(num_channels, x, x_recon):
+    """Compute the reconstruction loss comparing input and reconstruction
+    using an appropriate distribution given the number of channels.
+
+    :param x: the input image
+    :param x_recon: the reconstructed image produced by the decoder
+
+    :return: reconstruction loss
+    """
+
+    batch_size = x.size(0)
+    assert batch_size != 0
+
+    # Use w/one-channel images
+    if num_channels == 1:
+        recon_loss = F.binary_cross_entropy_with_logits(
+            x_recon, x, reduction="sum"
+        ).div(batch_size)
+    # Multi-channel images
+    elif num_channels == 3:
+        x_recon = F.sigmoid(x_recon)
+        recon_loss = F.mse_loss(x_recon, x, reduction="sum").div(batch_size)
+    else:
+        raise NotImplementedError("We only support 1 and 3 channel images.")
+
+    return recon_loss
+
+
+def kl_divergence(mu, logvar):
+    """Compute KL Divergence between the multivariate normal distribution of z
+    and a multivariate standard normal distribution.
+
+    :param mu: the mean of the predicted distribution
+    :param logvar: the log-variance of the predicted distribution
+
+    :return: total KL divergence loss
+    """
+
+    batch_size = mu.size(0)
+    assert batch_size != 0
+
+    if mu.data.ndimension() == 4:
+        mu = mu.view(mu.size(0), mu.size(1))
+    if logvar.data.ndimension() == 4:
+        logvar = logvar.view(logvar.size(0), logvar.size(1))
+
+    # Shortcut: KL divergence w/N(0, I) prior and encoder dist is a multivariate normal
+    # Push from multivariate normal --> multivariate STANDARD normal X ~ N(0,I)
+    klds = -0.5 * (1 + logvar - mu.pow(2) - logvar.exp())
+    total_kld = klds.sum(1).mean(0, True)
+
+    return total_kld
+
+
+class WrapperClassifierDataset(Dataset):
     """Wrapper dataset to put into a dataloader."""
 
     def __init__(self, X, y):
@@ -77,6 +132,19 @@ class WrapperDataset(Dataset):
     def __getitem__(self, idx):
         return self.X[idx], self.y[idx]
 
+class WrapperDecoderDataset(Dataset):
+    """Wrapper dataset to put into a dataloader."""
+
+    def __init__(self, X, y, z):
+        self.X = X
+        self.y = y
+        self.z = z
+
+    def __len__(self):
+        return self.X.shape[0]
+
+    def __getitem__(self, idx):
+        return self.X[idx], self.y[idx], self.y[idx]
 
 if __name__ == "__main__":
     X = torch.randn(100, 1, 32, 32)
@@ -84,7 +152,7 @@ if __name__ == "__main__":
         100,
     )
 
-    dataset = WrapperDataset(X, y)
+    dataset = WrapperClassifierDataset(X, y)
 
     dl = DataLoader(dataset, shuffle=True, batch_size=32)
 
