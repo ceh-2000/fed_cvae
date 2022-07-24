@@ -1,11 +1,9 @@
 import numpy as np
 import torch
-from matplotlib import pyplot as plt
 from torch.nn import CrossEntropyLoss
 from torch.optim import Adam
 from torch.utils.data import DataLoader
 from torchvision.utils import make_grid
-import torchvision.transforms.functional as F
 
 from models.decoder import ConditionalDecoder
 from servers.server import Server
@@ -43,19 +41,15 @@ class ServerFedVAE(Server):
         :param u: User ID
         :return: Probability distribution of target data for a given user
         """
+        subset_1_indices = self.data_subsets[u].dataset.indices
+        subset_1_dataset = self.data_subsets[u].dataset.dataset.targets
+        subset_1 = subset_1_dataset[subset_1_indices]
 
-        all_targets = self.data_subsets[u].dataset.dataset.targets
-        indices = self.data_subsets[u].indices
-        targets = all_targets[indices]
+        subset_2_indices = self.data_subsets[u].indices
+        subset_2_dataset = subset_1
+        subset_2 = subset_2_dataset[subset_2_indices]
 
-        targets = self.data_subsets[u].dataset.targets[
-            self.data_subsets[u].indices
-        ].numpy()
-        # print(u)
-        # print(indices)
-        # print(torch.unique(targets, return_counts=True))
-
-        _, counts = torch.unique(targets, return_counts=True)
+        vals, counts = torch.unique(subset_2, return_counts=True)
         pmf = counts / torch.sum(counts)
 
         return pmf
