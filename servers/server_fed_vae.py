@@ -1,16 +1,17 @@
-import copy
-
 import numpy as np
 import torch
+from matplotlib import pyplot as plt
 from torch.nn import CrossEntropyLoss
 from torch.optim import Adam
 from torch.utils.data import DataLoader
 from torchvision.utils import make_grid
+import torchvision.transforms.functional as F
 
 from models.decoder import ConditionalDecoder
 from servers.server import Server
 from users.user_fed_vae import UserFedVAE
-from utils import WrapperClassifierDataset, WrapperDecoderDataset, average_weights, one_hot_encode, reconstruction_loss
+from utils import (WrapperClassifierDataset, WrapperDecoderDataset,
+                   average_weights, one_hot_encode, reconstruction_loss)
 
 
 class ServerFedVAE(Server):
@@ -44,8 +45,16 @@ class ServerFedVAE(Server):
         """
 
         all_targets = self.data_subsets[u].dataset.dataset.targets
-        indices = self.data_subsets[u].dataset.indices
+        indices = self.data_subsets[u].indices
         targets = all_targets[indices]
+
+        targets = self.data_subsets[u].dataset.targets[
+            self.data_subsets[u].indices
+        ].numpy()
+        # print(u)
+        # print(indices)
+        # print(torch.unique(targets, return_counts=True))
+
         _, counts = torch.unique(targets, return_counts=True)
         pmf = counts / torch.sum(counts)
 
@@ -57,7 +66,6 @@ class ServerFedVAE(Server):
             dl = DataLoader(self.data_subsets[u], shuffle=True, batch_size=32)
             pmf = self.compute_pmf(u)
 
-
             new_user = UserFedVAE(
                 {
                     "user_id": u,
@@ -68,7 +76,7 @@ class ServerFedVAE(Server):
                 self.z_dim,
                 self.image_size,
                 self.beta,
-                pmf
+                pmf,
             )
             self.users.append(new_user)
 
@@ -102,10 +110,14 @@ class ServerFedVAE(Server):
 
             # Sample y's according to each user's target distribution
             classes = np.arange(self.num_classes)
-            y = torch.from_numpy(np.random.choice(classes, size = len_data, p = u.pmf))
+            y = torch.from_numpy(np.random.choice(classes, size=len_data, p=u.pmf))
             y_hot = one_hot_encode(y, self.num_classes)
 
+            print(u.user_id, u.pmf)
+            print(torch.unique(y, return_counts=True))
+
             X = u.model.decoder(z, y_hot)
+            self.save_images(X[:20], True, str(y[:20]), 0)
 
             X_vals = torch.cat((X_vals, X), 0)
             y_vals = torch.cat((y_vals, y_hot), 0)
@@ -122,7 +134,7 @@ class ServerFedVAE(Server):
                 recon_loss = reconstruction_loss(self.num_channels, X_batch, X_server)
 
                 self.kd_optimizer.zero_grad()
-                recon_loss.backward(retain_graph = True)
+                recon_loss.backward(retain_graph=True)
                 self.kd_optimizer.step()
 
         return self.decoder.state_dict()
@@ -137,6 +149,7 @@ class ServerFedVAE(Server):
         y_sample = np.random.choice(y, size=self.num_train_samples)
 
         y_s = torch.from_numpy(y_sample)
+
         y_hot = one_hot_encode(y_s, self.num_classes)
 
         return y_s, y_hot
@@ -234,7 +247,8 @@ class ServerFedVAE(Server):
         if sigmoid:
             images = torch.sigmoid(images).data
 
-        if glob_iter and self.writer:
+        if glob_iter is not None and self.writer:
+            print('saving images')
             grid = make_grid(images, nrow=self.num_classes)
             self.writer.add_image(name, grid, glob_iter)
 

@@ -1,9 +1,9 @@
 import copy
 
 import torch
+import torch.nn.functional as F
 from sklearn.preprocessing import OneHotEncoder
 from torch.utils.data import DataLoader, Dataset
-import torch.nn.functional as F
 
 
 def avg_weights(w, data_amts):
@@ -132,6 +132,7 @@ class WrapperClassifierDataset(Dataset):
     def __getitem__(self, idx):
         return self.X[idx], self.y[idx]
 
+
 class WrapperDecoderDataset(Dataset):
     """Wrapper dataset to put into a dataloader."""
 
@@ -145,6 +146,7 @@ class WrapperDecoderDataset(Dataset):
 
     def __getitem__(self, idx):
         return self.X[idx], self.y[idx], self.z[idx]
+
 
 if __name__ == "__main__":
     X = torch.randn(100, 1, 32, 32)

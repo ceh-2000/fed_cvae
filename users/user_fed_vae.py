@@ -4,7 +4,7 @@ from torch.optim import Adam
 
 from models.VAE import CVAE
 from users.user import User
-from utils import one_hot_encode, reconstruction_loss, kl_divergence
+from utils import kl_divergence, one_hot_encode, reconstruction_loss
 
 
 class UserFedVAE(User):
