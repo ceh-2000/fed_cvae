@@ -50,7 +50,15 @@ class ServerFedVAE(Server):
         subset_2 = subset_2_dataset[subset_2_indices]
 
         vals, counts = torch.unique(subset_2, return_counts=True)
-        pmf = counts / torch.sum(counts)
+        count_dict = {}
+        for i in range(len(vals)):
+            count_dict[int(vals[i])] = int(counts[i])
+
+        pmf = np.zeros(self.num_classes)
+
+        for p in range(self.num_classes):
+            if p in count_dict:
+                pmf[p] = count_dict.get(p) / torch.sum(counts)
 
         return pmf
 
@@ -108,7 +116,6 @@ class ServerFedVAE(Server):
             y_hot = one_hot_encode(y, self.num_classes)
 
             print(u.user_id, u.pmf)
-            print(torch.unique(y, return_counts=True))
 
             X = u.model.decoder(z, y_hot)
             self.save_images(X[:20], True, str(y[:20]), 0)
