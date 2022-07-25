@@ -93,7 +93,7 @@ class ServerFedVAE(Server):
         """
         return average_weights(decoders)
 
-    def aggregate_decoders(self, users):
+    def aggregate_decoders(self, users, e):
         """
         Aggregate decoder using knowledge distillation
 
@@ -118,20 +118,27 @@ class ServerFedVAE(Server):
             print(u.user_id, u.pmf)
 
             X = u.model.decoder(z, y_hot)
-            self.save_images(X[:20], True, str(y[:20]), 0)
+            self.save_images(X[:20], True, str(y[:20]), e)
 
             X_vals = torch.cat((X_vals, X), 0)
             y_vals = torch.cat((y_vals, y_hot), 0)
             z_vals = torch.cat((z_vals, z), 0)
 
-        dataset = WrapperDecoderDataset(X_vals, y_vals, z_vals)
-        dl = DataLoader(dataset, shuffle=True, batch_size=32)
+        decoder_dataset = WrapperDecoderDataset(X_vals, y_vals, z_vals)
+        dl = DataLoader(decoder_dataset, shuffle=False, batch_size=32)
 
         self.decoder.train()
 
         for epoch in range(3):
             for X_batch, y_batch, z_batch in dl:
                 X_server = self.decoder(z_batch, y_batch)
+
+                if epoch == 2:
+                    name = str(torch.argmax(y_batch, dim=1))
+                    print(name)
+                    self.save_images(X_batch, True, f'target', e)
+                    self.save_images(X_server, True, f'predicted', e)
+
                 recon_loss = reconstruction_loss(self.num_channels, X_batch, X_server)
 
                 self.kd_optimizer.zero_grad()
@@ -207,7 +214,7 @@ class ServerFedVAE(Server):
             self.decoder.load_state_dict(avg_state_dict)
 
             # Use weight averaging and knowledge distillation to aggregate decoders
-            decoder_state_dict = self.aggregate_decoders(selected_users)
+            decoder_state_dict = self.aggregate_decoders(selected_users, e)
 
             # Send aggregated decoder to selected users
             for u in selected_users:
