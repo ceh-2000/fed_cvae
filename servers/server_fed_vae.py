@@ -139,14 +139,14 @@ class ServerFedVAE(Server):
 
         for epoch in range(
             self.decoder_epochs
-        ):  
+        ):
             for X_batch, y_batch, z_batch in dl:
                 X_server = self.decoder(z_batch, y_batch)
 
                 recon_loss = reconstruction_loss(self.num_channels, X_batch, X_server)
 
                 self.kd_optimizer.zero_grad()
-                recon_loss.backward(retain_graph=False)
+                recon_loss.backward()
                 self.kd_optimizer.step()
 
         return self.decoder.state_dict()
