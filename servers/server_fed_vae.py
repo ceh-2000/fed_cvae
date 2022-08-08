@@ -16,7 +16,7 @@ from utils import (WrapperClassifierDataset, WrapperDecoderDataset,
 
 class ServerFedVAE(Server):
     def __init__(
-        self, base_params, z_dim, image_size, beta, num_train_samples, classifier_epochs
+        self, base_params, z_dim, image_size, beta, classifier_num_train_samples, classifier_epochs, decoder_num_train_samples, decoder_epochs
     ):
         super().__init__(base_params)
 
@@ -29,10 +29,13 @@ class ServerFedVAE(Server):
         )
         self.kd_optimizer = Adam(self.decoder.parameters(), lr=0.001)
 
+        self.decoder_num_train_samples = decoder_num_train_samples
+        self.decoder_epochs = decoder_epochs
+
         self.classifier_loss_func = CrossEntropyLoss()
         self.classifier_optimizer = Adam(self.server_model.parameters(), lr=0.001)
 
-        self.num_train_samples = num_train_samples
+        self.classifier_num_train_samples = classifier_num_train_samples
         self.classifier_epochs = classifier_epochs
         self.num_samples_per_class = 5
 
@@ -104,8 +107,8 @@ class ServerFedVAE(Server):
 
         # Number of samples per user
         len_data = int(
-            self.num_train_samples / len(users)
-        )  # TODO: currently re-uses classifier's command line arg - should give its own arg!
+            self.decoder_num_train_samples / len(users)
+        )
 
         X_vals = torch.Tensor()
         y_vals = torch.Tensor()
@@ -119,8 +122,8 @@ class ServerFedVAE(Server):
             y = torch.from_numpy(np.random.choice(classes, size=len_data, p=u.pmf))
             y_hot = one_hot_encode(y, self.num_classes)
 
-            X = u.model.decoder(z, y_hot)
-            # self.save_images(X[:20], True, str(y[:20]), e)
+            # Detaching ensures that there aren't issues w/trying to calculate the KD grad WRT this net's params - not needed!
+            X = u.model.decoder(z, y_hot).detach()
 
             X_vals = torch.cat((X_vals, X), 0)
             y_vals = torch.cat((y_vals, y_hot), 0)
@@ -135,21 +138,15 @@ class ServerFedVAE(Server):
         self.decoder.train()
 
         for epoch in range(
-            3
-        ):  # TODO: make the number of epochs here a passed command line arg!
+            self.decoder_epochs
+        ):  
             for X_batch, y_batch, z_batch in dl:
                 X_server = self.decoder(z_batch, y_batch)
-
-                # if epoch == 9:
-                #     name = str(torch.argmax(y_batch, dim=1))
-                #     print(name)
-                #     self.save_images(X_batch, True, f"target", e)
-                #     self.save_images(X_server, True, f"predicted", e)
 
                 recon_loss = reconstruction_loss(self.num_channels, X_batch, X_server)
 
                 self.kd_optimizer.zero_grad()
-                recon_loss.backward(retain_graph=True)
+                recon_loss.backward(retain_graph=False)
                 self.kd_optimizer.step()
 
         return self.decoder.state_dict()
@@ -161,7 +158,7 @@ class ServerFedVAE(Server):
         :return: one-hot-encoded y's
         """
         y = np.arange(self.num_classes)
-        y_sample = np.random.choice(y, size=self.num_train_samples)
+        y_sample = np.random.choice(y, size=self.classifier_num_train_samples)
 
         y_s = torch.from_numpy(y_sample)
 
@@ -171,7 +168,7 @@ class ServerFedVAE(Server):
 
     def generate_data_from_aggregated_decoder(self):
         # Sample z's + y's from uniform distribution
-        z_sample = self.users[0].model.sample_z(self.num_train_samples, "uniform")
+        z_sample = self.users[0].model.sample_z(self.classifier_num_train_samples, "uniform")
         y_sample, y_hot_sample = self.sample_y()
 
         with torch.no_grad():

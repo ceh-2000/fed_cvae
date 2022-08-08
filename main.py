@@ -47,7 +47,7 @@ def run_job(args):
         elif args.algorithm == "fedvae":
             cur_run_name = (
                 cur_run_name
-                + f"_glob_epochs={args.glob_epochs}_z_dim={args.z_dim}_beta={args.beta}_num_train_samples={args.num_train_samples}_classifier_epochs={args.classifier_epochs}"
+                + f"_glob_epochs={args.glob_epochs}_z_dim={args.z_dim}_beta={args.beta}_classifier_train_samples={args.classifier_num_train_samples}_classifier_epochs={args.classifier_epochs}"
             )
 
         writer = SummaryWriter(log_dir=cur_run_name)
@@ -108,8 +108,10 @@ def run_job(args):
                 args.z_dim,
                 d.image_size,
                 args.beta,
-                args.num_train_samples,
+                args.classifier_num_train_samples,
                 args.classifier_epochs,
+                args.decoder_num_train_samples,
+                args.decoder_epochs
             )
         else:
             raise NotImplementedError(
@@ -224,10 +226,22 @@ if __name__ == "__main__":
         default=1.0,
     )
     parser.add_argument(
-        "--num_train_samples",
+        "--decoder_num_train_samples",
+        type=int,
+        help="Number of images and labels to generate for server decoder KD fine-tuning",
+        default=1000,
+    )
+    parser.add_argument(
+        "--decoder_epochs",
+        type=int,
+        help="Number of epochs to fine-tune the server decoder for",
+        default=5,
+    )
+    parser.add_argument(
+        "--classifier_num_train_samples",
         type=int,
         help="Number of images and labels to generate for server classifier training",
-        default=500,  # For MNIST, that's ~50 per class
+        default=1000,  # For MNIST, that's ~100 per class
     )
     parser.add_argument(
         "--classifier_epochs",
@@ -291,8 +305,16 @@ if __name__ == "__main__":
             print("Latent vector dimension for VAE:", args.z_dim)
             print("Weight on the KL divergence term (beta):", args.beta)
             print(
+                "Number of images and labels to generate for server decoder KD fine-tuning:",
+                args.decoder_num_train_samples,
+            )
+            print(
+                "Number of epochs to fine-tune the server decoder for:",
+                args.decoder_epochs,
+            )
+            print(
                 "Number of images and labels to generate for server classifier training:",
-                args.num_train_samples,
+                args.classifier_num_train_samples,
             )
             print(
                 "Number of epochs to train classifier in server:",
