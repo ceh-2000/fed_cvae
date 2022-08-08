@@ -120,7 +120,7 @@ class ServerFedVAE(Server):
             y_hot = one_hot_encode(y, self.num_classes)
 
             X = u.model.decoder(z, y_hot)
-            self.save_images(X[:20], True, str(y[:20]), e)
+            # self.save_images(X[:20], True, str(y[:20]), e)
 
             X_vals = torch.cat((X_vals, X), 0)
             y_vals = torch.cat((y_vals, y_hot), 0)
@@ -135,21 +135,18 @@ class ServerFedVAE(Server):
         self.decoder.train()
 
         for epoch in range(
-            10
+            3
         ):  # TODO: make the number of epochs here a passed command line arg!
-            for i, (X_batch, y_batch, z_batch) in enumerate(dl):
+            for X_batch, y_batch, z_batch in dl:
                 X_server = self.decoder(z_batch, y_batch)
 
-                if epoch == 9:
-                    name = str(torch.argmax(y_batch, dim=1))
-                    print(name)
-                    self.save_images(X_batch, True, f"target", e)
-                    self.save_images(X_server, True, f"predicted", e)
+                # if epoch == 9:
+                #     name = str(torch.argmax(y_batch, dim=1))
+                #     print(name)
+                #     self.save_images(X_batch, True, f"target", e)
+                #     self.save_images(X_server, True, f"predicted", e)
 
                 recon_loss = reconstruction_loss(self.num_channels, X_batch, X_server)
-
-                # print(recon_loss)
-                # print(f'ON BATCH {i}')
 
                 self.kd_optimizer.zero_grad()
                 recon_loss.backward(retain_graph=True)
