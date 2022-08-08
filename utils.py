@@ -149,14 +149,7 @@ class WrapperDecoderDataset(Dataset):
 
 
 if __name__ == "__main__":
-    X = torch.randn(100, 1, 32, 32)
-    y = torch.randn(
-        100,
-    )
+    x_recon = torch.randn(100, 1, 32, 32)
+    x_true = torch.sigmoid(torch.randn(100, 1, 32, 32))
 
-    dataset = WrapperClassifierDataset(X, y)
-
-    dl = DataLoader(dataset, shuffle=True, batch_size=32)
-
-    for d in dl:
-        print(d[0].shape, d[1].shape)
+    print(reconstruction_loss(1, x_true, x_recon))

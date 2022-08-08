@@ -102,7 +102,6 @@ class Data:
                         dataset_train, visualize
                     )
 
-
             # We ALWAYS keep the full test set for final model evaluation
             dataset_test = MNIST(
                 root="data/mnist",
