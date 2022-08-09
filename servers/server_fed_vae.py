@@ -16,7 +16,15 @@ from utils import (WrapperClassifierDataset, WrapperDecoderDataset,
 
 class ServerFedVAE(Server):
     def __init__(
-        self, base_params, z_dim, image_size, beta, classifier_num_train_samples, classifier_epochs, decoder_num_train_samples, decoder_epochs
+        self,
+        base_params,
+        z_dim,
+        image_size,
+        beta,
+        classifier_num_train_samples,
+        classifier_epochs,
+        decoder_num_train_samples,
+        decoder_epochs,
     ):
         super().__init__(base_params)
 
@@ -34,7 +42,9 @@ class ServerFedVAE(Server):
 
         self.classifier_loss_func = CrossEntropyLoss()
         self.classifier_optimizer = Adam(self.server_model.parameters(), lr=0.001)
-        self.initial_classifier_state_dict = copy.deepcopy(self.server_model.state_dict())
+        self.initial_classifier_state_dict = copy.deepcopy(
+            self.server_model.state_dict()
+        )
 
         self.classifier_num_train_samples = classifier_num_train_samples
         self.classifier_epochs = classifier_epochs
@@ -119,9 +129,7 @@ class ServerFedVAE(Server):
         """
 
         # Number of samples per user
-        len_data = int(
-            self.decoder_num_train_samples / len(users)
-        )
+        len_data = int(self.decoder_num_train_samples / len(users))
 
         X_vals = torch.Tensor()
         y_vals = torch.Tensor()
@@ -130,7 +138,7 @@ class ServerFedVAE(Server):
         for u in users:
             u.model.eval()
 
-            z = u.model.sample_z(len_data, "uniform", uniform_width = (-1, 1))
+            z = u.model.sample_z(len_data, "uniform", uniform_width=(-1, 1))
 
             # Sample y's according to each user's target distribution
             classes = np.arange(self.num_classes)
@@ -152,9 +160,7 @@ class ServerFedVAE(Server):
 
         self.decoder.train()
 
-        for epoch in range(
-            self.decoder_epochs
-        ):
+        for epoch in range(self.decoder_epochs):
             for X_batch, y_batch, z_batch in dl:
                 X_server = self.decoder(z_batch, y_batch)
 
@@ -183,7 +189,9 @@ class ServerFedVAE(Server):
 
     def generate_data_from_aggregated_decoder(self):
         # Sample z's + y's from uniform distribution
-        z_sample = self.users[0].model.sample_z(self.classifier_num_train_samples, "uniform", uniform_width = (-1, 1))
+        z_sample = self.users[0].model.sample_z(
+            self.classifier_num_train_samples, "uniform", uniform_width=(-1, 1)
+        )
         y_sample, y_hot_sample = self.sample_y()
 
         self.decoder.eval()
@@ -200,9 +208,11 @@ class ServerFedVAE(Server):
 
         return dataloader
 
-    def train_classifier(self, reinitialize_weights = False):
+    def train_classifier(self, reinitialize_weights=False):
         if reinitialize_weights:
-            self.server_model.load_state_dict(copy.deepcopy(self.initial_classifier_state_dict))
+            self.server_model.load_state_dict(
+                copy.deepcopy(self.initial_classifier_state_dict)
+            )
 
         self.server_model.train()
 
@@ -259,7 +269,7 @@ class ServerFedVAE(Server):
             )
 
             # Train the server model's classifier
-            self.train_classifier(reinitialize_weights = True)
+            self.train_classifier(reinitialize_weights=True)
             print(f"Trained server classifier for epoch {e}")
 
             print("__________________________________________")

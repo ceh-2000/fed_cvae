@@ -111,7 +111,7 @@ def run_job(args):
                 args.classifier_num_train_samples,
                 args.classifier_epochs,
                 args.decoder_num_train_samples,
-                args.decoder_epochs
+                args.decoder_epochs,
             )
         else:
             raise NotImplementedError(
