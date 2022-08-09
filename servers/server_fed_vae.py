@@ -34,6 +34,7 @@ class ServerFedVAE(Server):
 
         self.classifier_loss_func = CrossEntropyLoss()
         self.classifier_optimizer = Adam(self.server_model.parameters(), lr=0.001)
+        self.initial_classifier_state_dict = copy.deepcopy(self.server_model.state_dict())
 
         self.classifier_num_train_samples = classifier_num_train_samples
         self.classifier_epochs = classifier_epochs
@@ -64,6 +65,18 @@ class ServerFedVAE(Server):
         for p in range(self.num_classes):
             if p in count_dict:
                 pmf[p] = count_dict.get(p) / torch.sum(counts)
+
+        # Handling the case where Python's precision messes with our calulations
+        # This will be a small difference, so we can safely add/subract it from wherever!
+        if np.sum(pmf) != 1.0:
+            diff = np.sum(pmf) - 1.0
+
+            if diff > 0:
+                pmf[0] -= diff
+            elif diff < 0:
+                pmf[0] += diff
+
+        assert np.sum(pmf) == 1.0, f"Vector for user ID {u} sums to {np.sum(pmf)}"
 
         return pmf
 
@@ -115,7 +128,9 @@ class ServerFedVAE(Server):
         z_vals = torch.Tensor()
 
         for u in users:
-            z = u.model.sample_z(len_data, "uniform")
+            u.model.eval()
+
+            z = u.model.sample_z(len_data, "uniform", uniform_width = (-1, 1))
 
             # Sample y's according to each user's target distribution
             classes = np.arange(self.num_classes)
@@ -168,8 +183,10 @@ class ServerFedVAE(Server):
 
     def generate_data_from_aggregated_decoder(self):
         # Sample z's + y's from uniform distribution
-        z_sample = self.users[0].model.sample_z(self.classifier_num_train_samples, "uniform")
+        z_sample = self.users[0].model.sample_z(self.classifier_num_train_samples, "uniform", uniform_width = (-1, 1))
         y_sample, y_hot_sample = self.sample_y()
+
+        self.decoder.eval()
 
         with torch.no_grad():
             X_sample = self.decoder(z_sample, y_hot_sample)
@@ -183,7 +200,10 @@ class ServerFedVAE(Server):
 
         return dataloader
 
-    def train_classifier(self):
+    def train_classifier(self, reinitialize_weights = False):
+        if reinitialize_weights:
+            self.server_model.load_state_dict(copy.deepcopy(self.initial_classifier_state_dict))
+
         self.server_model.train()
 
         for epoch in range(self.classifier_epochs):
@@ -235,12 +255,12 @@ class ServerFedVAE(Server):
             # Generate a dataloader holding the generated images and labels
             self.classifier_dataloader = self.generate_data_from_aggregated_decoder()
             print(
-                f"Generated {len(self.classifier_dataloader.dataset)} samples to train server classifier for epoch {e}."
+                f"Generated {len(self.classifier_dataloader.dataset)} samples to train server classifier for epoch {e}"
             )
 
             # Train the server model's classifier
-            self.train_classifier()
-            print(f"Trained server classifier for epoch {e}.")
+            self.train_classifier(reinitialize_weights = True)
+            print(f"Trained server classifier for epoch {e}")
 
             print("__________________________________________")
 
@@ -260,7 +280,6 @@ class ServerFedVAE(Server):
             images = torch.sigmoid(images).data
 
         if glob_iter is not None and self.writer:
-            print("saving images")
             grid = make_grid(images, nrow=self.num_classes)
             self.writer.add_image(name, grid, glob_iter)
 
