@@ -15,7 +15,7 @@ if __name__ == "__main__":
     host_num = int(socket.gethostname().split("-")[1])
     host_num_index = int(np.where(hosts == host_num)[0])
 
-    shell_file_name = f"experiments/hyperparam_runs_{host_num}.sh"
+    shell_file_name = f"hyperparam_runs_{host_num}.sh"
     print(host_num)
 
     beta_vals = [0.1, 0.5, 1.0]
