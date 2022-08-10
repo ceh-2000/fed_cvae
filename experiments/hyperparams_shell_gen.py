@@ -14,6 +14,7 @@ if __name__ == "__main__":
     hosts = np.array([19, 20, 21, 22, 23, 24])
     host_num = int(socket.gethostname().split("-")[1])
     host_num_index = int(np.where(hosts == host_num)[0])
+    print(host_num)
 
     a_vals = [0.1, 0.2, 0.3]
     b_vals = [1, 2, 3]
