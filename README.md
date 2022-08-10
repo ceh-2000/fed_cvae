@@ -19,6 +19,8 @@ This will install the necessary dependencies.
 
 The datasets available for benchmarking are [MNIST](http://yann.lecun.com/exdb/mnist/) and [FashionMNIST](https://github.com/zalandoresearch/fashion-mnist). All below examples use MNIST.
 
+Change to `--dataset fashionmnist` to use FashionMNIST. 
+
 #### Unachievable Ideal
 Run the following from command line.
 ```
