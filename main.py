@@ -28,7 +28,7 @@ def run_job(args):
     if args.should_log:
         # Before logging anything, we need to create a SummaryWriter instance.
         # Writer will output to ./runs/ directory by default.
-        cur_run_name = f"runs/algorithm={args.algorithm}_users={args.num_users}_local_epochs={args.local_epochs}_alpha={args.alpha}_sample_ratio={args.sample_ratio}"
+        cur_run_name = f"runs/algorithm={args.algorithm}_users={args.num_users}_local_epochs={args.local_epochs}_local_LR={args.local_LR}_alpha={args.alpha}_sample_ratio={args.sample_ratio}"
 
         # Adding in algo-specific hyperparams
         if args.algorithm == "central":
@@ -47,7 +47,7 @@ def run_job(args):
         elif args.algorithm == "fedvae":
             cur_run_name = (
                 cur_run_name
-                + f"_glob_epochs={args.glob_epochs}_z_dim={args.z_dim}_beta={args.beta}_classifier_train_samples={args.classifier_num_train_samples}_classifier_epochs={args.classifier_epochs}"
+                + f"_glob_epochs={args.glob_epochs}_z_dim={args.z_dim}_beta={args.beta}_decoder_LR={args.decoder_LR}_classifier_train_samples={args.classifier_num_train_samples}_classifier_epochs={args.classifier_epochs}"
             )
 
         writer = SummaryWriter(log_dir=cur_run_name)
