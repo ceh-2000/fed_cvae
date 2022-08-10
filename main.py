@@ -29,7 +29,7 @@ def run_job(args):
     if args.should_log:
         # Before logging anything, we need to create a SummaryWriter instance.
         # Writer will output to ./runs/ directory by default.
-        cur_run_name = f"runs/algorithm={args.algorithm}_users={args.num_users}_local_epochs={args.local_epochs}_alpha={args.alpha}_sample_ratio={args.sample_ratio}"
+        cur_run_name = f"runs/algorithm={args.algorithm}_dataset={args.dataset}_users={args.num_users}_local_epochs={args.local_epochs}_alpha={args.alpha}_sample_ratio={args.sample_ratio}"
 
         # Adding in algo-specific hyperparams
         if args.algorithm == "central":
