@@ -131,10 +131,7 @@ class WrapperDataset(Dataset):
         return self.X.shape[0]
 
     def __getitem__(self, idx):
-        if self.z != None:
-            return self.X[idx], self.y[idx], self.z[idx]
-        else:
-            return self.X[idx], self.y[idx]
+        return self.X[idx], self.y[idx], self.z[idx]
 
 
 if __name__ == "__main__":
