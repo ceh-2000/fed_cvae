@@ -10,8 +10,8 @@ from torchvision.utils import make_grid
 from models.decoder import ConditionalDecoder
 from servers.server import Server
 from users.user_fed_vae import UserFedVAE
-from utils import (WrapperClassifierDataset, WrapperDecoderDataset,
-                   average_weights, one_hot_encode, reconstruction_loss)
+from utils import (WrapperDataset, average_weights, one_hot_encode,
+                   reconstruction_loss)
 
 
 class ServerFedVAE(Server):
@@ -123,15 +123,16 @@ class ServerFedVAE(Server):
         """
         return average_weights(decoders)
 
-    def distill_user_decoders(self, users, e):
+    def generate_dataset_from_user_decoders(self, users, num_train_samples):
         """
-        Aggregate user decoders using knowledge distillation
+        Generate a novel dataset from user decoders
 
         :param users: List of selected users to use as teacher models
+        :param num_train_samples: How many samples to add to our new dataset
         """
 
         # Number of samples per user
-        len_data = int(self.decoder_num_train_samples / len(users))
+        len_data = int(num_train_samples / len(users))
 
         X_vals = torch.Tensor()
         y_vals = torch.Tensor()
@@ -157,8 +158,20 @@ class ServerFedVAE(Server):
         # Normalize "target" images to ensure reconstruction loss works correctly
         X_vals = torch.sigmoid(X_vals)
 
-        decoder_dataset = WrapperDecoderDataset(X_vals, y_vals, z_vals)
+        decoder_dataset = WrapperDataset(X_vals, y_vals, z_vals)
         dl = DataLoader(decoder_dataset, shuffle=True, batch_size=32)
+
+        return dl
+
+    def distill_user_decoders(self, users):
+        """
+        Aggregate user decoders using knowledge distillation
+
+        :param users: List of selected users to use as teacher models
+        """
+        dl = self.generate_dataset_from_user_decoders(
+            users, self.decoder_num_train_samples
+        )
 
         self.decoder.train()
 
@@ -203,7 +216,7 @@ class ServerFedVAE(Server):
             X_sample = torch.sigmoid(X_sample)
 
         # Put images and labels in wrapper pytoch dataset (e.g. override _get_item())
-        dataset = WrapperClassifierDataset(X_sample, y_sample)
+        dataset = WrapperDataset(X_sample, y_sample, z_sample)
 
         # Put dataset into pytorch dataloader and return dataloader
         dataloader = DataLoader(dataset, shuffle=True, batch_size=32)
@@ -219,7 +232,9 @@ class ServerFedVAE(Server):
         self.server_model.train()
 
         for epoch in range(self.classifier_epochs):
-            for batch_idx, (X_batch, y_batch) in enumerate(self.classifier_dataloader):
+            for batch_idx, (X_batch, y_batch, _) in enumerate(
+                self.classifier_dataloader
+            ):
                 # Forward pass through model
                 output = self.server_model(X_batch)
 
@@ -249,7 +264,7 @@ class ServerFedVAE(Server):
             avg_state_dict = self.average_decoders(decoders)
             self.decoder.load_state_dict(copy.deepcopy(avg_state_dict))
             decoder_state_dict = copy.deepcopy(
-                self.distill_user_decoders(selected_users, e)
+                self.distill_user_decoders(selected_users)
             )
 
             # Qualitative image check - both the server and a misc user!
