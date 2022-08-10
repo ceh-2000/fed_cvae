@@ -2,7 +2,6 @@
 Read in the data from a specified data source
 """
 import io
-import sys
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -12,7 +11,7 @@ import torchvision.utils
 from PIL import Image
 from torch import manual_seed, randperm
 from torch.utils.data import Subset, random_split
-from torchvision.datasets import MNIST
+from torchvision.datasets import MNIST, FashionMNIST
 from torchvision.transforms import Compose, Normalize, Resize, ToTensor
 
 # Setting seeds for reproducibility
@@ -34,7 +33,7 @@ class Data:
     ):
         """Read in the data, split training data into user subsets, and read in server test data.
 
-        :param dataset_name: Name of the dataset of interest
+        :param dataset_name: Name of the dataset of to use
         :param num_users: Number of users for distributed training
         :param writer: Logger
         :param central: Boolean for whether we want centralized or distributed training
@@ -74,34 +73,6 @@ class Data:
                 transform=transform_list,
             )
 
-            # Case where we only distribute a portion of the dataset to users
-            if self.sample_ratio < 1:
-                num_samples_keep = int(len(dataset_train) * self.sample_ratio)
-                indices = randperm(len(dataset_train))[
-                    :num_samples_keep
-                ]  # randomly choosing samples to keep
-                dataset_train = Subset(dataset_train, indices)
-
-            num_train_samples = len(dataset_train)
-            num_user_samples = int(num_train_samples / self.num_users)
-
-            data_split_sequence = []
-            for u in range(self.num_users):
-                data_split_sequence.append(num_user_samples)
-
-            # Data is composed of dataset.Subset objects
-            if central:
-                self.train_data = dataset_train
-
-            # Only partition into user datasets if we don't want centralized learning
-            else:
-                if self.alpha is None:
-                    self.train_data = random_split(dataset_train, data_split_sequence)
-                else:
-                    self.train_data = self.split_data_dirichlet(
-                        dataset_train, visualize
-                    )
-
             # We ALWAYS keep the full test set for final model evaluation
             dataset_test = MNIST(
                 root="data/mnist",
@@ -109,12 +80,66 @@ class Data:
                 train=False,
                 transform=transform_list,
             )
-            self.test_data = dataset_test
+        elif self.dataset_name == "fashionmnist":
+            self.num_channels = 1
+            self.num_classes = 10
+            self.image_size = 32
 
+            transform_list = []
+
+            # Establishing transforms
+            transform_list.append(ToTensor())
+            transform_list.append(Resize(32))  # Everyone gets resized to 32
+            if normalize:
+                transform_list.append(Normalize((0.5,), (0.5,)))
+
+            transform_list = Compose(transform_list)
+
+            dataset_train = FashionMNIST(
+                root="data/mnist",
+                download=True,
+                train=True,
+                transform=transform_list,
+            )
+
+            dataset_test = FashionMNIST(
+                root="data/mnist",
+                download=True,
+                train=False,
+                transform=transform_list,
+            )
         else:
             raise NotImplementedError(
-                "Only mnist has been implemented. Please implement other datasets."
+                f"Dataset '{dataset_name}' has not been implemented, please choose either mnist and fashionmnist"
             )
+
+        # Case where we only distribute a portion of the dataset to users
+        if self.sample_ratio < 1:
+            num_samples_keep = int(len(dataset_train) * self.sample_ratio)
+            indices = randperm(len(dataset_train))[
+                :num_samples_keep
+            ]  # randomly choosing samples to keep
+            dataset_train = Subset(dataset_train, indices)
+
+        num_train_samples = len(dataset_train)
+        num_user_samples = int(num_train_samples / self.num_users)
+
+        data_split_sequence = []
+        for u in range(self.num_users):
+            data_split_sequence.append(num_user_samples)
+
+        # Data is composed of dataset.Subset objects
+        if central:
+            self.train_data = dataset_train
+
+        # Only partition into user datasets if we don't want centralized learning
+        else:
+            if self.alpha is None:
+                self.train_data = random_split(dataset_train, data_split_sequence)
+            else:
+                self.train_data = self.split_data_dirichlet(dataset_train, visualize)
+
+        self.test_data = dataset_test
 
     def split_data_dirichlet(self, dataset_train, visualize):
         """Split the dataset according to proportionsk sampled from a Dirichlet distribution, with alpha controlling the level of heterogeneity.
