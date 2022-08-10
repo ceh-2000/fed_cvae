@@ -84,5 +84,12 @@ Modify `--decoder_num_train_samples` to change the number of generated samples t
 1. Run `black .` from the repo root.
 2. Run `isort .` also from the repo root.
 
+### Distributed hyperparameter tuning
+1. Modify `experiments/hyperparams_shell_gen.py` according to your preferences.
+2. Run `python3 experiments/hyperparams_shell_gen.py`
+3. Run `source hyperparam_runs_{HOST_NUMBER}.sh`.
+
+Notes: This is designed to distribute hyperparameter tuning across the W&M lab computers. 
+
 ### Multi-GPU Example
 https://pytorch.org/tutorials/beginner/former_torchies/parallelism_tutorial.html
