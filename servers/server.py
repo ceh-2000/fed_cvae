@@ -20,6 +20,7 @@ class Server:
 
         self.glob_epochs = params["glob_epochs"]
         self.local_epochs = params["local_epochs"]
+        self.local_LR = params["local_LR"]
 
         self.data_subsets = params["data_subsets"]
         self.dataloader = DataLoader(params["data_server"], shuffle=True, batch_size=32)
@@ -43,6 +44,7 @@ class Server:
                     "dataloader": dl,
                     "num_channels": self.num_channels,
                     "num_classes": self.num_classes,
+                    "local_LR": self.local_LR
                 }
             )
             self.users.append(new_user)
