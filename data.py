@@ -2,7 +2,6 @@
 Read in the data from a specified data source
 """
 import io
-import sys
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -12,7 +11,7 @@ import torchvision.utils
 from PIL import Image
 from torch import manual_seed, randperm
 from torch.utils.data import Subset, random_split
-from torchvision.datasets import MNIST
+from torchvision.datasets import MNIST, FashionMNIST
 from torchvision.transforms import Compose, Normalize, Resize, ToTensor
 
 # Setting seeds for reproducibility
@@ -102,9 +101,6 @@ class Data:
                 train=True,
                 transform=transform_list,
             )
-
-            print(dataset_train[0])
-            sys.exit()
 
             dataset_test = FashionMNIST(
                 root="data/mnist",
