@@ -16,6 +16,11 @@ pip3 install -r requirements.txt
 This will install the necessary dependencies.
 
 ### Algorithms
+
+The datasets available for benchmarking are [MNIST](http://yann.lecun.com/exdb/mnist/) and [FashionMNIST](https://github.com/zalandoresearch/fashion-mnist). All below examples use MNIST.
+
+Change to `--dataset fashionmnist` to use FashionMNIST. 
+
 #### Unachievable Ideal
 Run the following from command line.
 ```
@@ -39,7 +44,7 @@ The `mu` argument controls the weight on the proximal term in the local objectiv
 #### One-shot ensembled FL
 Run the following from command line.
 ```
-python3 main.py --algorithm oneshot --num_users 5 --alpha 1.0 --sample_ratio 0.1 --local_epochs 5 --should_log 1 --one_shot_sampling random --user_data_split 0.9 --K 3
+python3 main.py --algorithm oneshot --dataset mnist --num_users 5 --alpha 1.0 --sample_ratio 0.1 --local_epochs 5 --should_log 1 --one_shot_sampling random --user_data_split 0.9 --K 3
 ```
 `--one_shot_sampling` can take on the following values:
 - `random` (sample a random subset of K users to ensemble)
@@ -52,11 +57,11 @@ You can also adjust model specific parameters `--K` to adjust how many users are
 #### FedVAE
 Run the following from command line.
 ```
-python3 main.py --algorithm fedvae --num_users 5 --alpha 1.0 --sample_ratio 0.1 --glob_epochs 5 --local_epochs 5 --should_log 1 --z_dim 50 --beta 1.0 --num_train_samples 1000 --classifier_epochs 5
+python3 main.py --algorithm fedvae --dataset mnist --num_users 5 --alpha 1.0 --sample_ratio 0.1 --glob_epochs 5 --local_epochs 5 --should_log 1 --z_dim 50 --beta 1.0 --num_train_samples 1000 --classifier_epochs 5
 ```
 You can adjust model specific parameers `--z_dim` to change the latent vector dimension and `--beta` to change the weight of the KL divergence loss.
 Modify `--num_train_samples` to change how many samples are generated and `--classifier_epochs` to adjust the server model train time.
- 
+
 ### Logging
 1. Enable logging by adding the command line argument `--should_log 1` to `python3 main.py`.
 2. Run `tensorboard --logdir=runs` and navigate to [http://localhost:6006/](http://localhost:6006/).
