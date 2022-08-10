@@ -70,5 +70,11 @@ Modify `--num_train_samples` to change how many samples are generated and `--cla
 1. Run `black .` from the repo root.
 2. Run `isort .` also from the repo root.
 
+### Distributed hyperparameter tuning
+1. Modify `experiments/hyperparams_shell_gen.py` according to your preferences.
+2. Run `source hyperparam_runs.sh`.
+
+Notes: This is designed to distribute hyperparameter tuning across the W&M lab computers. 
+
 ### Multi-GPU Example
 https://pytorch.org/tutorials/beginner/former_torchies/parallelism_tutorial.html
