@@ -277,7 +277,7 @@ if __name__ == "__main__":
         type=float,
         default=0.001,
         help="Learning rate to use for decoder KD fine-tuning",
-        )
+    )
 
     args = parser.parse_args()
     args.should_log = bool(args.should_log)
