@@ -88,6 +88,7 @@ Modify `--decoder_num_train_samples` to change the number of generated samples t
 1. Modify `experiments/hyperparams_shell_gen.py` according to your preferences.
 2. Run `python3 experiments/hyperparams_shell_gen.py`
 3. Run `source hyperparam_runs_{HOST_NUMBER}.sh`.
+4. Copy the results to local machine: `scp -r ceheinbaugh@th121-19.cs.wm.edu:/home/ceheinbaugh/Desktop/fed_vae/experiments/runs/ /Users/clareheinbaugh/Desktop/fed_vae/`
 
 Notes: This is designed to distribute hyperparameter tuning across the W&M lab computers. 
 
