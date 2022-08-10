@@ -7,6 +7,7 @@ from data import Data
 from servers.server_fed_avg import ServerFedAvg
 from servers.server_fed_prox import ServerFedProx
 from servers.server_fed_vae import ServerFedVAE
+from servers.server_one_fed_vae import ServerOneFedVAE
 from servers.server_one_shot import ServerOneShot
 from unachievable_ideal import UnachievableIdeal
 
@@ -42,12 +43,17 @@ def run_job(args):
         elif args.algorithm == "oneshot":
             cur_run_name = (
                 cur_run_name
-                + f"_glob_epochs=1_sampling={args.one_shot_sampling}_K={args.K if args.one_shot_sampling != 'all' else 'all'}"
+                + f"_sampling={args.one_shot_sampling}_K={args.K if args.one_shot_sampling != 'all' else 'all'}"
             )
         elif args.algorithm == "fedvae":
             cur_run_name = (
                 cur_run_name
                 + f"_glob_epochs={args.glob_epochs}_z_dim={args.z_dim}_beta={args.beta}_decoder_LR={args.decoder_LR}_classifier_train_samples={args.classifier_num_train_samples}_classifier_epochs={args.classifier_epochs}"
+            )
+        elif args.algorithm == "onefedvae":
+            cur_run_name = (
+                cur_run_name
+                + f"_z_dim={args.z_dim}_beta={args.beta}_classifier_train_samples={args.classifier_num_train_samples}_classifier_epochs={args.classifier_epochs}"
             )
 
         writer = SummaryWriter(log_dir=cur_run_name)
@@ -97,12 +103,21 @@ def run_job(args):
 
         if args.algorithm == "fedavg":
             s = ServerFedAvg(default_params)
+        elif args.algorithm == "fedprox":
+            s = ServerFedProx(default_params, args.mu)
         elif args.algorithm == "oneshot":
             s = ServerOneShot(
                 default_params, args.one_shot_sampling, args.user_data_split, args.K
             )
-        elif args.algorithm == "fedprox":
-            s = ServerFedProx(default_params, args.mu)
+        elif args.algorithm == "onefedvae":
+            s = ServerOneFedVAE(
+                default_params,
+                args.z_dim,
+                d.image_size,
+                args.beta,
+                args.classifier_num_train_samples,
+                args.classifier_epochs,
+            )
         elif args.algorithm == "fedvae":
             s = ServerFedVAE(
                 default_params,
@@ -234,6 +249,18 @@ if __name__ == "__main__":
         default=1.0,
     )
     parser.add_argument(
+        "--classifier_num_train_samples",
+        type=int,
+        help="Number of images and labels to generate for server classifier training",
+        default=1000,  # For MNIST, that's ~100 per class
+    )
+    parser.add_argument(
+        "--classifier_epochs",
+        type=int,
+        help="Number of epochs to train classifier in server",
+        default=5,
+    )
+    parser.add_argument(
         "--decoder_num_train_samples",
         type=int,
         help="Number of images and labels to generate for server decoder KD fine-tuning",
@@ -250,18 +277,6 @@ if __name__ == "__main__":
         type=float,
         default=0.001,
         help="Learning rate to use for decoder KD fine-tuning",
-    )
-    parser.add_argument(
-        "--classifier_num_train_samples",
-        type=int,
-        help="Number of images and labels to generate for server classifier training",
-        default=1000,  # For MNIST, that's ~100 per class
-    )
-    parser.add_argument(
-        "--classifier_epochs",
-        type=int,
-        help="Number of epochs to train classifier in server",
-        default=5,
     )
 
     args = parser.parse_args()
@@ -293,14 +308,15 @@ if __name__ == "__main__":
             "Fraction of users sampled for each communication round:",
             args.user_fraction,
         )
-    if args.algorithm in ["oneshot"]:
+    if args.algorithm in ["oneshot", "onefedvae"]:
+        args.glob_epochs = 1
         print("Number of global epochs:", 1)
     if args.algorithm == "central":
         print("Number of epochs:", args.glob_epochs)
 
     print()
 
-    if args.algorithm in ["fedprox", "oneshot", "fedvae"]:
+    if args.algorithm in ["fedprox", "oneshot", "fedvae", "onefedvae"]:
         print("MODEL SPECIFIC COMMAND LINE ARGUMENTS")
         print()
 
@@ -316,11 +332,20 @@ if __name__ == "__main__":
             )
         elif args.algorithm == "fedprox":
             print("Weight on the proximal objective term (mu):", args.mu)
-        elif args.algorithm == "fedvae":
+        elif args.algorithm in ["fedvae", "onefedvae"]:
             print("Latent vector dimension for VAE:", args.z_dim)
             print("Weight on the KL divergence term (beta):", args.beta)
             print(
-                "Number of samples to generate for server decoder KD fine-tuning:",
+                "Number of samples to generate for server classifier training:",
+                args.classifier_num_train_samples,
+            )
+            print(
+                "Number of epochs to train classifier in server:",
+                args.classifier_epochs,
+            )
+        elif args.algorithm == "fedvae":
+            print(
+                "Number of images and labels to generate for server decoder KD fine-tuning:",
                 args.decoder_num_train_samples,
             )
             print(
@@ -330,14 +355,6 @@ if __name__ == "__main__":
             print(
                 "Learning rate to for server decoder fine-tuning:",
                 args.decoder_LR,
-            )
-            print(
-                "Number of samples to generate for server classifier training:",
-                args.classifier_num_train_samples,
-            )
-            print(
-                "Number of epochs to train classifier in server:",
-                args.classifier_epochs,
             )
 
     print("_________________________________________________\n")
