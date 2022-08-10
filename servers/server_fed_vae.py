@@ -214,7 +214,7 @@ class ServerFedVAE(Server):
             X_sample = torch.sigmoid(X_sample)
 
         # Put images and labels in wrapper pytoch dataset (e.g. override _get_item())
-        dataset = WrapperDataset(X_sample, y_sample)
+        dataset = WrapperDataset(X_sample, y_sample, z_sample)
 
         # Put dataset into pytorch dataloader and return dataloader
         dataloader = DataLoader(dataset, shuffle=True, batch_size=32)

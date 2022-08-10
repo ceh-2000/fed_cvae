@@ -122,7 +122,7 @@ def kl_divergence(mu, logvar):
 class WrapperDataset(Dataset):
     """Wrapper dataset to put into a dataloader."""
 
-    def __init__(self, X, y, z=None):
+    def __init__(self, X, y, z):
         self.X = X
         self.y = y
         self.z = z
