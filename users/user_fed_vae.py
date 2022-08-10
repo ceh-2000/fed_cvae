@@ -18,7 +18,7 @@ class UserFedVAE(User):
             z_dim=z_dim,
             image_size=image_size,
         )
-        self.optimizer = Adam(self.model.parameters(), lr=0.001)
+        self.optimizer = Adam(self.model.parameters(), lr=base_params["local_LR"])
 
         self.beta = beta
 

@@ -25,6 +25,7 @@ class ServerFedVAE(Server):
         classifier_epochs,
         decoder_num_train_samples,
         decoder_epochs,
+        decoder_LR,
     ):
         super().__init__(base_params)
 
@@ -35,7 +36,7 @@ class ServerFedVAE(Server):
         self.decoder = ConditionalDecoder(
             self.image_size, self.num_classes, self.num_channels, self.z_dim
         )
-        self.kd_optimizer = Adam(self.decoder.parameters(), lr=0.001)
+        self.kd_optimizer = Adam(self.decoder.parameters(), lr=decoder_LR)
 
         self.decoder_num_train_samples = decoder_num_train_samples
         self.decoder_epochs = decoder_epochs
@@ -102,6 +103,7 @@ class ServerFedVAE(Server):
                     "dataloader": dl,
                     "num_channels": self.num_channels,
                     "num_classes": self.num_classes,
+                    "local_LR": self.local_LR,
                 },
                 self.z_dim,
                 self.image_size,

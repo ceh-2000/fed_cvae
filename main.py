@@ -28,7 +28,7 @@ def run_job(args):
     if args.should_log:
         # Before logging anything, we need to create a SummaryWriter instance.
         # Writer will output to ./runs/ directory by default.
-        cur_run_name = f"runs/algorithm={args.algorithm}_dataset={args.dataset}_users={args.num_users}_local_epochs={args.local_epochs}_alpha={args.alpha}_sample_ratio={args.sample_ratio}"
+        cur_run_name = f"runs/algorithm={args.algorithm}_dataset={args.dataset}_users={args.num_users}_local_epochs={args.local_epochs}_local_LR={args.local_LR}_alpha={args.alpha}_sample_ratio={args.sample_ratio}"
 
         # Adding in algo-specific hyperparams
         if args.algorithm == "central":
@@ -47,7 +47,7 @@ def run_job(args):
         elif args.algorithm == "fedvae":
             cur_run_name = (
                 cur_run_name
-                + f"_glob_epochs={args.glob_epochs}_z_dim={args.z_dim}_beta={args.beta}_classifier_train_samples={args.classifier_num_train_samples}_classifier_epochs={args.classifier_epochs}"
+                + f"_glob_epochs={args.glob_epochs}_z_dim={args.z_dim}_beta={args.beta}_decoder_LR={args.decoder_LR}_classifier_train_samples={args.classifier_num_train_samples}_classifier_epochs={args.classifier_epochs}"
             )
 
         writer = SummaryWriter(log_dir=cur_run_name)
@@ -87,6 +87,7 @@ def run_job(args):
             "user_fraction": args.user_fraction,
             "glob_epochs": args.glob_epochs,
             "local_epochs": args.local_epochs,
+            "local_LR": args.local_LR,
             "data_subsets": d.train_data,
             "data_server": d.test_data,
             "num_channels": d.num_channels,
@@ -112,6 +113,7 @@ def run_job(args):
                 args.classifier_epochs,
                 args.decoder_num_train_samples,
                 args.decoder_epochs,
+                args.decoder_LR,
             )
         else:
             raise NotImplementedError(
@@ -190,6 +192,12 @@ if __name__ == "__main__":
         default=1.0,
         help="Fraction of users that we should sample each round",
     )
+    parser.add_argument(
+        "--local_LR",
+        type=float,
+        default=0.001,
+        help="Local (user) learning rate (either for classifier or CVAE)",
+    )
 
     # Command line arguments for specific models
     parser.add_argument(
@@ -238,6 +246,12 @@ if __name__ == "__main__":
         default=5,
     )
     parser.add_argument(
+        "--decoder_LR",
+        type=float,
+        default=0.001,
+        help="Learning rate to use for decoder KD fine-tuning",
+    )
+    parser.add_argument(
         "--classifier_num_train_samples",
         type=int,
         help="Number of images and labels to generate for server classifier training",
@@ -272,6 +286,7 @@ if __name__ == "__main__":
         )
         print("Number of users for training:", args.num_users)
         print("Number of local epochs:", args.local_epochs)
+        print("Local learning rate:", args.local_LR)
     if args.algorithm in ["fedavg", "fedprox", "fedvae"]:
         print("Number of global epochs:", args.glob_epochs)
         print(
@@ -305,7 +320,7 @@ if __name__ == "__main__":
             print("Latent vector dimension for VAE:", args.z_dim)
             print("Weight on the KL divergence term (beta):", args.beta)
             print(
-                "Number of images and labels to generate for server decoder KD fine-tuning:",
+                "Number of samples to generate for server decoder KD fine-tuning:",
                 args.decoder_num_train_samples,
             )
             print(
@@ -313,7 +328,11 @@ if __name__ == "__main__":
                 args.decoder_epochs,
             )
             print(
-                "Number of images and labels to generate for server classifier training:",
+                "Learning rate to for server decoder fine-tuning:",
+                args.decoder_LR,
+            )
+            print(
+                "Number of samples to generate for server classifier training:",
                 args.classifier_num_train_samples,
             )
             print(
