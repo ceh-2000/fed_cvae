@@ -23,7 +23,7 @@ if __name__ == "__main__":
     for beta in beta_vals:
         for local_lr in local_lr_vals:
             all_scripts.append(
-                f"python3 main.py --algorithm fedvae --dataset mnist --num_users 10 --alpha 1.0 --sample_ratio 0.1 --glob_epochs 5 --local_epochs 5 --should_log 1 --z_dim 50 --beta {beta} --local_LR {local_lr}"
+                f"python3 main.py --algorithm fedvae --dataset mnist --num_users 10 --alpha 1.0 --sample_ratio 0.1 --glob_epochs 3 --local_epochs 3 --should_log 1 --z_dim 50 --beta {beta} --local_LR {local_lr}"
             )
 
     counter = 0
