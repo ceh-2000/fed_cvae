@@ -73,7 +73,7 @@ Modify `--num_train_samples` to change how many samples are generated and `--cla
 ### Distributed hyperparameter tuning
 1. Modify `experiments/hyperparams_shell_gen.py` according to your preferences.
 2. Run `python3 experiments/hyperparams_shell_gen.py`
-3. Run `source hyperparam_runs.sh`.
+3. Run `source hyperparam_runs_{HOST_NUMBER}.sh`.
 
 Notes: This is designed to distribute hyperparameter tuning across the W&M lab computers. 
 

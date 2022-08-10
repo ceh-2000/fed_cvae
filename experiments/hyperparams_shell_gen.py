@@ -9,11 +9,11 @@ def split(a, n):
 
 
 if __name__ == "__main__":
-    shell_file_name = "experiments/hyperparam_runs.sh"
-
     hosts = np.array([19, 20, 21, 22, 23, 24])
     host_num = int(socket.gethostname().split("-")[1])
     host_num_index = int(np.where(hosts == host_num)[0])
+
+    shell_file_name = f"experiments/hyperparam_runs_{host_num}.sh"
     print(host_num)
 
     a_vals = [0.1, 0.2, 0.3]
