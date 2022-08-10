@@ -343,19 +343,19 @@ if __name__ == "__main__":
                 "Number of epochs to train classifier in server:",
                 args.classifier_epochs,
             )
-        elif args.algorithm == "fedvae":
-            print(
-                "Number of images and labels to generate for server decoder KD fine-tuning:",
-                args.decoder_num_train_samples,
-            )
-            print(
-                "Number of epochs to fine-tune the server decoder for:",
-                args.decoder_epochs,
-            )
-            print(
-                "Learning rate to for server decoder fine-tuning:",
-                args.decoder_LR,
-            )
+            if args.algorithm == "fedvae":
+                print(
+                    "Number of images and labels to generate for server decoder KD fine-tuning:",
+                    args.decoder_num_train_samples,
+                )
+                print(
+                    "Number of epochs to fine-tune the server decoder for:",
+                    args.decoder_epochs,
+                )
+                print(
+                    "Learning rate to for server decoder fine-tuning:",
+                    args.decoder_LR,
+                )
 
     print("_________________________________________________\n")
 
