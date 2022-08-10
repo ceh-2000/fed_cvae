@@ -44,7 +44,7 @@ class ServerOneShot(Server):
                         "dataloader": train_dl,
                         "num_channels": self.num_channels,
                         "num_classes": self.num_classes,
-                        "local_LR": self.local_LR
+                        "local_LR": self.local_LR,
                     },
                     valid_dl,
                 )
@@ -57,7 +57,7 @@ class ServerOneShot(Server):
                         "dataloader": dl,
                         "num_channels": self.num_channels,
                         "num_classes": self.num_classes,
-                        "local_LR": self.local_LR
+                        "local_LR": self.local_LR,
                     },
                 )
             self.users.append(new_user)

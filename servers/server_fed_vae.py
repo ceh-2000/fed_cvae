@@ -25,7 +25,7 @@ class ServerFedVAE(Server):
         classifier_epochs,
         decoder_num_train_samples,
         decoder_epochs,
-        decoder_LR
+        decoder_LR,
     ):
         super().__init__(base_params)
 
@@ -103,7 +103,7 @@ class ServerFedVAE(Server):
                     "dataloader": dl,
                     "num_channels": self.num_channels,
                     "num_classes": self.num_classes,
-                    "local_LR": self.local_LR
+                    "local_LR": self.local_LR,
                 },
                 self.z_dim,
                 self.image_size,
