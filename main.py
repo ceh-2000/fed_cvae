@@ -43,7 +43,7 @@ def run_job(args):
         elif args.algorithm == "oneshot":
             cur_run_name = (
                 cur_run_name
-                + f"_glob_epochs=1_sampling={args.one_shot_sampling}_K={args.K if args.one_shot_sampling != 'all' else 'all'}"
+                + f"_sampling={args.one_shot_sampling}_K={args.K if args.one_shot_sampling != 'all' else 'all'}"
             )
         elif args.algorithm == "fedvae":
             cur_run_name = (
@@ -53,7 +53,7 @@ def run_job(args):
         elif args.algorithm == "onefedvae":
             cur_run_name = (
                 cur_run_name
-                + f"_glob_epochs=1_z_dim={args.z_dim}_beta={args.beta}_classifier_train_samples={args.classifier_num_train_samples}_classifier_epochs={args.classifier_epochs}"
+                + f"_z_dim={args.z_dim}_beta={args.beta}_classifier_train_samples={args.classifier_num_train_samples}_classifier_epochs={args.classifier_epochs}"
             )
 
         writer = SummaryWriter(log_dir=cur_run_name)

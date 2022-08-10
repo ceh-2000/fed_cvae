@@ -119,24 +119,10 @@ def kl_divergence(mu, logvar):
     return total_kld
 
 
-class WrapperClassifierDataset(Dataset):
+class WrapperDataset(Dataset):
     """Wrapper dataset to put into a dataloader."""
 
-    def __init__(self, X, y):
-        self.X = X
-        self.y = y
-
-    def __len__(self):
-        return self.X.shape[0]
-
-    def __getitem__(self, idx):
-        return self.X[idx], self.y[idx]
-
-
-class WrapperDecoderDataset(Dataset):
-    """Wrapper dataset to put into a dataloader."""
-
-    def __init__(self, X, y, z):
+    def __init__(self, X, y, z=None):
         self.X = X
         self.y = y
         self.z = z
@@ -145,7 +131,10 @@ class WrapperDecoderDataset(Dataset):
         return self.X.shape[0]
 
     def __getitem__(self, idx):
-        return self.X[idx], self.y[idx], self.z[idx]
+        if self.z != None:
+            return self.X[idx], self.y[idx], self.z[idx]
+        else:
+            return self.X[idx], self.y[idx]
 
 
 if __name__ == "__main__":
