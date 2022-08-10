@@ -26,6 +26,7 @@ class ServerFedProx(Server):
                     "dataloader": dl,
                     "num_channels": self.num_channels,
                     "num_classes": self.num_classes,
+                    "local_LR": self.local_LR,
                 },
                 self.mu,
             )
