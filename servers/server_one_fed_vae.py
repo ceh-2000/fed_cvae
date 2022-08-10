@@ -23,7 +23,7 @@ class ServerOneFedVAE(ServerFedVAE):
         )
 
     def train(self):
-        self.evaluate(1)
+        self.evaluate(0)
 
         selected_users = self.sample_users()
 
@@ -33,7 +33,7 @@ class ServerOneFedVAE(ServerFedVAE):
             u.train(self.local_epochs)
             decoders.append(u.model.decoder)
 
-        print(f"Finished training user models for epoch 1")
+        print(f"Finished training user models for epoch 0")
 
         # Qualitative image check - misc user!
         self.qualitative_check(
@@ -45,11 +45,11 @@ class ServerOneFedVAE(ServerFedVAE):
             selected_users, self.classifier_num_train_samples
         )
         print(
-            f"Generated {len(self.classifier_dataloader.dataset)} samples to train server classifier for epoch 1"
+            f"Generated {len(self.classifier_dataloader.dataset)} samples to train server classifier for epoch 0"
         )
 
         # Train the server model's classifier
         self.train_classifier(reinitialize_weights=True)
-        print(f"Trained server classifier for epoch 1")
+        print(f"Trained server classifier for epoch 0")
 
         print("__________________________________________")

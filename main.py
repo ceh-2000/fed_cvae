@@ -294,6 +294,7 @@ if __name__ == "__main__":
             args.user_fraction,
         )
     if args.algorithm in ["oneshot", "onefedvae"]:
+        args.glob_epochs = 1
         print("Number of global epochs:", 1)
     if args.algorithm == "central":
         print("Number of epochs:", args.glob_epochs)
