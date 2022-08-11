@@ -10,7 +10,8 @@ from torchvision.utils import make_grid
 from models.decoder import ConditionalDecoder
 from servers.server import Server
 from users.user_fed_vae import UserFedVAE
-from utils import WrapperDataset, average_weights, one_hot_encode, reconstruction_loss
+from utils import (WrapperDataset, average_weights, one_hot_encode,
+                   reconstruction_loss)
 
 
 class ServerFedVAE(Server):
