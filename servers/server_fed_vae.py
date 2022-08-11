@@ -83,9 +83,9 @@ class ServerFedVAE(Server):
             diff = np.sum(pmf) - 1.0
 
             if diff > 0:
-                pmf[0] -= abs(diff)
+                pmf[np.argmax(pmf)] -= abs(diff)
             elif diff < 0:
-                pmf[0] += abs(diff)
+                pmf[np.argmax(pmf)] += abs(diff)
 
         assert np.sum(pmf) == 1.0, f"Vector for user ID {u} sums to {np.sum(pmf)}"
 
