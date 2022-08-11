@@ -1,6 +1,7 @@
 /venv/
 /runs/
 /data/
+/experiments/*.sh
 __pycache__
 .idea
 .DS_store
