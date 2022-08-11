@@ -20,6 +20,7 @@ class ServerOneFedVAE(ServerFedVAE):
             classifier_epochs,
             None,
             None,
+            0.01,
         )
 
     def train(self):
