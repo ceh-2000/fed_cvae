@@ -46,9 +46,9 @@ if __name__ == "__main__":
         # f"python3 ../main.py --algorithm onefedvae --dataset mnist --num_users 10 --alpha {alphas[2]} --sample_ratio 0.5 --local_epochs 75 --local_LR 0.001 --should_log 1 --z_dim 10 --beta 1.0 --classifier_num_train_samples 5000 --classifier_epochs 10",
         #
         # FedVAE with one epoch
-        f"python3 ../main.py --algorithm fedvae --dataset mnist --num_users 10 --alpha {alphas[0]} --sample_ratio 0.5 --glob_epochs 1 --local_epochs 75 --local_LR 0.001 --should_log 1 --z_dim 10 --beta 1.0 --classifier_num_train_samples 5000 --classifier_epochs 10 --decoder_num_train_samples 5000  --decoder_epochs 5 --decoder_LR 0.01"
-        f"python3 ../main.py --algorithm fedvae --dataset mnist --num_users 10 --alpha {alphas[1]} --sample_ratio 0.5 --glob_epochs 1 --local_epochs 75 --local_LR 0.001 --should_log 1 --z_dim 10 --beta 1.0 --classifier_num_train_samples 5000 --classifier_epochs 10 --decoder_num_train_samples 5000  --decoder_epochs 5 --decoder_LR 0.01"
-        f"python3 ../main.py --algorithm fedvae --dataset mnist --num_users 10 --alpha {alphas[2]} --sample_ratio 0.5 --glob_epochs 1 --local_epochs 75 --local_LR 0.001 --should_log 1 --z_dim 10 --beta 1.0 --classifier_num_train_samples 5000 --classifier_epochs 10 --decoder_num_train_samples 5000  --decoder_epochs 5 --decoder_LR 0.01"
+        f"python3 ../main.py --algorithm fedvae --dataset mnist --num_users 10 --alpha {alphas[0]} --sample_ratio 0.5 --glob_epochs 1 --local_epochs 75 --local_LR 0.001 --should_log 1 --z_dim 10 --beta 1.0 --classifier_num_train_samples 5000 --classifier_epochs 10 --decoder_num_train_samples 5000  --decoder_epochs 5 --decoder_LR 0.01",
+        f"python3 ../main.py --algorithm fedvae --dataset mnist --num_users 10 --alpha {alphas[1]} --sample_ratio 0.5 --glob_epochs 1 --local_epochs 75 --local_LR 0.001 --should_log 1 --z_dim 10 --beta 1.0 --classifier_num_train_samples 5000 --classifier_epochs 10 --decoder_num_train_samples 5000  --decoder_epochs 5 --decoder_LR 0.01",
+        f"python3 ../main.py --algorithm fedvae --dataset mnist --num_users 10 --alpha {alphas[2]} --sample_ratio 0.5 --glob_epochs 1 --local_epochs 75 --local_LR 0.001 --should_log 1 --z_dim 10 --beta 1.0 --classifier_num_train_samples 5000 --classifier_epochs 10 --decoder_num_train_samples 5000  --decoder_epochs 5 --decoder_LR 0.01",
     ]
 
     counter = 0
