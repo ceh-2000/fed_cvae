@@ -140,6 +140,13 @@ def run_job(args):
         print(f"_________________________________________________\n\n")
 
         s.train()
+        if (
+            args.algorithm in ["fedvae", "onefedvae"]
+            and args.should_log == 1
+            and args.local_epoch_exp == 1
+        ):
+            s.train_alt_one_comm()
+
         s.test()
 
     if args.should_log:
@@ -278,6 +285,12 @@ if __name__ == "__main__":
         default=0.001,
         help="Learning rate to use for decoder KD fine-tuning",
     )
+    parser.add_argument(
+        "--local_epoch_exp",
+        type=int,
+        default=0,
+        help="Whether or not we want to run a FedVAE experiment for local epochs",
+    )
 
     args = parser.parse_args()
     args.should_log = bool(args.should_log)
@@ -308,7 +321,7 @@ if __name__ == "__main__":
             "Fraction of users sampled for each communication round:",
             args.user_fraction,
         )
-    if args.algorithm in ["oneshot", "onefedvae"]:
+    if args.algorithm in ["oneshot", "onefedvae"] or args.local_epoch_exp == 1:
         args.glob_epochs = 1
         print("Number of global epochs:", 1)
     if args.algorithm == "central":
@@ -334,6 +347,10 @@ if __name__ == "__main__":
             print("Weight on the proximal objective term (mu):", args.mu)
         elif args.algorithm in ["fedvae", "onefedvae"]:
             print("Latent vector dimension for VAE:", args.z_dim)
+            print(
+                "Do we want to run a FedVAE experiment for local epochs?",
+                args.local_epoch_exp,
+            )
             print("Weight on the KL divergence term (beta):", args.beta)
             print(
                 "Number of samples to generate for server classifier training:",

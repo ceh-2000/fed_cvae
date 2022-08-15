@@ -291,6 +291,47 @@ class ServerFedVAE(Server):
 
             print("__________________________________________")
 
+    def train_alt_one_comm(self):
+        for i in range(self.local_epochs):
+            self.evaluate(i)
+
+            selected_users = self.sample_users()
+
+            # Train selected users and collect their decoder weights
+            decoders = []
+            for u in selected_users:
+                u.train(1)
+                decoders.append(u.model.decoder)
+
+            print(f"Finished training user models for local epoch {i}")
+
+            # Update the server decoder using weight averaging and knowledge distillation
+            avg_state_dict = self.average_decoders(decoders)
+            self.decoder.load_state_dict(copy.deepcopy(avg_state_dict))
+
+            # Updates the server decoder using knowledge distillation
+            self.distill_user_decoders(selected_users)
+
+            # Qualitative image check - both the server and a misc user!
+            self.qualitative_check(i, self.decoder, "Novel images server decoder")
+            self.qualitative_check(
+                i, self.users[0].model.decoder, "Novel images user 0 decoder"
+            )
+
+            print(f"Aggregated decoders for local epoch {i}")
+
+            # Generate a dataloader holding the generated images and labels
+            self.classifier_dataloader = self.generate_data_from_aggregated_decoder()
+            print(
+                f"Generated {len(self.classifier_dataloader.dataset)} samples to train server classifier for local epoch {i}"
+            )
+
+            # Train the server model's classifier
+            self.train_classifier(reinitialize_weights=True)
+            print(f"Trained server classifier for local epoch {i}")
+
+            print("__________________________________________")
+
     def save_images(self, images, sigmoid, name, glob_iter):
         """
         Save images so we can view their outputs

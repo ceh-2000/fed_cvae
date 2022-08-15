@@ -54,3 +54,36 @@ class ServerOneFedVAE(ServerFedVAE):
         print(f"Trained server classifier for epoch 0")
 
         print("__________________________________________")
+
+    def train_alt_one_comm(self):
+        for i in range(self.local_epochs):
+            self.evaluate(i)
+
+            selected_users = self.sample_users()
+
+            # Train selected users and collect their decoder weights
+            decoders = []
+            for u in selected_users:
+                u.train(1)
+                decoders.append(u.model.decoder)
+
+            print(f"Finished training user models for local epoch {i}")
+
+            # Qualitative image check - misc user!
+            self.qualitative_check(
+                i, self.users[0].model.decoder, "Novel images user 0 decoder"
+            )
+
+            # Generate a dataloader holding the generated images and labels
+            self.classifier_dataloader = self.generate_dataset_from_user_decoders(
+                selected_users, self.classifier_num_train_samples
+            )
+            print(
+                f"Generated {len(self.classifier_dataloader.dataset)} samples to train server classifier for local epoch {i}"
+            )
+
+            # Train the server model's classifier
+            self.train_classifier(reinitialize_weights=True)
+            print(f"Trained server classifier for local epoch {i}")
+
+            print("__________________________________________")
