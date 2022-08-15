@@ -26,6 +26,7 @@ class ServerFedVAE(Server):
         decoder_num_train_samples,
         decoder_epochs,
         decoder_LR,
+        weight,
     ):
         super().__init__(base_params)
 
@@ -49,7 +50,9 @@ class ServerFedVAE(Server):
 
         self.classifier_num_train_samples = classifier_num_train_samples
         self.classifier_epochs = classifier_epochs
-        self.num_samples_per_class = 5
+
+        self.num_samples_per_class = 5  # Just for display purposes
+        self.weight = weight
 
     def compute_data_amt_and_pmf(self, u):
         """
@@ -134,7 +137,10 @@ class ServerFedVAE(Server):
 
         :return: aggregated decoder
         """
-        return average_weights(decoders, data_amts=data_amts)
+        if self.weight == 1:
+            return average_weights(decoders, data_amts=data_amts)
+        else:
+            return average_weights(decoders)
 
     def generate_dataset_from_user_decoders(self, users, num_train_samples):
         """
@@ -152,7 +158,10 @@ class ServerFedVAE(Server):
             u.model.eval()
 
             # Sample a proportional number of samples to the amount of data the current user has seen
-            user_num_train_samples = int(u.data_amt * num_train_samples)
+            if self.weight == 1:
+                user_num_train_samples = int(u.data_amt * num_train_samples)
+            else:
+                user_num_train_samples = int(num_train_samples / self.num_users)
 
             z = u.model.sample_z(
                 user_num_train_samples, "uniform", uniform_width=(-1, 1)

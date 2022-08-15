@@ -48,12 +48,12 @@ def run_job(args):
         elif args.algorithm == "fedvae":
             cur_run_name = (
                 cur_run_name
-                + f"_glob_epochs={args.glob_epochs}_z_dim={args.z_dim}_beta={args.beta}_decoder_LR={args.decoder_LR}_classifier_train_samples={args.classifier_num_train_samples}_classifier_epochs={args.classifier_epochs}_decoder_train_samples={args.decoder_num_train_samples}_decoder_epochs={args.decoder_epochs}"
+                + f"_glob_epochs={args.glob_epochs}_z_dim={args.z_dim}_beta={args.beta}_decoder_LR={args.decoder_LR}_classifier_train_samples={args.classifier_num_train_samples}_classifier_epochs={args.classifier_epochs}_decoder_train_samples={args.decoder_num_train_samples}_decoder_epochs={args.decoder_epochs}_weight={args.should_weight}"
             )
         elif args.algorithm == "onefedvae":
             cur_run_name = (
                 cur_run_name
-                + f"_z_dim={args.z_dim}_beta={args.beta}_classifier_train_samples={args.classifier_num_train_samples}_classifier_epochs={args.classifier_epochs}"
+                + f"_z_dim={args.z_dim}_beta={args.beta}_classifier_train_samples={args.classifier_num_train_samples}_classifier_epochs={args.classifier_epochs}_weight={args.should_weight}"
             )
 
         writer = SummaryWriter(log_dir=cur_run_name)
@@ -117,6 +117,7 @@ def run_job(args):
                 args.beta,
                 args.classifier_num_train_samples,
                 args.classifier_epochs,
+                args.weight,
             )
         elif args.algorithm == "fedvae":
             s = ServerFedVAE(
@@ -129,6 +130,7 @@ def run_job(args):
                 args.decoder_num_train_samples,
                 args.decoder_epochs,
                 args.decoder_LR,
+                args.weight,
             )
         else:
             raise NotImplementedError(
@@ -278,6 +280,12 @@ if __name__ == "__main__":
         default=0.001,
         help="Learning rate to use for decoder KD fine-tuning",
     )
+    parser.add_argument(
+        "--should_weight",
+        type=int,
+        default=0,
+        help="Whether or not to weight server decoder aggregation and sampling",
+    )
 
     args = parser.parse_args()
     args.should_log = bool(args.should_log)
@@ -334,6 +342,7 @@ if __name__ == "__main__":
             print("Weight on the proximal objective term (mu):", args.mu)
         elif args.algorithm in ["fedvae", "onefedvae"]:
             print("Latent vector dimension for VAE:", args.z_dim)
+            print("Should weight sampling and aggregation:", args.should_weight)
             print("Weight on the KL divergence term (beta):", args.beta)
             print(
                 "Number of samples to generate for server classifier training:",
