@@ -117,7 +117,7 @@ def run_job(args):
                 args.beta,
                 args.classifier_num_train_samples,
                 args.classifier_epochs,
-                args.weight,
+                args.should_weight,
             )
         elif args.algorithm == "fedvae":
             s = ServerFedVAE(
@@ -130,7 +130,7 @@ def run_job(args):
                 args.decoder_num_train_samples,
                 args.decoder_epochs,
                 args.decoder_LR,
-                args.weight,
+                args.should_weight,
             )
         else:
             raise NotImplementedError(
