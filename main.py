@@ -139,15 +139,15 @@ def run_job(args):
 
         print(f"_________________________________________________\n\n")
 
-        s.train()
         if (
             args.algorithm in ["fedvae", "onefedvae"]
             and args.should_log == 1
             and args.local_epoch_exp == 1
         ):
             s.train_alt_one_comm()
-
-        s.test()
+        else:
+            s.train()
+            s.test()
 
     if args.should_log:
         # Make sure that all pending events have been written to disk
