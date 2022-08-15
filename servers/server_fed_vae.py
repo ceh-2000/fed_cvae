@@ -89,13 +89,25 @@ class ServerFedVAE(Server):
 
         assert np.sum(pmf) == 1.0, f"Vector for user ID {u} sums to {np.sum(pmf)}"
 
-        return len(subset_2), pmf
+        return subset_2.shape[0], pmf
 
     def create_users(self):
+        data_amts = np.zeros(
+            [
+                self.num_users,
+            ]
+        )
+        pmfs = []
         for u in range(self.num_users):
-
-            dl = DataLoader(self.data_subsets[u], shuffle=True, batch_size=32)
             data_amt, pmf = self.compute_data_amt_and_pmf(u)
+            data_amts[u] = data_amt
+            pmfs.append(pmf)
+
+        total_data = np.sum(data_amts)
+        data_amts = data_amts / total_data
+
+        for u in range(self.num_users):
+            dl = DataLoader(self.data_subsets[u], shuffle=True, batch_size=32)
 
             new_user = UserFedVAE(
                 {
@@ -108,8 +120,8 @@ class ServerFedVAE(Server):
                 self.z_dim,
                 self.image_size,
                 self.beta,
-                data_amt,
-                pmf,
+                data_amts[u],
+                pmfs[u],
             )
             self.users.append(new_user)
 
@@ -132,9 +144,6 @@ class ServerFedVAE(Server):
         :param num_train_samples: How many samples to add to our new dataset
         """
 
-        # Number of samples per user
-        len_data = int(num_train_samples / len(users))
-
         X_vals = torch.Tensor()
         y_vals = torch.Tensor()
         z_vals = torch.Tensor()
@@ -142,11 +151,18 @@ class ServerFedVAE(Server):
         for u in users:
             u.model.eval()
 
-            z = u.model.sample_z(len_data, "uniform", uniform_width=(-1, 1))
+            # Sample a proportional number of samples to the amount of data the current user has seen
+            user_num_train_samples = int(u.data_amt * num_train_samples)
+
+            z = u.model.sample_z(
+                user_num_train_samples, "uniform", uniform_width=(-1, 1)
+            )
 
             # Sample y's according to each user's target distribution
             classes = np.arange(self.num_classes)
-            y = torch.from_numpy(np.random.choice(classes, size=len_data, p=u.pmf))
+            y = torch.from_numpy(
+                np.random.choice(classes, size=user_num_train_samples, p=u.pmf)
+            )
             y_hot = one_hot_encode(y, self.num_classes)
 
             # Detaching ensures that there aren't issues w/trying to calculate the KD grad WRT this net's params - not needed!
