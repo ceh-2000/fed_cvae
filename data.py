@@ -16,7 +16,7 @@ from torchvision.transforms import Compose, Normalize, Resize, ToTensor
 
 # Setting seeds for reproducibility
 np.random.seed(1693)
-manual_seed(1693)
+# manual_seed(1693)
 
 
 class Data:
@@ -116,7 +116,7 @@ class Data:
         # Case where we only distribute a portion of the dataset to users
         if self.sample_ratio < 1:
             num_samples_keep = int(len(dataset_train) * self.sample_ratio)
-            indices = randperm(len(dataset_train))[
+            indices = np.random.permutation(len(dataset_train))[
                 :num_samples_keep
             ]  # randomly choosing samples to keep
             dataset_train = Subset(dataset_train, indices)
@@ -135,7 +135,7 @@ class Data:
         # Only partition into user datasets if we don't want centralized learning
         else:
             if self.alpha is None:
-                self.train_data = random_split(dataset_train, data_split_sequence)
+                self.train_data = random_split(dataset_train, data_split_sequence, generator = torch.Generator().manual_seed(1693))
             else:
                 self.train_data = self.split_data_dirichlet(dataset_train, visualize)
 
