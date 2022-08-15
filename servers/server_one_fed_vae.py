@@ -30,9 +30,11 @@ class ServerOneFedVAE(ServerFedVAE):
 
         # Train selected users and collect their decoder weights
         decoders = []
+        data_amts = []
         for u in selected_users:
             u.train(self.local_epochs)
             decoders.append(u.model.decoder)
+            data_amts.append(u.data_amt)
 
         print(f"Finished training user models for epoch 0")
 
