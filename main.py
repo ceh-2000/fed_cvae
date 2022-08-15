@@ -353,7 +353,7 @@ if __name__ == "__main__":
                     args.decoder_epochs,
                 )
                 print(
-                    "Learning rate to for server decoder fine-tuning:",
+                    "Learning rate for server decoder fine-tuning:",
                     args.decoder_LR,
                 )
 
