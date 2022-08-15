@@ -16,7 +16,6 @@ from torchvision.transforms import Compose, Normalize, Resize, ToTensor
 
 # Setting seeds for reproducibility
 np.random.seed(1693)
-# manual_seed(1693)
 
 
 class Data:
@@ -267,11 +266,12 @@ if __name__ == "__main__":
         num_users=20,
         writer=None,
         sample_ratio=0.5,
-        alpha=1,
+        alpha=0.001,
         normalize=True,
         visualize=True,
+        central=False
     )
-    print(sum([len(MNIST_data.train_data[i]) for i in range(MNIST_data.num_users)]))
+    print([len(MNIST_data.train_data[i]) for i in range(MNIST_data.num_users)])
 
     from collections import Counter
 
