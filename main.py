@@ -94,6 +94,7 @@ def run_job(args):
             "glob_epochs": args.glob_epochs,
             "local_epochs": args.local_epochs,
             "local_LR": args.local_LR,
+            "use_adam": args.use_adam,
             "data_subsets": d.train_data,
             "data_server": d.test_data,
             "num_channels": d.num_channels,
@@ -213,6 +214,12 @@ if __name__ == "__main__":
         default=0.001,
         help="Local (user) learning rate (either for classifier or CVAE)",
     )
+    parser.add_argument(
+        "--use_adam",
+        type=int,
+        default=0,
+        help="If 1, use Adam as the local optimized, else use SGD"
+    )
 
     # Command line arguments for specific models
     parser.add_argument(
@@ -281,6 +288,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     args.should_log = bool(args.should_log)
+    args.use_adam = bool(args.use_adam)
 
     # Get available gpus
     devices = get_gpus()
@@ -293,6 +301,7 @@ if __name__ == "__main__":
     print("Portion of the dataset used:", args.sample_ratio)
     print("Logging?", args.should_log)
     print("Seed:", args.seed)
+    print(f"Using {'Adam' if args.use_adam else 'SGD'} as the local optimizer")
 
     if args.algorithm != "central":
         print(

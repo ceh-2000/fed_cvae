@@ -1,6 +1,6 @@
 import copy
 
-from torch.optim import Adam
+from torch.optim import Adam, SGD
 
 from models.VAE import CVAE
 from users.user import User
@@ -18,7 +18,11 @@ class UserFedVAE(User):
             z_dim=z_dim,
             image_size=image_size,
         )
-        self.optimizer = Adam(self.model.parameters(), lr=base_params["local_LR"])
+
+        if base_params["use_adam"]:
+            self.optimizer = Adam(self.model.parameters(), lr=base_params["local_LR"])
+        else:
+            self.optimizer = SGD(self.model.parameters(), lr=base_params["local_LR"])
 
         self.beta = beta
 
