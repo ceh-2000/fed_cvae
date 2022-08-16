@@ -43,7 +43,7 @@ def run_job(args):
         elif args.algorithm == "oneshot":
             cur_run_name = (
                 cur_run_name
-                + f"_sampling={args.one_shot_sampling}_K={args.K if args.one_shot_sampling != 'all' else 'all'}"
+                + f"_sampling={args.one_shot_sampling}_K={args.K if args.one_shot_sampling != 'all' else args.num_users}"
             )
         elif args.algorithm == "fedvae":
             cur_run_name = (
