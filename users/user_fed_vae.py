@@ -8,7 +8,7 @@ from utils import kl_divergence, one_hot_encode, reconstruction_loss
 
 
 class UserFedVAE(User):
-    def __init__(self, base_params, z_dim, image_size, beta, pmf):
+    def __init__(self, base_params, z_dim, image_size, beta, data_amt, pmf):
         super().__init__(base_params)
 
         self.z_dim = z_dim
@@ -25,8 +25,7 @@ class UserFedVAE(User):
             self.optimizer = SGD(self.model.parameters(), lr=base_params["local_LR"])
 
         self.beta = beta
-
-        # Distribution of targets
+        self.data_amt = data_amt
         self.pmf = pmf
 
     def train(self, local_epochs):

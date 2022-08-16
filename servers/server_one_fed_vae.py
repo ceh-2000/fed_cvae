@@ -10,6 +10,7 @@ class ServerOneFedVAE(ServerFedVAE):
         beta,
         classifier_num_train_samples,
         classifier_epochs,
+        weight,
     ):
         super().__init__(
             base_params,
@@ -21,6 +22,7 @@ class ServerOneFedVAE(ServerFedVAE):
             None,
             None,
             0.01,
+            weight,
         )
 
     def train(self):
@@ -29,10 +31,8 @@ class ServerOneFedVAE(ServerFedVAE):
         selected_users = self.sample_users()
 
         # Train selected users and collect their decoder weights
-        decoders = []
         for u in selected_users:
             u.train(self.local_epochs)
-            decoders.append(u.model.decoder)
 
         print(f"Finished training user models for epoch 0")
 

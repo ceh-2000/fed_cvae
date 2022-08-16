@@ -26,6 +26,7 @@ class ServerFedVAE(Server):
         decoder_num_train_samples,
         decoder_epochs,
         decoder_LR,
+        weight,
     ):
         super().__init__(base_params)
 
@@ -49,9 +50,11 @@ class ServerFedVAE(Server):
 
         self.classifier_num_train_samples = classifier_num_train_samples
         self.classifier_epochs = classifier_epochs
-        self.num_samples_per_class = 5
 
-    def compute_pmf(self, u):
+        self.num_samples_per_class = 5  # Just for display purposes
+        self.weight = weight
+
+    def compute_data_amt_and_pmf(self, u):
         """
         Helper function to get probabilities for user target values
 
@@ -89,13 +92,25 @@ class ServerFedVAE(Server):
 
         assert np.sum(pmf) == 1.0, f"Vector for user ID {u} sums to {np.sum(pmf)}"
 
-        return pmf
+        return subset_2.shape[0], pmf
 
     def create_users(self):
+        data_amts = np.zeros(
+            [
+                self.num_users,
+            ]
+        )
+        pmfs = []
         for u in range(self.num_users):
+            data_amt, pmf = self.compute_data_amt_and_pmf(u)
+            data_amts[u] = data_amt
+            pmfs.append(pmf)
 
+        total_data = np.sum(data_amts)
+        data_amts = data_amts / total_data
+
+        for u in range(self.num_users):
             dl = DataLoader(self.data_subsets[u], shuffle=True, batch_size=32)
-            pmf = self.compute_pmf(u)
 
             new_user = UserFedVAE(
                 {
@@ -109,20 +124,24 @@ class ServerFedVAE(Server):
                 self.z_dim,
                 self.image_size,
                 self.beta,
-                pmf,
+                data_amts[u],
+                pmfs[u],
             )
             self.users.append(new_user)
 
-    def average_decoders(self, decoders):
+    def average_decoders(self, decoders, data_amts):
         """
         Helper method to average the decoders into a shared model
 
         :param decoders: List of decoders from selected user models
-        :param distill: Boolean that controls whether we aggregate with KD or not
+        :param data_amts: List of how many samples each user has
 
         :return: aggregated decoder
         """
-        return average_weights(decoders)
+        if self.weight == 1:
+            return average_weights(decoders, data_amts=data_amts)
+        else:
+            return average_weights(decoders)
 
     def generate_dataset_from_user_decoders(self, users, num_train_samples):
         """
@@ -132,9 +151,6 @@ class ServerFedVAE(Server):
         :param num_train_samples: How many samples to add to our new dataset
         """
 
-        # Number of samples per user
-        len_data = int(num_train_samples / len(users))
-
         X_vals = torch.Tensor()
         y_vals = torch.Tensor()
         z_vals = torch.Tensor()
@@ -142,11 +158,21 @@ class ServerFedVAE(Server):
         for u in users:
             u.model.eval()
 
-            z = u.model.sample_z(len_data, "uniform", uniform_width=(-1, 1))
+            # Sample a proportional number of samples to the amount of data the current user has seen
+            if self.weight == 1:
+                user_num_train_samples = int(u.data_amt * num_train_samples)
+            else:
+                user_num_train_samples = int(num_train_samples / self.num_users)
+
+            z = u.model.sample_z(
+                user_num_train_samples, "uniform", uniform_width=(-1, 1)
+            )
 
             # Sample y's according to each user's target distribution
             classes = np.arange(self.num_classes)
-            y = torch.from_numpy(np.random.choice(classes, size=len_data, p=u.pmf))
+            y = torch.from_numpy(
+                np.random.choice(classes, size=user_num_train_samples, p=u.pmf)
+            )
             y_hot = one_hot_encode(y, self.num_classes)
 
             # Detaching ensures that there aren't issues w/trying to calculate the KD grad WRT this net's params - not needed!
@@ -253,16 +279,18 @@ class ServerFedVAE(Server):
 
             selected_users = self.sample_users()
 
-            # Train selected users and collect their decoder weights
+            # Train selected users and collect their decoder weights and number of training samples
             decoders = []
+            data_amts = []
             for u in selected_users:
                 u.train(self.local_epochs)
                 decoders.append(u.model.decoder)
+                data_amts.append(u.data_amt)
 
             print(f"Finished training user models for epoch {e}")
 
             # Update the server decoder using weight averaging and knowledge distillation
-            avg_state_dict = self.average_decoders(decoders)
+            avg_state_dict = self.average_decoders(decoders, data_amts)
             self.decoder.load_state_dict(copy.deepcopy(avg_state_dict))
             decoder_state_dict = copy.deepcopy(
                 self.distill_user_decoders(selected_users)
