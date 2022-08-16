@@ -125,6 +125,8 @@ if __name__ == "__main__":
                     f"--local_epochs {local_epochs}"
                 )
 
+    print('Number of experiments:', len(all_scripts))
+
     counter = 0
     for i in split(all_scripts, len(hosts)):
         shell_file_name = f"hyperparam_runs_{hosts[counter]}.sh"
