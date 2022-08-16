@@ -31,6 +31,8 @@ class Server:
 
         self.writer = params["writer"]
 
+        self.use_adam = params["use_adam"]
+
     def create_users(self):
         """
         Every user gets an id, dataloader corresponding to their unique, private data, and info about the data
@@ -45,6 +47,7 @@ class Server:
                     "num_channels": self.num_channels,
                     "num_classes": self.num_classes,
                     "local_LR": self.local_LR,
+                    "use_adam": self.use_adam
                 }
             )
             self.users.append(new_user)
