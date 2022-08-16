@@ -125,7 +125,7 @@ if __name__ == "__main__":
                     f"--local_epochs {local_epochs}"
                 )
 
-    print('Number of experiments:', len(all_scripts))
+    print("Number of experiments:", len(all_scripts))
 
     counter = 0
     for i in split(all_scripts, len(hosts)):
