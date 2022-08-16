@@ -54,7 +54,6 @@ if __name__ == "__main__":
     algorithm = "oneshot"
     num_users = 10
     glob_epochs = 1
-    local_epochs = 15
     alpha = 0.01
     sample_ratio = 0.5
     user_data_split = 0.8
@@ -62,42 +61,46 @@ if __name__ == "__main__":
     should_log = 1
 
     dataset_vals = ["mnist", "fashionmnist"]
+    local_epochs_vals = [5, 10, 15]
     local_LR_vals = [0.01, 0.001, 0.0001]
     K_vals = [3, 5, 7]
 
     # one_shot_sampling_vals = ["random", "data", "validation", "all"]
     one_shot_sampling_vals = ["random", "data"]
     for dataset in dataset_vals:
-        for local_LR in local_LR_vals:
-            for one_shot_sampling in one_shot_sampling_vals:
-                for K in K_vals:
-                    all_scripts.append(
-                        f"python3 ../main.py --should_log {should_log} --use_adam {use_adam} --algorithm {algorithm} "
-                        f"--num_users {num_users} --glob_epochs {glob_epochs} --local_epochs {local_epochs} "
-                        f"--alpha {alpha} --sample_ratio {sample_ratio} --dataset {dataset} --local_LR {local_LR} "
-                        f"--one_shot_sampling {one_shot_sampling} --K {K}"
-                    )
+        for local_epochs in local_epochs_vals:
+            for local_LR in local_LR_vals:
+                for one_shot_sampling in one_shot_sampling_vals:
+                    for K in K_vals:
+                        all_scripts.append(
+                            f"python3 ../main.py --should_log {should_log} --use_adam {use_adam} --algorithm {algorithm} "
+                            f"--num_users {num_users} --glob_epochs {glob_epochs} --local_epochs {local_epochs} "
+                            f"--alpha {alpha} --sample_ratio {sample_ratio} --dataset {dataset} --local_LR {local_LR} "
+                            f"--one_shot_sampling {one_shot_sampling} --K {K}"
+                        )
 
     one_shot_sampling = "validation"
     for dataset in dataset_vals:
-        for local_LR in local_LR_vals:
-            for K in K_vals:
-                all_scripts.append(
-                    f"python3 ../main.py --should_log {should_log} --use_adam {use_adam} --algorithm {algorithm} "
-                    f"--num_users {num_users} --glob_epochs {glob_epochs} --local_epochs {local_epochs} --alpha {alpha} "
-                    f"--sample_ratio {sample_ratio} --one_shot_sampling {one_shot_sampling} "
-                    f"--user_data_split {user_data_split} --dataset {dataset} --local_LR {local_LR} --K {K}"
-                )
+        for local_epochs in local_epochs_vals:
+            for local_LR in local_LR_vals:
+                for K in K_vals:
+                    all_scripts.append(
+                        f"python3 ../main.py --should_log {should_log} --use_adam {use_adam} --algorithm {algorithm} "
+                        f"--num_users {num_users} --glob_epochs {glob_epochs} --local_epochs {local_epochs} --alpha {alpha} "
+                        f"--sample_ratio {sample_ratio} --one_shot_sampling {one_shot_sampling} "
+                        f"--user_data_split {user_data_split} --dataset {dataset} --local_LR {local_LR} --K {K}"
+                    )
 
     one_shot_sampling = "all"
     for dataset in dataset_vals:
-        for local_LR in local_LR_vals:
-            all_scripts.append(
-                f"python3 ../main.py --should_log {should_log} --use_adam {use_adam} --algorithm {algorithm} "
-                f"--num_users {num_users} --glob_epochs {glob_epochs} --local_epochs {local_epochs} --alpha {alpha} "
-                f"--sample_ratio {sample_ratio} --one_shot_sampling {one_shot_sampling} --dataset {dataset}"
-                f"--local_LR {local_LR}"
-            )
+        for local_epochs in local_epochs_vals:
+            for local_LR in local_LR_vals:
+                all_scripts.append(
+                    f"python3 ../main.py --should_log {should_log} --use_adam {use_adam} --algorithm {algorithm} "
+                    f"--num_users {num_users} --glob_epochs {glob_epochs} --local_epochs {local_epochs} --alpha {alpha} "
+                    f"--sample_ratio {sample_ratio} --one_shot_sampling {one_shot_sampling} --dataset {dataset}"
+                    f"--local_LR {local_LR}"
+                )
 
     # FedAvg Tuning
     algorithm = "fedavg"
