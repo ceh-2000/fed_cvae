@@ -220,7 +220,7 @@ if __name__ == "__main__":
         "--use_adam",
         type=int,
         default=0,
-        help="If 1, use Adam as the local optimized, else use SGD"
+        help="If 1, use Adam as the local optimized, else use SGD",
     )
 
     # Command line arguments for specific models

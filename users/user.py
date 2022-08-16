@@ -1,5 +1,5 @@
 from torch.nn import CrossEntropyLoss
-from torch.optim import Adam, SGD
+from torch.optim import SGD, Adam
 
 from models.classifier import Classifier
 

@@ -119,7 +119,7 @@ class ServerFedVAE(Server):
                     "num_channels": self.num_channels,
                     "num_classes": self.num_classes,
                     "local_LR": self.local_LR,
-                    "use_adam": self.use_adam
+                    "use_adam": self.use_adam,
                 },
                 self.z_dim,
                 self.image_size,

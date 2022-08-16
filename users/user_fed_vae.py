@@ -1,6 +1,6 @@
 import copy
 
-from torch.optim import Adam, SGD
+from torch.optim import SGD, Adam
 
 from models.VAE import CVAE
 from users.user import User
