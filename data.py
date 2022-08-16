@@ -79,7 +79,7 @@ class Data:
                 train=False,
                 transform=transform_list,
             )
-        elif self.dataset_name == "fashionmnist":
+        elif self.dataset_name == "fashion":
             self.num_channels = 1
             self.num_classes = 10
             self.image_size = 32

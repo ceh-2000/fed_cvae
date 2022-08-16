@@ -28,7 +28,7 @@ if __name__ == "__main__":
     local_LR = 0.001
     decoder_LR = 0.01
 
-    dataset_vals = ["mnist", "fashionmnist"]
+    dataset_vals = ["mnist", "fashion"]
     z_dim_vals = [10, 50, 100]
     decoder_num_epochs_vals = [3, 5, 7]
     classifier_num_epochs_vals = [5, 10, 15]
@@ -60,7 +60,7 @@ if __name__ == "__main__":
     use_adam = 1
     should_log = 1
 
-    dataset_vals = ["mnist", "fashionmnist"]
+    dataset_vals = ["mnist", "fashion"]
     local_epochs_vals = [5, 10, 15]
     local_LR_vals = [0.01, 0.001, 0.0001]
     K_vals = [3, 5, 7]
@@ -98,7 +98,7 @@ if __name__ == "__main__":
                 all_scripts.append(
                     f"python3 ../main.py --should_log {should_log} --use_adam {use_adam} --algorithm {algorithm} "
                     f"--num_users {num_users} --glob_epochs {glob_epochs} --local_epochs {local_epochs} --alpha {alpha} "
-                    f"--sample_ratio {sample_ratio} --one_shot_sampling {one_shot_sampling} --dataset {dataset}"
+                    f"--sample_ratio {sample_ratio} --one_shot_sampling {one_shot_sampling} --dataset {dataset} "
                     f"--local_LR {local_LR}"
                 )
 
@@ -111,7 +111,7 @@ if __name__ == "__main__":
     use_adam = 1
     should_log = 1
 
-    dataset_vals = ["mnist", "fashionmnist"]
+    dataset_vals = ["mnist", "fashion"]
     local_LR_vals = [0.01, 0.001, 0.0001]
     local_epochs_vals = [5, 7, 10]
 
