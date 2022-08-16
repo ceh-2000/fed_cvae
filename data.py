@@ -134,7 +134,11 @@ class Data:
         # Only partition into user datasets if we don't want centralized learning
         else:
             if self.alpha is None:
-                self.train_data = random_split(dataset_train, data_split_sequence, generator = torch.Generator().manual_seed(1693))
+                self.train_data = random_split(
+                    dataset_train,
+                    data_split_sequence,
+                    generator=torch.Generator().manual_seed(1693),
+                )
             else:
                 self.train_data = self.split_data_dirichlet(dataset_train, visualize)
 
@@ -269,7 +273,7 @@ if __name__ == "__main__":
         alpha=0.001,
         normalize=True,
         visualize=True,
-        central=False
+        central=False,
     )
     print([len(MNIST_data.train_data[i]) for i in range(MNIST_data.num_users)])
 
