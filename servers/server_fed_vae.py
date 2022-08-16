@@ -212,8 +212,6 @@ class ServerFedVAE(Server):
                 recon_loss.backward()
                 self.kd_optimizer.step()
 
-        return self.decoder.state_dict()
-
     def sample_y(self):
         """
         Helper method to sample one-hot-encoded targets
@@ -274,10 +272,21 @@ class ServerFedVAE(Server):
                 self.classifier_optimizer.step()
 
     def train(self):
+        # Ensure all models are initialized the same
+        weight_init_state_dict = self.users[0].model.state_dict()
+        for u in self.users:
+            u.model.load_state_dict(copy.deepcopy(weight_init_state_dict))
+
+        # Training loop
         for e in range(self.glob_epochs):
             self.evaluate(e)
 
             selected_users = self.sample_users()
+
+            # Send server decoder to selected users
+            decoder_state_dict = copy.deepcopy(self.decoder.state_dict())
+            for u in selected_users:
+                u.update_decoder(decoder_state_dict)
 
             # Train selected users and collect their decoder weights and number of training samples
             decoders = []
@@ -292,21 +301,13 @@ class ServerFedVAE(Server):
             # Update the server decoder using weight averaging and knowledge distillation
             avg_state_dict = self.average_decoders(decoders, data_amts)
             self.decoder.load_state_dict(copy.deepcopy(avg_state_dict))
-            decoder_state_dict = copy.deepcopy(
-                self.distill_user_decoders(selected_users)
-            )
+            self.distill_user_decoders(selected_users)
 
             # Qualitative image check - both the server and a misc user!
             self.qualitative_check(e, self.decoder, "Novel images server decoder")
             self.qualitative_check(
                 e, self.users[0].model.decoder, "Novel images user 0 decoder"
             )
-
-            # Send aggregated decoder to selected users
-            for u in selected_users:
-                u.update_decoder(decoder_state_dict)
-
-            print(f"Aggregated decoders for epoch {e}")
 
             # Generate a dataloader holding the generated images and labels
             self.classifier_dataloader = self.generate_data_from_aggregated_decoder()

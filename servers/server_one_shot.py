@@ -1,3 +1,4 @@
+import copy
 import random
 
 import numpy as np
@@ -93,6 +94,11 @@ class ServerOneShot(Server):
         """
         Instead of training for multiple global iterations, allow all users to train and then ensemble select models
         """
+
+        # Ensure all models are initialized the same
+        weight_init_state_dict = self.users[0].model.state_dict()
+        for u in self.users:
+            u.model.load_state_dict(copy.deepcopy(weight_init_state_dict))
 
         # Train all local users once for as long as specified
         for u in self.users:

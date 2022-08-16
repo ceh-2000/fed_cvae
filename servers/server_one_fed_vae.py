@@ -1,3 +1,5 @@
+import copy
+
 from servers.server_fed_vae import ServerFedVAE
 
 
@@ -26,6 +28,11 @@ class ServerOneFedVAE(ServerFedVAE):
         )
 
     def train(self):
+        # Ensure all models are initialized the same
+        weight_init_state_dict = self.users[0].model.state_dict()
+        for u in self.users:
+            u.model.load_state_dict(copy.deepcopy(weight_init_state_dict))
+
         self.evaluate(0)
 
         selected_users = self.sample_users()
