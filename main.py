@@ -139,11 +139,7 @@ def run_job(args):
 
         print(f"_________________________________________________\n\n")
 
-        if (
-            args.algorithm in ["fedvae", "onefedvae"]
-            and args.should_log == 1
-            and args.local_epoch_exp == 1
-        ):
+        if args.should_log == 1 and args.local_epoch_exp == 1:
             s.train_alt_one_comm()
         else:
             s.train()
@@ -289,7 +285,7 @@ if __name__ == "__main__":
         "--local_epoch_exp",
         type=int,
         default=0,
-        help="Whether or not we want to run a FedVAE experiment for local epochs",
+        help="Whether or not we want to run a one-shot experiment for local epochs",
     )
 
     args = parser.parse_args()
@@ -306,6 +302,10 @@ if __name__ == "__main__":
     print("Portion of the dataset used:", args.sample_ratio)
     print("Logging?", args.should_log)
     print("Seed:", args.seed)
+    print(
+        "Do we want to run a one-shot experiment for local epochs?",
+        args.local_epoch_exp,
+    )
 
     if args.algorithm != "central":
         print(
@@ -315,16 +315,22 @@ if __name__ == "__main__":
         print("Number of users for training:", args.num_users)
         print("Number of local epochs:", args.local_epochs)
         print("Local learning rate:", args.local_LR)
-    if args.algorithm in ["fedavg", "fedprox", "fedvae"]:
+
+    # Global communication variables
+    if args.algorithm in ["fedavg", "fedprox", "fedvae"] and args.local_epoch_exp == 0:
         print("Number of global epochs:", args.glob_epochs)
         print(
             "Fraction of users sampled for each communication round:",
             args.user_fraction,
         )
-    if args.algorithm in ["oneshot", "onefedvae"] or args.local_epoch_exp == 1:
+    elif args.algorithm in ["oneshot", "onefedvae"] or args.local_epoch_exp == 1:
         args.glob_epochs = 1
         print("Number of global epochs:", 1)
-    if args.algorithm == "central":
+        print(
+            "Fraction of users sampled for each communication round:",
+            args.user_fraction,
+        )
+    elif args.algorithm == "central":
         print("Number of epochs:", args.glob_epochs)
 
     print()
@@ -347,10 +353,6 @@ if __name__ == "__main__":
             print("Weight on the proximal objective term (mu):", args.mu)
         elif args.algorithm in ["fedvae", "onefedvae"]:
             print("Latent vector dimension for VAE:", args.z_dim)
-            print(
-                "Do we want to run a FedVAE experiment for local epochs?",
-                args.local_epoch_exp,
-            )
             print("Weight on the KL divergence term (beta):", args.beta)
             print(
                 "Number of samples to generate for server classifier training:",

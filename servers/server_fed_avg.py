@@ -39,3 +39,30 @@ class ServerFedAvg(Server):
 
             print(f"Finished training {len(selected_users)} users for epoch {e}")
             print("__________________________________________")
+
+    def train_alt_one_comm(self):
+        """
+        Train the global server model and local user models.
+        After each epoch average the weights of all users.
+        """
+
+        self.user_data_amts = [len(u.dataloader.dataset) for u in self.users]
+
+        for i in range(self.local_epochs):
+            self.evaluate(i)
+
+            # Sample users for training
+            selected_users = self.sample_users()
+
+            # Train SELECTED user models and save model weights
+            models = []
+            for u in selected_users:
+                u.train(1)
+                models.append(u.model)
+
+            # Average the weights of SELECTED user models and save in server
+            state_dict = average_weights(models, data_amts=self.user_data_amts)
+            self.server_model.load_state_dict(copy.deepcopy(state_dict))
+
+            print(f"Finished training {len(selected_users)} users for local epoch {i}")
+            print("__________________________________________")

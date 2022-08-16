@@ -20,6 +20,7 @@ This will install the necessary dependencies.
 The datasets available for benchmarking are [MNIST](http://yann.lecun.com/exdb/mnist/) and [FashionMNIST](https://github.com/zalandoresearch/fashion-mnist). All below examples use MNIST.
 
 Change to `--dataset fashionmnist` to use FashionMNIST. 
+Add `--local_epoch_exp 1` to any valid run for `fedavg`, `oneshot`, `fedvae`, or `onefedvae` to add logging for every local epoch of user training in the one-shot setting. 
 
 #### Unachievable Ideal
 Run the following from command line.
