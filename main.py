@@ -216,6 +216,12 @@ if __name__ == "__main__":
         default=0.001,
         help="Local (user) learning rate (either for classifier or CVAE)",
     )
+    parser.add_argument(
+        "--local_epoch_exp",
+        type=int,
+        default=0,
+        help="Whether or not we want to run a one-shot experiment for local epochs",
+    )
 
     # Command line arguments for specific models
     parser.add_argument(
@@ -280,12 +286,6 @@ if __name__ == "__main__":
         type=float,
         default=0.001,
         help="Learning rate to use for decoder KD fine-tuning",
-    )
-    parser.add_argument(
-        "--local_epoch_exp",
-        type=int,
-        default=0,
-        help="Whether or not we want to run a one-shot experiment for local epochs",
     )
 
     args = parser.parse_args()

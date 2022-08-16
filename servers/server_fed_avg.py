@@ -42,12 +42,17 @@ class ServerFedAvg(Server):
 
     def train_alt_one_comm(self):
         """
-        Train the global server model and local user models.
-        After each epoch average the weights of all users.
+        Train the global server model and local user models, checking the effect of increased local computation.
         """
 
         self.user_data_amts = [len(u.dataloader.dataset) for u in self.users]
 
+        # Ensure that all users start with the same weight initialization
+        server_model_weights = copy.deepcopy(self.server_model.state_dict())
+        for u in self.users:
+            u.model.load_state_dict(server_model_weights)
+
+        # Train for a certain number of local epochs (one global epoch) and record results for each level of local training
         for i in range(self.local_epochs):
             self.evaluate(i)
 
