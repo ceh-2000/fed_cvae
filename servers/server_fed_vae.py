@@ -28,7 +28,7 @@ class ServerFedVAE(Server):
         decoder_LR,
         should_weight,
         should_fine_tune,
-        should_avg_exp,
+        should_avg,
     ):
         super().__init__(base_params)
 
@@ -58,7 +58,7 @@ class ServerFedVAE(Server):
         # Variables important for ablation experiments
         self.should_weight = should_weight
         self.should_fine_tune = should_fine_tune
-        self.should_avg_exp = should_avg_exp
+        self.should_avg = should_avg
 
     def compute_data_amt_and_pmf(self, u):
         """
@@ -305,9 +305,12 @@ class ServerFedVAE(Server):
             print(f"Finished training user models for epoch {e}")
 
             # Update the server decoder using weight averaging and knowledge distillation
-            avg_state_dict = self.average_decoders(decoders, data_amts)
-            self.decoder.load_state_dict(copy.deepcopy(avg_state_dict))
-            self.distill_user_decoders(selected_users)
+            if self.should_avg:
+                avg_state_dict = self.average_decoders(decoders, data_amts)
+                self.decoder.load_state_dict(copy.deepcopy(avg_state_dict))
+
+            if self.should_fine_tune:
+                self.distill_user_decoders(selected_users)
 
             # Qualitative image check - both the server and a misc user!
             self.qualitative_check(e, self.decoder, "Novel images server decoder")

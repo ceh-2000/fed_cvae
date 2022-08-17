@@ -323,7 +323,7 @@ if __name__ == "__main__":
     print("Dataset name:", args.dataset)
     print("Algorithm:", args.algorithm)
     print("Portion of the dataset used:", args.sample_ratio)
-    print("Logging?", args.should_log)
+    print("Logging?", "yes" if args.should_log else "no")
     print("Seed:", args.seed)
     print(f"Using {'Adam' if args.use_adam else 'SGD'} as the local optimizer")
 
@@ -395,15 +395,15 @@ if __name__ == "__main__":
         if args.algorithm == "fedvae":
             print(
                 "Should we weight the server decoder aggregation and sampling?",
-                "yes" if args.should_weight_exp == 1 else "no",
+                "yes" if args.should_weight_exp else "no",
             )
             print(
                 "Should we fine tune the server decoder?",
-                "yes" if args.should_fine_tune_exp == 1 else "no",
+                "yes" if args.should_fine_tune_exp else "no",
             )
             print(
                 "Should we average the server decoder?",
-                "yes" if args.should_avg_exp == 1 else "no",
+                "yes" if args.should_avg_exp else "no",
             )
 
     print("_________________________________________________\n")
