@@ -48,12 +48,12 @@ def run_job(args):
         elif args.algorithm == "fedvae":
             cur_run_name = (
                 cur_run_name
-                + f"_glob_epochs={args.glob_epochs}_z_dim={args.z_dim}_beta={args.beta}_decoder_LR={args.decoder_LR}_classifier_train_samples={args.classifier_num_train_samples}_classifier_epochs={args.classifier_epochs}_decoder_train_samples={args.decoder_num_train_samples}_decoder_epochs={args.decoder_epochs}_weight={args.should_weight}"
+                + f"_glob_epochs={args.glob_epochs}_z_dim={args.z_dim}_beta={args.beta}_decoder_LR={args.decoder_LR}_classifier_train_samples={args.classifier_num_train_samples}_classifier_epochs={args.classifier_epochs}_decoder_train_samples={args.decoder_num_train_samples}_decoder_epochs={args.decoder_epochs}"
             )
         elif args.algorithm == "onefedvae":
             cur_run_name = (
                 cur_run_name
-                + f"_z_dim={args.z_dim}_beta={args.beta}_classifier_train_samples={args.classifier_num_train_samples}_classifier_epochs={args.classifier_epochs}_weight={args.should_weight}"
+                + f"_z_dim={args.z_dim}_beta={args.beta}_classifier_train_samples={args.classifier_num_train_samples}_classifier_epochs={args.classifier_epochs}"
             )
 
         writer = SummaryWriter(log_dir=cur_run_name)
@@ -118,7 +118,7 @@ def run_job(args):
                 args.beta,
                 args.classifier_num_train_samples,
                 args.classifier_epochs,
-                args.should_weight,
+                args.should_weight_exp,
             )
         elif args.algorithm == "fedvae":
             s = ServerFedVAE(
@@ -131,7 +131,9 @@ def run_job(args):
                 args.decoder_num_train_samples,
                 args.decoder_epochs,
                 args.decoder_LR,
-                args.should_weight,
+                args.should_weight_exp,
+                args.should_fine_tune_exp,
+                args.should_avg_exp,
             )
         else:
             raise NotImplementedError(
@@ -287,11 +289,25 @@ if __name__ == "__main__":
         default=0.001,
         help="Learning rate to use for decoder KD fine-tuning",
     )
+
+    # Command line arguments for experiments
     parser.add_argument(
-        "--should_weight",
+        "--should_weight_exp",
         type=int,
         default=0,
         help="Whether or not to weight server decoder aggregation and sampling",
+    )
+    parser.add_argument(
+        "--should_fine_tune_exp",
+        type=int,
+        default=0,
+        help="Whether or not fine tune server decoder",
+    )
+    parser.add_argument(
+        "--should_avg_exp",
+        type=int,
+        default=0,
+        help="Whether or not to average server decoder",
     )
 
     args = parser.parse_args()
@@ -351,7 +367,6 @@ if __name__ == "__main__":
             print("Weight on the proximal objective term (mu):", args.mu)
         elif args.algorithm in ["fedvae", "onefedvae"]:
             print("Latent vector dimension for VAE:", args.z_dim)
-            print("Should weight sampling and aggregation:", args.should_weight)
             print("Weight on the KL divergence term (beta):", args.beta)
             print(
                 "Number of samples to generate for server classifier training:",
@@ -374,6 +389,22 @@ if __name__ == "__main__":
                     "Learning rate for server decoder fine-tuning:",
                     args.decoder_LR,
                 )
+
+        print()
+
+        if args.algorithm == "fedvae":
+            print(
+                "Should we weight the server decoder aggregation and sampling?",
+                "yes" if args.should_weight_exp == 1 else "no",
+            )
+            print(
+                "Should we fine tune the server decoder?",
+                "yes" if args.should_fine_tune_exp == 1 else "no",
+            )
+            print(
+                "Should we average the server decoder?",
+                "yes" if args.should_avg_exp == 1 else "no",
+            )
 
     print("_________________________________________________\n")
 

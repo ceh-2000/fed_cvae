@@ -26,7 +26,9 @@ class ServerFedVAE(Server):
         decoder_num_train_samples,
         decoder_epochs,
         decoder_LR,
-        weight,
+        should_weight,
+        should_fine_tune,
+        should_avg_exp,
     ):
         super().__init__(base_params)
 
@@ -52,7 +54,11 @@ class ServerFedVAE(Server):
         self.classifier_epochs = classifier_epochs
 
         self.num_samples_per_class = 5  # Just for display purposes
-        self.weight = weight
+
+        # Variables important for ablation experiments
+        self.should_weight = should_weight
+        self.should_fine_tune = should_fine_tune
+        self.should_avg_exp = should_avg_exp
 
     def compute_data_amt_and_pmf(self, u):
         """
@@ -138,7 +144,7 @@ class ServerFedVAE(Server):
 
         :return: aggregated decoder
         """
-        if self.weight == 1:
+        if self.should_weight:
             return average_weights(decoders, data_amts=data_amts)
         else:
             return average_weights(decoders)
@@ -159,7 +165,7 @@ class ServerFedVAE(Server):
             u.model.eval()
 
             # Sample a proportional number of samples to the amount of data the current user has seen
-            if self.weight == 1:
+            if self.should_weight:
                 user_num_train_samples = int(u.data_amt * num_train_samples)
             else:
                 user_num_train_samples = int(num_train_samples / self.num_users)

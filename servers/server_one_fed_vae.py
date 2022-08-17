@@ -12,7 +12,7 @@ class ServerOneFedVAE(ServerFedVAE):
         beta,
         classifier_num_train_samples,
         classifier_epochs,
-        weight,
+        should_weight,
     ):
         super().__init__(
             base_params,
@@ -24,7 +24,9 @@ class ServerOneFedVAE(ServerFedVAE):
             None,
             None,
             0.01,
-            weight,
+            should_weight,
+            0,
+            0,
         )
 
     def train(self):
