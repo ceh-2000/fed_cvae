@@ -18,7 +18,7 @@ if __name__ == "__main__":
     num_users = 10
     glob_epochs = 1
     local_epochs = 15
-    alpha = 0.01
+    alpha = 0.1
     sample_ratio = 0.5
     beta = 1.0
     classifier_num_train_samples = 5000
@@ -54,7 +54,7 @@ if __name__ == "__main__":
     algorithm = "oneshot"
     num_users = 10
     glob_epochs = 1
-    alpha = 0.01
+    alpha = 0.1
     sample_ratio = 0.5
     user_data_split = 0.8
     use_adam = 1
@@ -106,7 +106,7 @@ if __name__ == "__main__":
     algorithm = "fedavg"
     num_users = 10
     glob_epochs = 1
-    alpha = 0.01
+    alpha = 0.1
     sample_ratio = 0.5
     use_adam = 1
     should_log = 1
