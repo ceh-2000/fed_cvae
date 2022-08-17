@@ -26,35 +26,39 @@ def run_job(args):
     torch.manual_seed(args.seed)
 
     writer = None
-    if args.should_log:
-        # Before logging anything, we need to create a SummaryWriter instance.
-        # Writer will output to ./runs/ directory by default.
-        cur_run_name = f"runs/algorithm={args.algorithm}_dataset={args.dataset}_users={args.num_users}_local_epochs={args.local_epochs}_local_LR={args.local_LR}_alpha={args.alpha}_sample_ratio={args.sample_ratio}"
 
-        # Adding in algo-specific hyperparams
-        if args.algorithm == "central":
-            cur_run_name = f"runs/central_model_sampling_ratio={args.sample_ratio}_number_of_epochs={args.glob_epochs}"
-        elif args.algorithm == "fedavg":
-            cur_run_name = cur_run_name + f"_glob_epochs={args.glob_epochs}"
-        elif args.algorithm == "fedprox":
-            cur_run_name = (
-                cur_run_name + f"_glob_epochs={args.glob_epochs}_mu={args.mu}"
-            )
-        elif args.algorithm == "oneshot":
-            cur_run_name = (
-                cur_run_name
-                + f"_sampling={args.one_shot_sampling}_K={args.K if args.one_shot_sampling != 'all' else args.num_users}"
-            )
-        elif args.algorithm == "fedvae":
-            cur_run_name = (
-                cur_run_name
-                + f"_glob_epochs={args.glob_epochs}_z_dim={args.z_dim}_beta={args.beta}_decoder_LR={args.decoder_LR}_classifier_train_samples={args.classifier_num_train_samples}_classifier_epochs={args.classifier_epochs}_decoder_train_samples={args.decoder_num_train_samples}_decoder_epochs={args.decoder_epochs}_weight={args.should_weight}"
-            )
-        elif args.algorithm == "onefedvae":
-            cur_run_name = (
-                cur_run_name
-                + f"_z_dim={args.z_dim}_beta={args.beta}_classifier_train_samples={args.classifier_num_train_samples}_classifier_epochs={args.classifier_epochs}_weight={args.should_weight}"
-            )
+    if args.should_log:
+        if args.cur_run_name == "":
+            # Before logging anything, we need to create a SummaryWriter instance.
+            # Writer will output to ./runs/ directory by default.
+            cur_run_name = f"runs/algorithm={args.algorithm}_dataset={args.dataset}_users={args.num_users}_local_epochs={args.local_epochs}_local_LR={args.local_LR}_alpha={args.alpha}_sample_ratio={args.sample_ratio}"
+
+            # Adding in algo-specific hyperparams
+            if args.algorithm == "central":
+                cur_run_name = f"runs/central_model_sampling_ratio={args.sample_ratio}_number_of_epochs={args.glob_epochs}"
+            elif args.algorithm == "fedavg":
+                cur_run_name = cur_run_name + f"_glob_epochs={args.glob_epochs}"
+            elif args.algorithm == "fedprox":
+                cur_run_name = (
+                    cur_run_name + f"_glob_epochs={args.glob_epochs}_mu={args.mu}"
+                )
+            elif args.algorithm == "oneshot":
+                cur_run_name = (
+                    cur_run_name
+                    + f"_sampling={args.one_shot_sampling}_K={args.K if args.one_shot_sampling != 'all' else args.num_users}"
+                )
+            elif args.algorithm == "fedvae":
+                cur_run_name = (
+                    cur_run_name
+                    + f"_glob_epochs={args.glob_epochs}_z_dim={args.z_dim}_beta={args.beta}_decoder_LR={args.decoder_LR}_classifier_train_samples={args.classifier_num_train_samples}_classifier_epochs={args.classifier_epochs}_decoder_train_samples={args.decoder_num_train_samples}_decoder_epochs={args.decoder_epochs}"
+                )
+            elif args.algorithm == "onefedvae":
+                cur_run_name = (
+                    cur_run_name
+                    + f"_z_dim={args.z_dim}_beta={args.beta}_classifier_train_samples={args.classifier_num_train_samples}_classifier_epochs={args.classifier_epochs}"
+                )
+        else:
+            cur_run_name = args.cur_run_name
 
         writer = SummaryWriter(log_dir=cur_run_name)
 
@@ -118,7 +122,7 @@ def run_job(args):
                 args.beta,
                 args.classifier_num_train_samples,
                 args.classifier_epochs,
-                args.should_weight,
+                args.should_weight_exp,
             )
         elif args.algorithm == "fedvae":
             s = ServerFedVAE(
@@ -131,7 +135,9 @@ def run_job(args):
                 args.decoder_num_train_samples,
                 args.decoder_epochs,
                 args.decoder_LR,
-                args.should_weight,
+                args.should_weight_exp,
+                args.should_avg_exp,
+                args.should_fine_tune_exp,
             )
         else:
             raise NotImplementedError(
@@ -287,11 +293,31 @@ if __name__ == "__main__":
         default=0.001,
         help="Learning rate to use for decoder KD fine-tuning",
     )
+
+    # Command line arguments for experiments
     parser.add_argument(
-        "--should_weight",
+        "--cur_run_name",
+        type=str,
+        default="",
+        help="Modify what the run is named in Tensorboard",
+    )
+    parser.add_argument(
+        "--should_weight_exp",
         type=int,
-        default=0,
+        default=1,
         help="Whether or not to weight server decoder aggregation and sampling",
+    )
+    parser.add_argument(
+        "--should_avg_exp",
+        type=int,
+        default=1,
+        help="Whether or not to average server decoder",
+    )
+    parser.add_argument(
+        "--should_fine_tune_exp",
+        type=int,
+        default=1,
+        help="Whether or not fine tune server decoder",
     )
 
     args = parser.parse_args()
@@ -307,7 +333,7 @@ if __name__ == "__main__":
     print("Dataset name:", args.dataset)
     print("Algorithm:", args.algorithm)
     print("Portion of the dataset used:", args.sample_ratio)
-    print("Logging?", args.should_log)
+    print("Logging?", "yes" if args.should_log else "no")
     print("Seed:", args.seed)
     print(f"Using {'Adam' if args.use_adam else 'SGD'} as the local optimizer")
 
@@ -351,7 +377,6 @@ if __name__ == "__main__":
             print("Weight on the proximal objective term (mu):", args.mu)
         elif args.algorithm in ["fedvae", "onefedvae"]:
             print("Latent vector dimension for VAE:", args.z_dim)
-            print("Should weight sampling and aggregation:", args.should_weight)
             print("Weight on the KL divergence term (beta):", args.beta)
             print(
                 "Number of samples to generate for server classifier training:",
@@ -374,6 +399,22 @@ if __name__ == "__main__":
                     "Learning rate for server decoder fine-tuning:",
                     args.decoder_LR,
                 )
+
+        print()
+
+        if args.cur_run_name != "":
+            print(
+                "Should we weight the server decoder aggregation and sampling?",
+                "yes" if args.should_weight_exp else "no",
+            )
+            print(
+                "Should we average the server decoder?",
+                "yes" if args.should_avg_exp else "no",
+            )
+            print(
+                "Should we fine tune the server decoder?",
+                "yes" if args.should_fine_tune_exp else "no",
+            )
 
     print("_________________________________________________\n")
 
