@@ -307,7 +307,7 @@ class ServerFedVAE(Server):
             # Update the server decoder using weight averaging and knowledge distillation
             if self.should_avg:
                 avg_state_dict = self.average_decoders(decoders, data_amts)
-                self.decoder.load_statse_dict(copy.deepcopy(avg_state_dict))
+                self.decoder.load_state_dict(copy.deepcopy(avg_state_dict))
 
             if self.should_fine_tune:
                 self.distill_user_decoders(selected_users)
