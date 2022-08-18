@@ -1,10 +1,6 @@
 import numpy as np
 
-
-def split(a, n):
-    k, m = divmod(len(a), n)
-    return (a[i * k + min(i, m) : (i + 1) * k + min(i + 1, m)] for i in range(n))
-
+from experiments.utils import create_shell_files
 
 if __name__ == "__main__":
     hosts = np.array(
@@ -127,11 +123,4 @@ if __name__ == "__main__":
 
     print("Number of experiments:", len(all_scripts))
 
-    counter = 0
-    for i in split(all_scripts, len(hosts)):
-        shell_file_name = f"hyperparam_runs_{hosts[counter]}.sh"
-        with open(shell_file_name, "w") as f:
-            for c in i:
-                f.write(c)
-                f.write("\n")
-        counter += 1
+    create_shell_files(all_scripts, hosts, "final_tuning")

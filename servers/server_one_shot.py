@@ -12,7 +12,14 @@ from users.user_one_shot import UserOneShot
 
 
 class ServerOneShot(Server):
-    def __init__(self, base_params, user_sampling_method, user_data_split, K):
+    def __init__(
+        self,
+        base_params,
+        user_sampling_method,
+        user_data_split,
+        K,
+        should_initialize_same,
+    ):
         super().__init__(base_params)
         self.user_sampling_method = user_sampling_method
         self.user_data_split = user_data_split
@@ -20,6 +27,7 @@ class ServerOneShot(Server):
         self.dataloader = DataLoader(
             base_params["data_server"], shuffle=True, batch_size=1
         )
+        self.should_initialize_same = should_initialize_same
 
     def create_users(self):
         """
@@ -96,9 +104,10 @@ class ServerOneShot(Server):
         """
 
         # Ensure all models are initialized the same
-        weight_init_state_dict = self.users[0].model.state_dict()
-        for u in self.users:
-            u.model.load_state_dict(copy.deepcopy(weight_init_state_dict))
+        if self.should_initialize_same:
+            weight_init_state_dict = self.users[0].model.state_dict()
+            for u in self.users:
+                u.model.load_state_dict(copy.deepcopy(weight_init_state_dict))
 
         # Train all local users once for as long as specified
         for u in self.users:

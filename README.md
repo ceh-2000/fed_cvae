@@ -74,7 +74,10 @@ python3 main.py --algorithm fedvae --dataset mnist --num_users 5 --alpha 1.0 --s
 You can adjust model specific parameters `--z_dim` to change the latent vector dimension and `--beta` to change the weight of the KL divergence loss.
 Modify `--classifier_num_train_samples` to change the number of generated samples to train the server classifier and `--classifier_epochs` to adjust the server classifier train time.
 Modify `--decoder_num_train_samples` to change the number of generated samples to train the server decoder and `--decoder_epochs` to adjust the server decoder train time.
- 
+
+### Experiments
+Run ablation experiments for FedVAE using the following command line arguments:
+- 
 
 ### Logging
 1. Enable logging by adding the command line argument `--should_log 1` to `python3 main.py`.
