@@ -28,7 +28,7 @@ if __name__ == "__main__":
     for seed in all_seeds:
         for alpha in alphas:
             for default_script_name in default_scripts_dict.keys():
-                cur_name = f"{default_script_name}_alpha={alpha}_seed={seed}"
+                cur_name = f"runs/{default_script_name}_alpha={alpha}_seed={seed}"
                 script = default_scripts_dict.get(default_script_name)
                 all_scripts.append(
                     f"{script} --alpha {alpha} --seed {seed} --cur_run_name {cur_name}"
