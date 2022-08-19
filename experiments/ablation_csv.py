@@ -15,7 +15,11 @@ if __name__ == "__main__":
 
     for df_key in dfs.keys():
         print(df_key)
-        print(dfs[df_key])
+
+        df = dfs[df_key]
+        df.index.name = "run_name"
 
         # ablation_exp = dfs[df_key][].str.extract
         # dfs[df_key] =
+
+        # Reassign the cur_df at the end

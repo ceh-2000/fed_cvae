@@ -12,17 +12,24 @@ if __name__ == "__main__":
     default_script = "python3 ../main.py --algorithm fedvae --dataset mnist --num_users 10 --alpha 0.01 --sample_ratio 0.5 --glob_epochs 1 --local_epochs 15 --z_dim 10 --beta 1.0 --classifier_num_train_samples 5000 --decoder_num_train_samples 5000 --classifier_epochs 10 --decoder_epochs 7 --local_LR 0.001 --decoder_LR 0.01 --should_log 1 --use_adam 1"
 
     all_seeds = [1588, 1693, 7089, 4488, 3776]
-    all_exps = ["should_weight_exp", "should_avg_exp", "should_fine_tune_exp"]
-    all_vals = [0, 1]
 
-    for seed in all_seeds:
-        for exp in all_exps:
-            for val in all_vals:
-                run_name = f"runs/fedvae_{exp}={val}_seed={seed}"
-                all_scripts.append(
-                    default_script
-                    + f" --seed {seed} --{exp} {val} --cur_run_name {run_name}"
-                )
+    experiments = [
+        "--should_weight_exp 1 --should_initialize_same_exp 1 --should_avg_exp 1 --should_fine_tune_exp 1",
+        "--should_weight_exp 0 --should_initialize_same_exp 1 --should_avg_exp 1 --should_fine_tune_exp 1",
+        "--should_weight_exp 1 --should_initialize_same_exp 0 --should_avg_exp 1 --should_fine_tune_exp 1",
+        "--should_weight_exp 1 --should_initialize_same_exp 1 --should_avg_exp 0 --should_fine_tune_exp 1",
+        "--should_weight_exp 1 --should_initialize_same_exp 1 --should_avg_exp 1 --should_fine_tune_exp 0",
+        "--should_weight_exp 1 --should_initialize_same_exp 0 --should_avg_exp 0 --should_fine_tune_exp 1",
+        "--should_weight_exp 0 --should_initialize_same_exp 0 --should_avg_exp 0 --should_fine_tune_exp 1",
+    ]
+
+    for exp in experiments:
+        for seed in all_seeds:
+            exp_name = exp.replace("--", "").strip()
+            run_name = f"runs/fedvae_{exp}_seed={seed}"
+            all_scripts.append(
+                default_script + f" {exp} --seed {seed} --cur_run_name {run_name}"
+            )
 
     print("Number of experiments:", len(all_scripts))
 
