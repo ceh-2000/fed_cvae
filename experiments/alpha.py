@@ -1,25 +1,17 @@
 import numpy as np
 
-from utils import create_shell_files
+from utils import create_shell_files, populate_default_scripts
 
 if __name__ == "__main__":
     hosts = np.array(
         [2, 4, 5, 6, 7, 8, 9, 11, 12, 14, 15, 16, 17, 18, 20, 21, 22, 23, 24]
     )
     all_scripts = []
+    datasets = ['mnist', 'fashion']
+    algorithms = ['fedavg', 'oneshot', 'onefedvae', 'fedvae']
+    default_script = f'python3 ../main.py --should_log 1 --num_users 10 --sample_ratio 0.5 --glob_epochs 1'
 
-    default_scripts_dict = {
-        # MNIST
-        "fed_avg_dataset=mnist": "python3 ../main.py --algorithm fedavg --dataset mnist --num_users 10 --sample_ratio 0.5 --glob_epochs 1 --local_epochs 10 --local_LR 0.001 --use_adam 1 --should_log 1",
-        "one_shot_dataset=mnist": "python3 ../main.py --algorithm oneshot --dataset mnist --num_users 10 --sample_ratio 0.5 --glob_epochs 1 --local_epochs 15 --local_LR 0.001 --one_shot_sampling all --use_adam 1 --should_log 1",
-        "one_fed_vae_dataset=mnist": "python3 ../main.py --algorithm onefedvae --dataset mnist --num_users 10 --sample_ratio 0.5 --glob_epochs 1 --local_epochs 15 --local_LR 0.001 --z_dim 10 --beta 1.0 --classifier_train_samples 5000 --classifier_epochs 10 --use_adam 1 --should_log 1",
-        "fed_vae_dataset=mnist": "python3 ../main.py --algorithm fedvae --dataset mnist --num_users 10 --sample_ratio 0.5 --glob_epochs 1 --local_epochs 15 --local_LR 0.001 --z_dim 10 --beta 1.0 --classifier_train_samples 5000 --classifier_epochs 10 --decoder_train_samples 5000 --decoder_epochs 7 --decoder_LR 0.01 --use_adam 1 --should_log 1",
-        # FashionMNIST
-        "fed_avg_dataset=fashion": "python3 ../main.py --algorithm fedavg --dataset fashion --num_users 10 --sample_ratio 0.5 --glob_epochs 1 --local_epochs 10 --local_LR 0.001 --use_adam 1 --should_log 1",
-        "one_shot_dataset=fashion": "python3 ../main.py --algorithm oneshot --dataset fashion --num_users 10 --sample_ratio 0.5 --glob_epochs 1 --local_epochs 15 --local_LR 0.001 --one_shot_sampling data --K 7 --use_adam 1 --should_log 1",
-        "one_fed_vae_dataset=fashion": "python3 ../main.py --algorithm onefedvae --dataset fashion --num_users 10 --sample_ratio 0.5 --glob_epochs 1 --local_epochs 15 --local_LR 0.001 --z_dim 100 --beta 1.0 --classifier_train_samples 5000 --classifier_epochs 5 --use_adam 1 --should_log 1",
-        "fed_vae_dataset=fashion": "python3 ../main.py --algorithm fedvae --dataset fashion --num_users 10 --sample_ratio 0.5 --glob_epochs 1 --local_epochs 15 --local_LR 0.001 --z_dim 100 --beta 1.0 --classifier_train_samples 5000 --classifier_epochs 5 --decoder_train_samples 5000 --decoder_epochs 7 --decoder_LR 0.01 --use_adam 1 --should_log 1",
-    }
+    default_scripts_dict = populate_default_scripts(datasets, algorithms, default_script)
 
     all_seeds = [1588, 1693, 7089, 4488, 3776]
 

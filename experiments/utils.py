@@ -74,3 +74,20 @@ def csvs_to_dfs(dir):
             dfs[filename.strip(".csv")] = df.drop(["Unnamed: 0"], axis=1).T
 
     return dfs
+
+def populate_default_scripts(datasets, algorithms, default_script):
+    default_scripts_dict = {}
+    for dataset in datasets:
+        for algorithm in algorithms:
+            filepath = f'best_hyperparameters/{dataset}/{algorithm}.txt'
+            with open(filepath, 'r') as f:
+                params = f.readlines()
+
+            new_script = f'{default_script} --algorithm {algorithm} --dataset {dataset}'
+            for p in params:
+                key, val = p.split('=')
+                new_script = f'{new_script} --{key} {val.strip()}'
+
+            default_scripts_dict[f'{algorithm}_dataset={dataset}'] = new_script
+
+    return default_scripts_dict
