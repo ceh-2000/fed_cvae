@@ -7,9 +7,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
+import torch
 import torchvision.utils
 from PIL import Image
-from torch import manual_seed, randperm
 from torch.utils.data import Subset, random_split
 from torchvision.datasets import MNIST, FashionMNIST
 from torchvision.transforms import Compose, Normalize, Resize, ToTensor

@@ -103,6 +103,8 @@ class ServerOneShot(Server):
         Instead of training for multiple global iterations, allow all users to train and then ensemble select models
         """
 
+        super().evaluate(0)
+
         # Ensure all models are initialized the same
         if self.should_initialize_same:
             weight_init_state_dict = self.users[0].model.state_dict()
