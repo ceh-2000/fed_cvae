@@ -13,6 +13,7 @@ class ServerOneFedVAE(ServerFedVAE):
         classifier_num_train_samples,
         classifier_epochs,
         should_weight,
+        should_initialize_same,
     ):
         super().__init__(
             base_params,
@@ -25,15 +26,17 @@ class ServerOneFedVAE(ServerFedVAE):
             None,
             0.01,
             should_weight,
+            should_initialize_same,
             0,
             0,
         )
 
     def train(self):
         # Ensure all models are initialized the same
-        weight_init_state_dict = self.users[0].model.state_dict()
-        for u in self.users:
-            u.model.load_state_dict(copy.deepcopy(weight_init_state_dict))
+        if self.should_initialize_same:
+            weight_init_state_dict = self.users[0].model.state_dict()
+            for u in self.users:
+                u.model.load_state_dict(copy.deepcopy(weight_init_state_dict))
 
         self.evaluate(0)
 

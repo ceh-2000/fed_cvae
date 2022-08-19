@@ -112,7 +112,11 @@ def run_job(args):
             s = ServerFedProx(default_params, args.mu)
         elif args.algorithm == "oneshot":
             s = ServerOneShot(
-                default_params, args.one_shot_sampling, args.user_data_split, args.K
+                default_params,
+                args.one_shot_sampling,
+                args.user_data_split,
+                args.K,
+                args.should_initialize_same_exp,
             )
         elif args.algorithm == "onefedvae":
             s = ServerOneFedVAE(
@@ -123,6 +127,7 @@ def run_job(args):
                 args.classifier_num_train_samples,
                 args.classifier_epochs,
                 args.should_weight_exp,
+                args.should_initialize_same_exp,
             )
         elif args.algorithm == "fedvae":
             s = ServerFedVAE(
@@ -136,6 +141,7 @@ def run_job(args):
                 args.decoder_epochs,
                 args.decoder_LR,
                 args.should_weight_exp,
+                args.should_initialize_same_exp,
                 args.should_avg_exp,
                 args.should_fine_tune_exp,
             )
@@ -308,6 +314,12 @@ if __name__ == "__main__":
         help="Whether or not to weight server decoder aggregation and sampling",
     )
     parser.add_argument(
+        "--should_initialize_same_exp",
+        type=int,
+        default=1,
+        help="Whether or not to initialize all user models the same",
+    )
+    parser.add_argument(
         "--should_avg_exp",
         type=int,
         default=1,
@@ -406,6 +418,10 @@ if __name__ == "__main__":
             print(
                 "Should we weight the server decoder aggregation and sampling?",
                 "yes" if args.should_weight_exp else "no",
+            )
+            print(
+                "Should initialize user models the same?",
+                "yes" if args.should_initialize_same_exp else "no",
             )
             print(
                 "Should we average the server decoder?",

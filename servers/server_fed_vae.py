@@ -27,6 +27,7 @@ class ServerFedVAE(Server):
         decoder_epochs,
         decoder_LR,
         should_weight,
+        should_initialize_same,
         should_avg,
         should_fine_tune,
     ):
@@ -57,6 +58,7 @@ class ServerFedVAE(Server):
 
         # Variables important for ablation experiments
         self.should_weight = should_weight
+        self.should_initialize_same = should_initialize_same
         self.should_avg = should_avg
         self.should_fine_tune = should_fine_tune
 
@@ -279,9 +281,10 @@ class ServerFedVAE(Server):
 
     def train(self):
         # Ensure all models are initialized the same
-        weight_init_state_dict = self.users[0].model.state_dict()
-        for u in self.users:
-            u.model.load_state_dict(copy.deepcopy(weight_init_state_dict))
+        if self.should_initialize_same:
+            weight_init_state_dict = self.users[0].model.state_dict()
+            for u in self.users:
+                u.model.load_state_dict(copy.deepcopy(weight_init_state_dict))
 
         # Training loop
         for e in range(self.glob_epochs):
