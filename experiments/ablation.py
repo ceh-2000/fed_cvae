@@ -9,7 +9,7 @@ if __name__ == "__main__":
     all_scripts = []
 
     # By default we include weighting, averaging, and fine-tuning
-    default_script = "python3 ../main.py --algorithm fedvae --dataset fashion --num_users 10 --alpha 0.01 --sample_ratio 0.5 --glob_epochs 1 --local_epochs 15 --z_dim 10 --beta 1.0 --classifier_num_train_samples 5000 --decoder_num_train_samples 5000 --classifier_epochs 10 --decoder_epochs 7 --local_LR 0.001 --decoder_LR 0.01 --should_log 1 --use_adam 1"
+    default_script = "python3 ../main.py --algorithm fedvae --dataset fashion --num_users 10 --alpha 0.01 --sample_ratio 0.5 --glob_epochs 1 --local_epochs 15 --z_dim 100 --beta 1.0 --classifier_num_train_samples 5000 --decoder_num_train_samples 5000 --classifier_epochs 5 --decoder_epochs 7 --local_LR 0.001 --decoder_LR 0.01 --should_log 1 --use_adam 1"
 
     all_seeds = [1588, 1693, 7089, 4488, 3776]
 

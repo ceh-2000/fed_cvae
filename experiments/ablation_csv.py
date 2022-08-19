@@ -1,10 +1,13 @@
 import os
+from pathlib import Path
 
 from experiments.utils import csvs_to_dfs, to_csv
 
 if __name__ == "__main__":
     # Convert ablation results to csvs
     experiment_dir = "../runs"
+    out_path = Path(experiment_dir + "/ablation.csv")
+
     if not os.path.exists(experiment_dir + "/csv"):
         to_csv(experiment_dir)
 
@@ -29,4 +32,5 @@ if __name__ == "__main__":
         df = df.drop("filenames", axis=1)
 
         df = df.groupby(["exps"]).agg({"accuracies": ["mean", "min", "max", "std"]})
-        print(df)
+
+        df.to_csv(out_path, index=False)
