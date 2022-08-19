@@ -1,6 +1,6 @@
 import numpy as np
 
-from experiments.utils import create_shell_files
+from utils import create_shell_files
 
 if __name__ == "__main__":
     hosts = np.array(
@@ -14,21 +14,22 @@ if __name__ == "__main__":
     all_seeds = [1588, 1693, 7089, 4488, 3776]
 
     experiments = [
-        "--should_weight_exp 1 --should_initialize_same_exp 1 --should_avg_exp 1 --should_fine_tune_exp 1",
-        "--should_weight_exp 0 --should_initialize_same_exp 1 --should_avg_exp 1 --should_fine_tune_exp 1",
-        "--should_weight_exp 1 --should_initialize_same_exp 0 --should_avg_exp 1 --should_fine_tune_exp 1",
-        "--should_weight_exp 1 --should_initialize_same_exp 1 --should_avg_exp 0 --should_fine_tune_exp 1",
-        "--should_weight_exp 1 --should_initialize_same_exp 1 --should_avg_exp 1 --should_fine_tune_exp 0",
-        "--should_weight_exp 1 --should_initialize_same_exp 0 --should_avg_exp 0 --should_fine_tune_exp 1",
-        "--should_weight_exp 0 --should_initialize_same_exp 0 --should_avg_exp 0 --should_fine_tune_exp 1",
+        "--should_weight_exp=1 --should_initialize_same_exp=1 --should_avg_exp=1 --should_fine_tune_exp=1",
+        "--should_weight_exp=0 --should_initialize_same_exp=1 --should_avg_exp=1 --should_fine_tune_exp=1",
+        "--should_weight_exp=1 --should_initialize_same_exp=0 --should_avg_exp=1 --should_fine_tune_exp=1",
+        "--should_weight_exp=1 --should_initialize_same_exp=1 --should_avg_exp=0 --should_fine_tune_exp=1",
+        "--should_weight_exp=1 --should_initialize_same_exp=1 --should_avg_exp=1 --should_fine_tune_exp=0",
+        "--should_weight_exp=1 --should_initialize_same_exp=0 --should_avg_exp=0 --should_fine_tune_exp=1",
+        "--should_weight_exp=0 --should_initialize_same_exp=0 --should_avg_exp=0 --should_fine_tune_exp=1",
     ]
 
     for exp in experiments:
         for seed in all_seeds:
-            exp_name = exp.replace("--", "").strip()
-            run_name = f"runs/fedvae_{exp}_seed={seed}"
+            exp_name = exp.replace("--", "_").replace(" ", "")[1:]
+            run_name = f"runs/fedvae_{exp_name}_seed={seed}"
             all_scripts.append(
-                default_script + f" {exp} --seed {seed} --cur_run_name {run_name}"
+                default_script
+                + f" {exp.replace('=', ' ')} --seed {seed} --cur_run_name {run_name}"
             )
 
     print("Number of experiments:", len(all_scripts))
