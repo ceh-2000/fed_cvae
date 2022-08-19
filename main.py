@@ -310,19 +310,19 @@ if __name__ == "__main__":
     parser.add_argument(
         "--should_weight_exp",
         type=int,
-        default=1,
+        default=0,
         help="Whether or not to weight server decoder aggregation and sampling",
     )
     parser.add_argument(
         "--should_initialize_same_exp",
         type=int,
-        default=1,
+        default=0,
         help="Whether or not to initialize all user models the same",
     )
     parser.add_argument(
         "--should_avg_exp",
         type=int,
-        default=1,
+        default=0,
         help="Whether or not to average server decoder",
     )
     parser.add_argument(
