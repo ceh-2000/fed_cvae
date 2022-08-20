@@ -300,9 +300,7 @@ class ServerFedVAE(Server):
             selected_users = self.sample_users()
 
             # Send server decoder to selected users
-            if not self.heterogeneous_models or (
-                self.should_initialize_same and self.glob_epochs == 1
-            ):
+            if not self.heterogeneous_models and not self.should_initialize_same:
                 decoder_state_dict = copy.deepcopy(self.decoder.state_dict())
                 for u in selected_users:
                     u.update_decoder(decoder_state_dict)
