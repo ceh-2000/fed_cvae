@@ -8,7 +8,7 @@ from utils import kl_divergence, one_hot_encode, reconstruction_loss
 
 
 class UserFedVAE(User):
-    def __init__(self, base_params, z_dim, image_size, beta, data_amt, pmf):
+    def __init__(self, base_params, z_dim, image_size, beta, data_amt, pmf, version):
         super().__init__(base_params)
 
         self.z_dim = z_dim
@@ -17,6 +17,7 @@ class UserFedVAE(User):
             num_channels=self.num_channels,
             z_dim=z_dim,
             image_size=image_size,
+            version=version,
         )
 
         if base_params["use_adam"]:

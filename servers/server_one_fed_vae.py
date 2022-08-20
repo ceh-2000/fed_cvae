@@ -14,6 +14,7 @@ class ServerOneFedVAE(ServerFedVAE):
         classifier_epochs,
         should_weight,
         should_initialize_same,
+        heterogeneous_models,
     ):
         super().__init__(
             base_params,
@@ -29,6 +30,7 @@ class ServerOneFedVAE(ServerFedVAE):
             should_initialize_same,
             0,
             0,
+            heterogeneous_models,
         )
 
     def train(self):

@@ -47,12 +47,39 @@ class ConditionalDecoder(nn.Module):
         return self.model(concat_vec)
 
 
+class ConditionalDecoderAlt(nn.Module):
+    """
+    Decoder needs to take in a sampled z AND the true class passed from the forward method
+    """
+
+    def __init__(self, image_size, num_classes, num_channels, z_dim):
+        super().__init__()
+        self.model = nn.Sequential(
+            nn.Linear(z_dim + num_classes, int(image_size / 2) * int(image_size / 2)),
+            View((-1, 64, int(image_size / 16), int(image_size / 16))),
+            nn.ReLU(True),
+            nn.ConvTranspose2d(64, 64, 6, 2, 1),
+            nn.BatchNorm2d(64, 1.0e-3),
+            nn.ReLU(True),
+            nn.ConvTranspose2d(64, 32, 8, 2, 1),
+            nn.BatchNorm2d(32, 1.0e-3),
+            nn.ReLU(True),
+            nn.ConvTranspose2d(32, num_channels, 4, 2, 1),
+        )
+
+    def forward(self, z, y_hot):
+        y_hot = y_hot.to(torch.float32)
+        concat_vec = torch.cat((z, y_hot), 1)  # sampled z and a one-hot class vector
+
+        return self.model(concat_vec)
+
+
 if __name__ == "__main__":
     img_size = 32
     num_classes = 10
     num_channels = 1
     z_dim = 50
     summary(
-        ConditionalDecoder(img_size, num_classes, num_channels, z_dim).model,
+        ConditionalDecoderAlt(img_size, num_classes, num_channels, z_dim).model,
         (1, (z_dim + num_classes)),
     )
