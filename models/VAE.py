@@ -3,8 +3,8 @@ from torch import nn
 from torch.autograd import Variable
 from torch.distributions.multivariate_normal import MultivariateNormal
 
-from models.decoder import ConditionalDecoder
-from models.encoder import Encoder
+from models.decoder import ConditionalDecoder, ConditionalDecoderAlt
+from models.encoder import ConditionalEncoder, ConditionalEncoderAlt
 
 
 class CVAE(nn.Module):
@@ -15,7 +15,7 @@ class CVAE(nn.Module):
     of the pipeline, and allows image generation conditional on a chosen class.
     """
 
-    def __init__(self, num_classes, num_channels, z_dim, image_size):
+    def __init__(self, num_classes, num_channels, z_dim, image_size, version=0):
         super().__init__()
         self.num_classes = num_classes
         self.num_channels = num_channels
@@ -32,15 +32,30 @@ class CVAE(nn.Module):
         )
 
         # Define neural models needed for this implementation
-        self.encoder = Encoder(
-            num_channels=self.num_channels, image_size=self.image_size, z_dim=self.z_dim
-        )
-        self.decoder = ConditionalDecoder(
-            image_size=self.image_size,
-            num_classes=self.num_classes,
-            num_channels=self.num_channels,
-            z_dim=self.z_dim,
-        )
+        if version == 1:
+            self.encoder = ConditionalEncoderAlt(
+                num_channels=self.num_channels,
+                image_size=self.image_size,
+                z_dim=self.z_dim,
+            )
+            self.decoder = ConditionalDecoderAlt(
+                image_size=self.image_size,
+                num_classes=self.num_classes,
+                num_channels=self.num_channels,
+                z_dim=self.z_dim,
+            )
+        else:
+            self.encoder = ConditionalEncoder(
+                num_channels=self.num_channels,
+                image_size=self.image_size,
+                z_dim=self.z_dim,
+            )
+            self.decoder = ConditionalDecoder(
+                image_size=self.image_size,
+                num_classes=self.num_classes,
+                num_channels=self.num_channels,
+                z_dim=self.z_dim,
+            )
 
     def kaiming_init(self, m):
         if isinstance(m, (nn.Linear, nn.Conv2d)):

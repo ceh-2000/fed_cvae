@@ -2,7 +2,7 @@ from torch import nn
 from torchsummary import summary
 
 
-class Encoder(nn.Module):
+class ConditionalEncoder(nn.Module):
     """Basic CNN without the fully connected layers on the end"""
 
     def __init__(self, num_channels, image_size, z_dim):
@@ -33,10 +33,36 @@ class Encoder(nn.Module):
         return self.model(X)
 
 
+class ConditionalEncoderAlt(nn.Module):
+    """Basic CNN without the fully connected layers on the end"""
+
+    def __init__(self, num_channels, image_size, z_dim):
+        super().__init__()
+
+        self.model = nn.Sequential(
+            nn.Conv2d(num_channels, 32, 4, 2, 1),
+            nn.BatchNorm2d(32),
+            nn.ReLU(True),
+            nn.Conv2d(32, 64, 8, 2, 1),
+            nn.BatchNorm2d(64),
+            nn.ReLU(True),
+            nn.Conv2d(64, 64, 4, 3, 1),
+            nn.BatchNorm2d(64),
+            nn.ReLU(True),
+            nn.Flatten(start_dim=1),
+            nn.Linear(int(image_size / 2) * int(image_size / 2), 300),
+            nn.Linear(300, z_dim * 2),
+        )
+
+    def forward(self, X):
+        return self.model(X)
+
+
 if __name__ == "__main__":
     img_size = 32
     num_channels = 1
     z_dim = 50
     summary(
-        Encoder(num_channels, img_size, z_dim).model, (num_channels, img_size, img_size)
+        ConditionalEncoderAlt(num_channels, img_size, z_dim).model,
+        (num_channels, img_size, img_size),
     )
