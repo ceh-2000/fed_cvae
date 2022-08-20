@@ -30,4 +30,4 @@ if __name__ == "__main__":
 
     print("Number of experiments:", len(all_scripts))
 
-    create_shell_files(all_scripts, hosts, "num_users")
+    create_shell_files(all_scripts, hosts, "local_epochs")
