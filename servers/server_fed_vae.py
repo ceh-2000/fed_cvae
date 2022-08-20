@@ -30,6 +30,7 @@ class ServerFedVAE(Server):
         should_initialize_same,
         should_avg,
         should_fine_tune,
+        heterogeneous_models,
     ):
         super().__init__(base_params)
 
@@ -61,6 +62,7 @@ class ServerFedVAE(Server):
         self.should_initialize_same = should_initialize_same
         self.should_avg = should_avg
         self.should_fine_tune = should_fine_tune
+        self.heterogeneous_models = heterogeneous_models
 
     def compute_data_amt_and_pmf(self, u):
         """
@@ -120,6 +122,10 @@ class ServerFedVAE(Server):
         for u in range(self.num_users):
             dl = DataLoader(self.data_subsets[u], shuffle=True, batch_size=32)
 
+            version = 0
+            if self.heterogeneous_models and u < int(self.num_users / 2):
+                version = 1
+
             new_user = UserFedVAE(
                 {
                     "user_id": u,
@@ -134,6 +140,7 @@ class ServerFedVAE(Server):
                 self.beta,
                 data_amts[u],
                 pmfs[u],
+                version,
             )
             self.users.append(new_user)
 
@@ -293,9 +300,12 @@ class ServerFedVAE(Server):
             selected_users = self.sample_users()
 
             # Send server decoder to selected users
-            decoder_state_dict = copy.deepcopy(self.decoder.state_dict())
-            for u in selected_users:
-                u.update_decoder(decoder_state_dict)
+            if not self.heterogeneous_models or (
+                self.should_initialize_same and self.glob_epochs == 1
+            ):
+                decoder_state_dict = copy.deepcopy(self.decoder.state_dict())
+                for u in selected_users:
+                    u.update_decoder(decoder_state_dict)
 
             # Train selected users and collect their decoder weights and number of training samples
             decoders = []

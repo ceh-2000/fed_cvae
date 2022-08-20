@@ -128,6 +128,7 @@ def run_job(args):
                 args.classifier_epochs,
                 args.should_weight_exp,
                 args.should_initialize_same_exp,
+                args.heterogeneous_models_exp,
             )
         elif args.algorithm == "fedvae":
             s = ServerFedVAE(
@@ -144,6 +145,7 @@ def run_job(args):
                 args.should_initialize_same_exp,
                 args.should_avg_exp,
                 args.should_fine_tune_exp,
+                args.heterogeneous_models_exp,
             )
         else:
             raise NotImplementedError(
@@ -331,6 +333,12 @@ if __name__ == "__main__":
         default=1,
         help="Whether or not fine tune server decoder",
     )
+    parser.add_argument(
+        "--heterogeneous_models_exp",
+        type=int,
+        default=0,
+        help="Whether or not to give users heterogeneous models",
+    )
 
     args = parser.parse_args()
     args.should_log = bool(args.should_log)
@@ -430,6 +438,10 @@ if __name__ == "__main__":
             print(
                 "Should we fine tune the server decoder?",
                 "yes" if args.should_fine_tune_exp else "no",
+            )
+            print(
+                "Should we use heterogeneous models?",
+                "yes" if args.heterogeneous_models_exp else "no",
             )
 
     print("_________________________________________________\n")

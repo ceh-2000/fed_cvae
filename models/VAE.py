@@ -15,7 +15,7 @@ class CVAE(nn.Module):
     of the pipeline, and allows image generation conditional on a chosen class.
     """
 
-    def __init__(self, num_classes, num_channels, z_dim, image_size, version=0):
+    def __init__(self, num_classes, num_channels, z_dim, image_size, version):
         super().__init__()
         self.num_classes = num_classes
         self.num_channels = num_channels
@@ -33,6 +33,7 @@ class CVAE(nn.Module):
 
         # Define neural models needed for this implementation
         if version == 1:
+            print("Alt model")
             self.encoder = ConditionalEncoderAlt(
                 num_channels=self.num_channels,
                 image_size=self.image_size,
@@ -45,6 +46,7 @@ class CVAE(nn.Module):
                 z_dim=self.z_dim,
             )
         else:
+            print("Standard model")
             self.encoder = ConditionalEncoder(
                 num_channels=self.num_channels,
                 image_size=self.image_size,
@@ -92,9 +94,8 @@ class CVAE(nn.Module):
         return z
 
     def forward(self, X, y_hot):
-        feature_rep = self.encoder(X)
+        distributions = self.encoder(X)
 
-        distributions = self.lin_pred(feature_rep)
         mu = distributions[:, : self.z_dim]
         logvar = distributions[:, self.z_dim :]
 
@@ -113,8 +114,9 @@ if __name__ == "__main__":
     num_classes = 10
     num_channels = 1
     z_dim = 50
+    version = 1
 
-    model = CVAE(num_classes, num_channels, z_dim, img_size)
+    model = CVAE(num_classes, num_channels, z_dim, img_size, version)
 
     # Generate dummy data
     X = torch.rand((2, 1, 32, 32))
