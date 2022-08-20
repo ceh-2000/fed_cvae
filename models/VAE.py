@@ -5,7 +5,6 @@ from torch.distributions.multivariate_normal import MultivariateNormal
 
 from models.decoder import ConditionalDecoder
 from models.encoder import Encoder
-from models.linear_predict import LinearPredict
 
 
 class CVAE(nn.Module):
@@ -33,8 +32,9 @@ class CVAE(nn.Module):
         )
 
         # Define neural models needed for this implementation
-        self.encoder = Encoder(num_channels=self.num_channels)
-        self.lin_pred = LinearPredict(image_size=self.image_size, z_dim=self.z_dim)
+        self.encoder = Encoder(
+            num_channels=self.num_channels, image_size=self.image_size, z_dim=self.z_dim
+        )
         self.decoder = ConditionalDecoder(
             image_size=self.image_size,
             num_classes=self.num_classes,
