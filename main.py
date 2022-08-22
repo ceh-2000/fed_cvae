@@ -312,7 +312,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--should_weight_exp",
         type=int,
-        default=0,
+        default=1,
         help="Whether or not to weight server decoder aggregation and sampling",
     )
     parser.add_argument(
