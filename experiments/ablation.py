@@ -29,7 +29,7 @@ if __name__ == "__main__":
         for exp in experiments:
             for default_script_name in default_scripts_dict:
                 cur_script = default_scripts_dict.get(default_script_name)
-                cur_name = f"{default_script_name}_exp={exp.replace('--', '').replace(' ', '_')}_seed={seed}"
+                cur_name = f"runs/{default_script_name}_exp={exp.replace('--', '').replace(' ', '_')}_seed={seed}"
                 all_scripts.append(
                     f"{cur_script} {exp.replace('=', ' ')} --seed {seed} --cur_run_name {cur_name}"
                 )
