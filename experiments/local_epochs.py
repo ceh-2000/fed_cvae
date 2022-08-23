@@ -23,7 +23,9 @@ if __name__ == "__main__":
     for seed in all_seeds:
         for epoch in num_epochs:
             for default_script_name in default_scripts_dict.keys():
-                cur_name = f"runs/{default_script_name}_seed={seed}"
+                cur_name = (
+                    f"runs/{default_script_name}_local_epochs={epoch}_seed={seed}"
+                )
                 script = default_scripts_dict.get(default_script_name)
                 part_1, part_2 = script.split(" --local_epochs ")
                 script = f"{part_1.strip()} --local_epochs {epoch}{part_2.strip()[2:]}"
