@@ -1,12 +1,10 @@
 import os
-from pathlib import Path
 
 from experiments.utils import csvs_to_dfs, to_csv
 
 if __name__ == "__main__":
     # Convert ablation results to csvs
     experiment_dir = "../runs"
-    out_path = Path(experiment_dir + "/csv/alpha.csv")
 
     if not os.path.exists(experiment_dir + "/csv"):
         to_csv(experiment_dir)
