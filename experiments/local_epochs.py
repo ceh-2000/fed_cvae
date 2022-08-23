@@ -1,3 +1,5 @@
+import random
+
 import numpy as np
 
 from utils import create_shell_files, populate_default_scripts
@@ -29,5 +31,7 @@ if __name__ == "__main__":
                 all_scripts.append(f"{script} --seed {seed} --cur_run_name {cur_name}")
 
     print("Number of experiments:", len(all_scripts))
+
+    random.shuffle(all_scripts)
 
     create_shell_files(all_scripts, hosts, "local_epochs")
