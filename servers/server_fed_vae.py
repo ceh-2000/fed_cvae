@@ -71,15 +71,17 @@ class ServerFedVAE(Server):
         :param u: User ID
         :return: Probability distribution of target data for a given user
         """
-        subset_1_indices = self.data_subsets[u].dataset.indices
-        subset_1_dataset = self.data_subsets[u].dataset.dataset.targets
-        subset_1 = subset_1_dataset[subset_1_indices]
 
-        subset_2_indices = self.data_subsets[u].indices
-        subset_2_dataset = subset_1
-        subset_2 = subset_2_dataset[subset_2_indices]
+        targets = torch.from_numpy(
+            np.array(
+                [
+                    int(self.data_subsets[u][i][1])
+                    for i in range(len(self.data_subsets[u]))
+                ]
+            )
+        )
 
-        vals, counts = torch.unique(subset_2, return_counts=True)
+        vals, counts = torch.unique(targets, return_counts=True)
         count_dict = {}
         for i in range(len(vals)):
             count_dict[int(vals[i])] = int(counts[i])
@@ -102,7 +104,7 @@ class ServerFedVAE(Server):
 
         assert np.sum(pmf) == 1.0, f"Vector for user ID {u} sums to {np.sum(pmf)}"
 
-        return subset_2.shape[0], pmf
+        return targets.shape[0], pmf
 
     def create_users(self):
         data_amts = np.zeros(

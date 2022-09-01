@@ -216,17 +216,9 @@ class Data:
         if self.sample_ratio == 1:
             targets = dataset_train.targets.numpy()
         else:
-            try:
-                targets = np.array(dataset_train.dataset.targets)[
-                    dataset_train.indices
-                ]  # case where we've subsetted the dataset, in which case we reframe indices based on this subset's data indices
-            except AttributeError:
-                targets = np.array(
-                    [
-                        int(dataset_train.dataset[i][1])
-                        for i in range(len(dataset_train))
-                    ]
-                )  # case where we have to manually extract targets
+            targets = np.array(
+                [int(dataset_train[i][1]) for i in range(len(dataset_train))]
+            )
 
         class_idxs = {}
 
@@ -333,8 +325,8 @@ class Data:
 
 
 if __name__ == "__main__":
-    MNIST_data = Data(
-        "mnist",
+    SVHN_data = Data(
+        "svhn",
         num_users=20,
         writer=None,
         sample_ratio=0.5,
@@ -343,12 +335,12 @@ if __name__ == "__main__":
         visualize=True,
         central=False,
     )
-    print([len(MNIST_data.train_data[i]) for i in range(MNIST_data.num_users)])
-    print(sum([len(MNIST_data.train_data[i]) for i in range(MNIST_data.num_users)]))
+    print([len(SVHN_data.train_data[i]) for i in range(SVHN_data.num_users)])
+    print(sum([len(SVHN_data.train_data[i]) for i in range(SVHN_data.num_users)]))
 
     from collections import Counter
 
     from torch.utils.data import DataLoader
 
-    dl = DataLoader(MNIST_data.train_data[5], batch_size=len(MNIST_data.train_data[5]))
+    dl = DataLoader(SVHN_data.train_data[5], batch_size=len(SVHN_data.train_data[5]))
     print(Counter(next(iter(dl))[1].tolist()))
