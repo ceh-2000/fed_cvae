@@ -2,6 +2,7 @@
 Read in the data from a specified data source
 """
 import io
+import sys
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -11,7 +12,7 @@ import torch
 import torchvision.utils
 from PIL import Image
 from torch.utils.data import Subset, random_split
-from torchvision.datasets import MNIST, FashionMNIST
+from torchvision.datasets import CIFAR10, MNIST, SVHN, FashionMNIST
 from torchvision.transforms import Compose, Normalize, Resize, ToTensor
 
 # Setting seeds for reproducibility
@@ -107,9 +108,65 @@ class Data:
                 train=False,
                 transform=transform_list,
             )
+        elif self.dataset_name == "svhn":
+            self.num_channels = 3
+            self.num_classes = 10
+            self.image_size = 32
+
+            transform_list = []
+
+            # Establishing transforms
+            transform_list.append(ToTensor())
+            transform_list.append(Resize(32))  # Everyone gets resized to 32
+            if normalize:
+                transform_list.append(Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)))
+
+            transform_list = Compose(transform_list)
+
+            dataset_train = SVHN(
+                root="data/svhn",
+                download=True,
+                split="train",
+                transform=transform_list,
+            )
+
+            dataset_test = SVHN(
+                root="data/svhn",
+                download=True,
+                split="test",
+                transform=transform_list,
+            )
+        elif self.dataset_name == "cifar10":
+            self.num_channels = 3
+            self.num_classes = 10
+            self.image_size = 32
+
+            transform_list = []
+
+            # Establishing transforms
+            transform_list.append(ToTensor())
+            transform_list.append(Resize(32))  # Everyone gets resized to 32
+            if normalize:
+                transform_list.append(Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)))
+
+            transform_list = Compose(transform_list)
+
+            dataset_train = CIFAR10(
+                root="data/cifar10",
+                download=True,
+                train=True,
+                transform=transform_list,
+            )
+
+            dataset_test = CIFAR10(
+                root="data/cifar10",
+                download=True,
+                train=False,
+                transform=transform_list,
+            )
         else:
             raise NotImplementedError(
-                f"Dataset '{dataset_name}' has not been implemented, please choose either mnist and fashionmnist"
+                f"Dataset '{dataset_name}' has not been implemented, please choose either mnist, fashion, svhn, or cifar10"
             )
 
         # Case where we only distribute a portion of the dataset to users
@@ -126,6 +183,8 @@ class Data:
         data_split_sequence = []
         for u in range(self.num_users):
             data_split_sequence.append(num_user_samples)
+        if sum(data_split_sequence) != num_train_samples:
+            data_split_sequence[0] += num_train_samples - sum(data_split_sequence)
 
         # Data is composed of dataset.Subset objects
         if central:
@@ -157,9 +216,18 @@ class Data:
         if self.sample_ratio == 1:
             targets = dataset_train.targets.numpy()
         else:
-            targets = dataset_train.dataset.targets[
-                dataset_train.indices
-            ].numpy()  # case where we've subsetted the dataset, in which case we reframe indices based on this subset's data indices
+            try:
+                targets = np.array(dataset_train.dataset.targets)[
+                    dataset_train.indices
+                ]  # case where we've subsetted the dataset, in which case we reframe indices based on this subset's data indices
+            except AttributeError:
+                targets = np.array(
+                    [
+                        int(dataset_train.dataset[i][1])
+                        for i in range(len(dataset_train))
+                    ]
+                )  # case where we have to manually extract targets
+
         class_idxs = {}
 
         for i in range(self.num_classes):
@@ -266,16 +334,17 @@ class Data:
 
 if __name__ == "__main__":
     MNIST_data = Data(
-        "MNIST",
+        "mnist",
         num_users=20,
         writer=None,
         sample_ratio=0.5,
-        alpha=0.001,
-        normalize=True,
+        alpha=0.01,
+        normalize=False,
         visualize=True,
         central=False,
     )
     print([len(MNIST_data.train_data[i]) for i in range(MNIST_data.num_users)])
+    print(sum([len(MNIST_data.train_data[i]) for i in range(MNIST_data.num_users)]))
 
     from collections import Counter
 
