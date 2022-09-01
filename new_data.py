@@ -1,17 +1,18 @@
+import glob
 import sys
 
+import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
-from torchvision.transforms import ToTensor
-from models.classifier import ClassifierPCAM
+import torch
+import torch.nn.functional as F
+from PIL import Image, ImageOps
 from torch.nn import CrossEntropyLoss
 from torch.optim import Adam
-import torch
-import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader, Dataset
-from PIL import Image, ImageOps
-import glob
-import numpy as np
-import torch.nn.functional as F
+from torchvision.transforms import ToTensor
+
+from models.classifier import ClassifierPCAM
 
 
 class WrapperDataset(Dataset):
@@ -27,6 +28,7 @@ class WrapperDataset(Dataset):
     def __getitem__(self, idx):
         return self.X[idx], self.y[idx]
 
+
 def show(img):
     img = img.view(img.shape[1], img.shape[2], img.shape[0])
     print(type(img), img.shape)
@@ -34,12 +36,13 @@ def show(img):
     plt.imshow(img, cmap="gray")
     plt.show()
 
+
 def read_in_images(filepath):
     image_dict = {}
 
     counter = 0
     transform = ToTensor()
-    for filename in glob.glob(f'{filepath}/*.png'):
+    for filename in glob.glob(f"{filepath}/*.png"):
         if counter < 10:
             im = Image.open(filename)
 
@@ -56,6 +59,7 @@ def read_in_images(filepath):
 
     return image_dict
 
+
 def map_x_to_y(img_dict, label_df):
     X = []
     y = []
@@ -70,7 +74,8 @@ def map_x_to_y(img_dict, label_df):
 
     return X, y
 
-if __name__=="__main__":
+
+if __name__ == "__main__":
     num_channels = 1
     num_classes = 2
     epochs = 10
@@ -89,11 +94,19 @@ if __name__=="__main__":
     show(X[9])
     print(y[9])
 
-    train_X = X[:int(len(train_images)*train_test_split*amt_of_data)]
-    test_X = X[int(len(train_images)*train_test_split*amt_of_data):int(len(train_images)*amt_of_data)]
+    train_X = X[: int(len(train_images) * train_test_split * amt_of_data)]
+    test_X = X[
+        int(len(train_images) * train_test_split * amt_of_data) : int(
+            len(train_images) * amt_of_data
+        )
+    ]
 
-    train_y = y[:int(len(train_images)*train_test_split*amt_of_data)]
-    test_y = y[int(len(train_images)*train_test_split*amt_of_data):int(len(train_images)*amt_of_data)]
+    train_y = y[: int(len(train_images) * train_test_split * amt_of_data)]
+    test_y = y[
+        int(len(train_images) * train_test_split * amt_of_data) : int(
+            len(train_images) * amt_of_data
+        )
+    ]
 
     train_dataset = WrapperDataset(train_X, train_y)
     test_dataset = WrapperDataset(test_X, test_y)
@@ -133,5 +146,3 @@ if __name__=="__main__":
 
         accuracy = round(total_correct / len(test_dataloader.dataset) * 100, 2)
         print(f"Model accuracy was: {accuracy}%")
-
-

@@ -24,6 +24,7 @@ class Classifier(nn.Module):
     def forward(self, X):
         return self.model(X)
 
+
 class ClassifierBlind(nn.Module):
     def __init__(self, input_channels, num_classes):
         super().__init__()
@@ -39,7 +40,6 @@ class ClassifierBlind(nn.Module):
                 kernel_size=(3, 3),
             ),
             MaxPool2d((2, 2)),
-
             Conv2d(
                 in_channels=64,
                 out_channels=256,
@@ -56,7 +56,6 @@ class ClassifierBlind(nn.Module):
                 kernel_size=(3, 3),
             ),
             MaxPool2d((2, 2)),
-
             Conv2d(
                 in_channels=256,
                 out_channels=512,
@@ -73,7 +72,6 @@ class ClassifierBlind(nn.Module):
                 kernel_size=(3, 3),
             ),
             MaxPool2d((2, 2)),
-
             Conv2d(
                 in_channels=512,
                 out_channels=512,
@@ -90,7 +88,6 @@ class ClassifierBlind(nn.Module):
                 kernel_size=(3, 3),
             ),
             MaxPool2d((2, 2)),
-
             Flatten(),
             Linear(32768, 4096),
             ReLU(),
