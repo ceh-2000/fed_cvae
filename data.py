@@ -12,7 +12,7 @@ import torch
 import torchvision.utils
 from PIL import Image
 from torch.utils.data import Subset, random_split
-from torchvision.datasets import MNIST, FashionMNIST, SVHN, CIFAR10
+from torchvision.datasets import CIFAR10, MNIST, SVHN, FashionMNIST
 from torchvision.transforms import Compose, Normalize, Resize, ToTensor
 
 # Setting seeds for reproducibility
@@ -126,14 +126,14 @@ class Data:
             dataset_train = SVHN(
                 root="data/svhn",
                 download=True,
-                split='train',
+                split="train",
                 transform=transform_list,
             )
 
             dataset_test = SVHN(
                 root="data/svhn",
                 download=True,
-                split='test',
+                split="test",
                 transform=transform_list,
             )
         elif self.dataset_name == "cifar10":
@@ -221,7 +221,12 @@ class Data:
                     dataset_train.indices
                 ]  # case where we've subsetted the dataset, in which case we reframe indices based on this subset's data indices
             except AttributeError:
-                targets = np.array([int(dataset_train.dataset[i][1]) for i in range(len(dataset_train))]) # case where we have to manually extract targets
+                targets = np.array(
+                    [
+                        int(dataset_train.dataset[i][1])
+                        for i in range(len(dataset_train))
+                    ]
+                )  # case where we have to manually extract targets
 
         class_idxs = {}
 
