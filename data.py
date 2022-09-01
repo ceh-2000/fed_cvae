@@ -12,7 +12,7 @@ import torch
 import torchvision.utils
 from PIL import Image
 from torch.utils.data import Subset, random_split
-from torchvision.datasets import MNIST, FashionMNIST, SVHN
+from torchvision.datasets import MNIST, FashionMNIST, SVHN, CIFAR10
 from torchvision.transforms import Compose, Normalize, Resize, ToTensor
 
 # Setting seeds for reproducibility
@@ -136,9 +136,37 @@ class Data:
                 split='test',
                 transform=transform_list,
             )
+        elif self.dataset_name == "cifar10":
+            self.num_channels = 3
+            self.num_classes = 10
+            self.image_size = 32
+
+            transform_list = []
+
+            # Establishing transforms
+            transform_list.append(ToTensor())
+            transform_list.append(Resize(32))  # Everyone gets resized to 32
+            if normalize:
+                transform_list.append(Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)))
+
+            transform_list = Compose(transform_list)
+
+            dataset_train = CIFAR10(
+                root="data/cifar10",
+                download=True,
+                train=True,
+                transform=transform_list,
+            )
+
+            dataset_test = CIFAR10(
+                root="data/cifar10",
+                download=True,
+                train=False,
+                transform=transform_list,
+            )
         else:
             raise NotImplementedError(
-                f"Dataset '{dataset_name}' has not been implemented, please choose either mnist, fashionmnist, or svhn"
+                f"Dataset '{dataset_name}' has not been implemented, please choose either mnist, fashion, svhn, or cifar10"
             )
 
         # Case where we only distribute a portion of the dataset to users
@@ -189,9 +217,9 @@ class Data:
             targets = dataset_train.targets.numpy()
         else:
             try:
-                targets = dataset_train.dataset.targets[
+                targets = np.array(dataset_train.dataset.targets)[
                     dataset_train.indices
-                ].numpy()  # case where we've subsetted the dataset, in which case we reframe indices based on this subset's data indices
+                ]  # case where we've subsetted the dataset, in which case we reframe indices based on this subset's data indices
             except AttributeError:
                 targets = np.array([int(dataset_train.dataset[i][1]) for i in range(len(dataset_train))]) # case where we have to manually extract targets
 
@@ -301,11 +329,11 @@ class Data:
 
 if __name__ == "__main__":
     MNIST_data = Data(
-        "svhn",
+        "mnist",
         num_users=20,
         writer=None,
         sample_ratio=0.5,
-        alpha=None,
+        alpha=0.01,
         normalize=False,
         visualize=True,
         central=False,
