@@ -3,7 +3,7 @@ from torchsummary import summary
 
 
 class ConditionalEncoder(nn.Module):
-    """Basic CNN without the fully connected layers on the end"""
+    """Basic CNN"""
 
     def __init__(self, num_channels, image_size, z_dim):
         super().__init__()
@@ -34,7 +34,7 @@ class ConditionalEncoder(nn.Module):
 
 
 class ConditionalEncoderAlt(nn.Module):
-    """Basic CNN without the fully connected layers on the end"""
+    """Basic CNN with a few layers different """
 
     def __init__(self, num_channels, image_size, z_dim):
         super().__init__()
@@ -57,6 +57,29 @@ class ConditionalEncoderAlt(nn.Module):
     def forward(self, X):
         return self.model(X)
 
+class ConditionalEncoderResNet(nn.Module):
+    """CNN with ResNet structure"""
+
+    def __init__(self, num_channels, image_size, z_dim):
+        super().__init__()
+
+        self.model = nn.Sequential(
+            nn.Conv2d(num_channels, 32, 4, 2, 1),
+            nn.BatchNorm2d(32),
+            nn.ReLU(True),
+            nn.Conv2d(32, 64, 8, 2, 1),
+            nn.BatchNorm2d(64),
+            nn.ReLU(True),
+            nn.Conv2d(64, 64, 4, 3, 1),
+            nn.BatchNorm2d(64),
+            nn.ReLU(True),
+            nn.Flatten(start_dim=1),
+            nn.Linear(int(image_size / 2) * int(image_size / 2), 300),
+            nn.Linear(300, z_dim * 2),
+        )
+
+    def forward(self, X):
+        return self.model(X)
 
 if __name__ == "__main__":
     img_size = 32
