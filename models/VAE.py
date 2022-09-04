@@ -3,8 +3,10 @@ from torch import nn
 from torch.autograd import Variable
 from torch.distributions.multivariate_normal import MultivariateNormal
 
-from models.decoder import ConditionalDecoder, ConditionalDecoderAlt
-from models.encoder import ConditionalEncoder, ConditionalEncoderAlt
+from models.decoder import (ConditionalDecoder, ConditionalDecoderAlt,
+                            ConditionalDecoderResNet)
+from models.encoder import (ConditionalEncoder, ConditionalEncoderAlt,
+                            ConditionalEncoderResNet)
 
 
 class CVAE(nn.Module):
@@ -32,7 +34,20 @@ class CVAE(nn.Module):
         )
 
         # Define neural models needed for this implementation
-        if version == 1:
+        if version == 0:
+            print("Standard model")
+            self.encoder = ConditionalEncoder(
+                num_channels=self.num_channels,
+                image_size=self.image_size,
+                z_dim=self.z_dim,
+            )
+            self.decoder = ConditionalDecoder(
+                image_size=self.image_size,
+                num_classes=self.num_classes,
+                num_channels=self.num_channels,
+                z_dim=self.z_dim,
+            )
+        elif version == 1:
             print("Alt model")
             self.encoder = ConditionalEncoderAlt(
                 num_channels=self.num_channels,
@@ -45,18 +60,20 @@ class CVAE(nn.Module):
                 num_channels=self.num_channels,
                 z_dim=self.z_dim,
             )
-        else:
-            print("Standard model")
-            self.encoder = ConditionalEncoder(
+        elif version == 2:
+            print("ResNet Model")
+            self.encoder = ConditionalEncoderResNet(
                 num_channels=self.num_channels,
-                image_size=self.image_size,
                 z_dim=self.z_dim,
             )
-            self.decoder = ConditionalDecoder(
-                image_size=self.image_size,
+            self.decoder = ConditionalDecoderResNet(
                 num_classes=self.num_classes,
                 num_channels=self.num_channels,
                 z_dim=self.z_dim,
+            )
+        else:
+            raise NotImplementedError(
+                "The model you specified has not been implemented."
             )
 
     def kaiming_init(self, m):
