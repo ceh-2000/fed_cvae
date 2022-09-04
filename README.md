@@ -76,8 +76,11 @@ Modify `--classifier_num_train_samples` to change the number of generated sample
 Modify `--decoder_num_train_samples` to change the number of generated samples to train the server decoder and `--decoder_epochs` to adjust the server decoder train time.
 
 ### Experiments
-Run ablation experiments for FedVAE using the following command line arguments:
-- 
+1. `--should_weight_exp`: Turn on (`1`) or off (`0`) weighting when averaging models.
+2. `--should_initialize_models_same`: Turn on (`1`) or off (`0`) initializing all user models with the same weights.
+3. `--should_avg_exp`: Turn on (`1`) or off (`0`) averaging all user decoders for the server decoder (FedVAE-specific).
+4. `--should_fine_tune_exp`: Turn on (`1`) or off (`0`) fine-tuning the server decoder (FedVAE-specific).
+5. `--heterogeneous_models_exp`: Choose whether to use heterogeneous models or not. Pass in a string containing which versions of the CVAE to use. Passing in a string of length 1 yields homogeneous models. Version 0 is the standard CVAE, version 1 is a smaller alternate, and version 2 is ResNet-based. Ex. `"012"`
 
 ### Logging
 1. Enable logging by adding the command line argument `--should_log 1` to `python3 main.py`.
@@ -87,11 +90,11 @@ Run ablation experiments for FedVAE using the following command line arguments:
 1. Run `black .` from the repo root.
 2. Run `isort .` also from the repo root.
 
-### Distributed hyperparameter tuning
-1. Modify `experiments/hyperparams_shell_gen.py` according to your preferences.
+### Using the scripts in `experiments`
+1. Modify `experiments/[EXPERIMENT_NAME].py` according to your preferences.
 2. `cd experiments`
-3. Run `python3 hyperparams_shell_gen.py`
-4. Run `nohup sh hyperparam_runs_{HOST_NUMBER}.sh &`
+3. Run `python3 [EXPERIMENT_NAME].py`
+4. Run `nohup sh [EXPERIMENT_NAME]_{HOST_NUMBER}.sh &`
 5. Copy the results to local machine: `scp -r ceheinbaugh@th121-1.cs.wm.edu:/home/ceheinbaugh/Desktop/fed_vae/experiments/runs/ /Users/clareheinbaugh/Desktop/fed_vae/`
 
 Notes: This is designed to distribute hyperparameter tuning across the W&M lab computers. 

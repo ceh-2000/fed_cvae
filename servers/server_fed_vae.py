@@ -1,4 +1,5 @@
 import copy
+import random
 
 import numpy as np
 import torch
@@ -121,12 +122,11 @@ class ServerFedVAE(Server):
         total_data = np.sum(data_amts)
         data_amts = data_amts / total_data
 
+        version_options = [int(i) for i in list(self.heterogeneous_models)]
         for u in range(self.num_users):
             dl = DataLoader(self.data_subsets[u], shuffle=True, batch_size=32)
 
-            version = 0
-            if self.heterogeneous_models and u < int(self.num_users / 2):
-                version = 1
+            version = random.choice(version_options)
 
             new_user = UserFedVAE(
                 {

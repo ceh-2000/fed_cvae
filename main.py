@@ -335,9 +335,9 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--heterogeneous_models_exp",
-        type=int,
-        default=0,
-        help="Whether or not to give users heterogeneous models",
+        type=str,
+        default="0",
+        help="Whether or not to give users heterogeneous models. Provide which versions of the CVAE to add as a string.",
     )
 
     args = parser.parse_args()
@@ -441,7 +441,7 @@ if __name__ == "__main__":
             )
             print(
                 "Should we use heterogeneous models?",
-                "yes" if args.heterogeneous_models_exp else "no",
+                "yes" if len(args.heterogeneous_models_exp) > 1 else "no",
             )
 
     print("_________________________________________________\n")
