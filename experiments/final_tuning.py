@@ -46,7 +46,7 @@ if __name__ == "__main__":
     decoder_LR = 0.01
     should_weight = 1
 
-    dataset_vals = ["svhn", "cifar10"]
+    dataset_vals = ["svhn"]
     z_dim_vals = [50, 100, 250, 500]
     decoder_num_epochs_vals = [5, 10, 15]
     classifier_num_epochs_vals = [5, 10, 15]
@@ -65,7 +65,8 @@ if __name__ == "__main__":
                             f"--classifier_num_train_samples {classifier_num_train_samples} "
                             f"--decoder_num_train_samples {decoder_num_train_samples} "
                             f"--classifier_epochs {classifier_num_epochs} --decoder_epochs {decoder_num_epochs} "
-                            f"--local_LR {local_LR} --decoder_LR {decoder_LR} --should_weight {should_weight}"
+                            f"--local_LR {local_LR} --decoder_LR {decoder_LR} --should_weight {should_weight} "
+                            f"--heterogeneous_models_exp 2"
                         )
 
     # # One-shot FL tuning
