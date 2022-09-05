@@ -3,7 +3,7 @@ import numpy as np
 from utils import create_shell_files, populate_default_scripts
 
 if __name__ == "__main__":
-    hosts = np.array([13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24])
+    hosts = np.array([3, 4])
     all_scripts = []
     datasets = ["fashion"]
     algorithms = ["oneshot"]
