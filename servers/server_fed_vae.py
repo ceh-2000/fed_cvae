@@ -224,7 +224,11 @@ class ServerFedVAE(Server):
 
         for epoch in range(self.decoder_epochs):
             for X_batch, y_batch, z_batch in dl:
-                X_batch, y_batch, z_batch = X_batch.to(self.device), y_batch.to(self.device), z_batch.to(self.device)
+                X_batch, y_batch, z_batch = (
+                    X_batch.to(self.device),
+                    y_batch.to(self.device),
+                    z_batch.to(self.device),
+                )
 
                 X_server = self.decoder(z_batch, y_batch)
 
@@ -259,7 +263,9 @@ class ServerFedVAE(Server):
         self.decoder.eval()
 
         with torch.no_grad():
-            z_sample, y_hot_sample = z_sample.to(self.device), y_hot_sample.to(self.device)
+            z_sample, y_hot_sample = z_sample.to(self.device), y_hot_sample.to(
+                self.device
+            )
 
             X_sample = self.decoder(z_sample, y_hot_sample).detach().cpu()
             X_sample = torch.sigmoid(X_sample)

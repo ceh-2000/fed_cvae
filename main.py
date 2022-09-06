@@ -11,6 +11,7 @@ from servers.server_one_fed_vae import ServerOneFedVAE
 from servers.server_one_shot import ServerOneShot
 from unachievable_ideal import UnachievableIdeal
 
+
 def run_job(args):
     torch.manual_seed(args.seed)
 

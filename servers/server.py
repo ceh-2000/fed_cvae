@@ -26,7 +26,9 @@ class Server:
 
         self.num_channels = params["num_channels"]
         self.num_classes = params["num_classes"]
-        self.server_model = Classifier(self.num_channels, self.num_classes).to(self.device)
+        self.server_model = Classifier(self.num_channels, self.num_classes).to(
+            self.device
+        )
 
         self.writer = params["writer"]
 
