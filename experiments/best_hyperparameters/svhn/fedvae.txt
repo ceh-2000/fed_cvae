@@ -1,0 +1,10 @@
+local_epochs=150
+local_LR=0.001
+z_dim=250
+beta=1.0
+classifier_num_train_samples=5000
+classifier_epochs=5
+decoder_num_train_samples=5000
+decoder_epochs=15
+decoder_LR=0.01
+use_adam=1
