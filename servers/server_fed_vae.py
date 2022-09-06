@@ -194,7 +194,9 @@ class ServerFedVAE(Server):
             y_hot = one_hot_encode(y, self.num_classes).to(self.device)
 
             # Detaching ensures that there aren't issues w/trying to calculate the KD grad WRT this net's params - not needed!
-            X = u.model.decoder(z, y_hot).detach().cpu()
+            X = u.model.decoder(z, y_hot).detach()
+
+            X, y_hot, z = X.cpu(), y_hot.cpu(), z.cpu()
 
             X_vals = torch.cat((X_vals, X), 0)
             y_vals = torch.cat((y_vals, y_hot), 0)

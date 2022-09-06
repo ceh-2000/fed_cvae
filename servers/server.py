@@ -101,6 +101,7 @@ class Server:
                 test_logits = self.server_model(X_batch).cpu()
                 pred_probs = F.softmax(input=test_logits, dim=1)
                 y_pred = torch.argmax(pred_probs, dim=1)
+                y_batch = y_batch.cpu()
                 total_correct += np.sum((y_pred == y_batch).numpy())
 
             accuracy = round(total_correct / len(self.dataloader.dataset) * 100, 2)
