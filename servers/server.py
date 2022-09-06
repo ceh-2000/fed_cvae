@@ -10,6 +10,7 @@ from users.user import User
 class Server:
     def __init__(self, params):
         self.device = params["device"]
+        self.dataset_name = params["dataset_name"]
 
         self.users = []
         self.num_users = params["num_users"]

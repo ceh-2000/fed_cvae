@@ -89,6 +89,7 @@ def run_job(args):
             "local_epochs": args.local_epochs,
             "local_LR": args.local_LR,
             "use_adam": args.use_adam,
+            "dataset_name": args.dataset,
             "data_subsets": d.train_data,
             "data_server": d.test_data,
             "num_channels": d.num_channels,
@@ -136,6 +137,7 @@ def run_job(args):
                 args.should_avg_exp,
                 args.should_fine_tune_exp,
                 args.heterogeneous_models_exp,
+                args.transform_exp,
             )
         else:
             raise NotImplementedError(
@@ -329,6 +331,12 @@ if __name__ == "__main__":
         default="0",
         help="Whether or not to give users heterogeneous models. Provide which versions of the CVAE to add as a string.",
     )
+    parser.add_argument(
+        "--transform_exp",
+        type=int,
+        default=0,
+        help="Whether or not to apply transforms to the training images generated in the FedVAE pipeline.",
+    )
 
     args = parser.parse_args()
     args.should_log = bool(args.should_log)
@@ -432,6 +440,10 @@ if __name__ == "__main__":
             print(
                 "Should we use heterogeneous models?",
                 "yes" if len(args.heterogeneous_models_exp) > 1 else "no",
+            )
+            print(
+                "Should we apply transforms?",
+                "yes" if args.transform_exp == 1 else "no",
             )
 
     print("_________________________________________________\n")

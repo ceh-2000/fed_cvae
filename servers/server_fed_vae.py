@@ -6,6 +6,8 @@ import torch
 from torch.nn import CrossEntropyLoss
 from torch.optim import Adam
 from torch.utils.data import DataLoader
+from torchvision.transforms import (ColorJitter, Compose, RandomResizedCrop,
+                                    RandomRotation)
 from torchvision.utils import make_grid
 
 from models.decoder import ConditionalDecoder
@@ -32,6 +34,7 @@ class ServerFedVAE(Server):
         should_avg,
         should_fine_tune,
         heterogeneous_models,
+        should_transform,
     ):
         super().__init__(base_params)
 
@@ -64,6 +67,7 @@ class ServerFedVAE(Server):
         self.should_avg = should_avg
         self.should_fine_tune = should_fine_tune
         self.heterogeneous_models = heterogeneous_models
+        self.should_transform = should_transform
 
     def compute_data_amt_and_pmf(self, u):
         """
@@ -270,10 +274,28 @@ class ServerFedVAE(Server):
             X_sample = self.decoder(z_sample, y_hot_sample).detach().cpu()
             X_sample = torch.sigmoid(X_sample)
 
+        # Apply transforms to inject variations into samples for SVHN
+        if self.dataset_name == "svhn" and self.should_transform:
+            transforms = Compose(
+                [
+                    ColorJitter(brightness=0.5, contrast=0.5, hue=0.5),
+                    RandomRotation(45),
+                    RandomResizedCrop(32, scale=(0.6, 1.0)),
+                ]
+            )
+
+            X_sample_transform = torch.sigmoid(transforms(X_sample))
+
+            self.save_images(
+                X_sample_transform[:10], False, "transformed_fedvae_images", 1
+            )
+
+            X_sample = torch.cat((X_sample, X_sample_transform), 0)
+            y_sample = torch.cat((y_sample, y_sample), 0)
+            z_sample = torch.cat((z_sample, z_sample), 0)
+
         # Put images and labels in wrapper pytoch dataset (e.g. override _get_item())
         dataset = WrapperDataset(X_sample, y_sample, z_sample)
-
-        # TODO: Apply transforms before putting dataset in dataloader
 
         # Put dataset into pytorch dataloader and return dataloader
         dataloader = DataLoader(dataset, shuffle=True, batch_size=32)

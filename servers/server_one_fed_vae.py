@@ -31,6 +31,7 @@ class ServerOneFedVAE(ServerFedVAE):
             0,
             0,
             heterogeneous_models,
+            0,
         )
 
     def train(self):
