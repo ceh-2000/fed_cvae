@@ -49,6 +49,7 @@ class ServerOneShot(Server):
                 valid_dl = DataLoader(data[1], shuffle=True, batch_size=32)
                 new_user = UserOneShot(
                     {
+                        "device": self.device,
                         "user_id": u,
                         "dataloader": train_dl,
                         "num_channels": self.num_channels,
@@ -63,6 +64,7 @@ class ServerOneShot(Server):
                 dl = DataLoader(self.data_subsets[u], shuffle=True, batch_size=32)
                 new_user = User(
                     {
+                        "device": self.device,
                         "user_id": u,
                         "dataloader": dl,
                         "num_channels": self.num_channels,
@@ -127,9 +129,11 @@ class ServerOneShot(Server):
         total = len(self.dataloader.dataset)
         with torch.no_grad():
             for X, y in self.dataloader:
+                X, y = X.to(self.device), y.to(self.device)
+
                 batch_pred = []
                 for s in sampled_users:
-                    test_logits = s.model(X)
+                    test_logits = s.model(X).cpu()
                     pred_probs = F.softmax(input=test_logits, dim=1)
                     y_pred = torch.argmax(pred_probs, dim=1).tolist()
                     batch_pred.append(int(y_pred[0]))

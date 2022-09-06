@@ -41,7 +41,7 @@ class ServerFedVAE(Server):
 
         self.decoder = ConditionalDecoder(
             self.image_size, self.num_classes, self.num_channels, self.z_dim
-        )
+        ).to(self.device)
         self.kd_optimizer = Adam(self.decoder.parameters(), lr=decoder_LR)
 
         self.decoder_num_train_samples = decoder_num_train_samples
@@ -130,6 +130,7 @@ class ServerFedVAE(Server):
 
             new_user = UserFedVAE(
                 {
+                    "device": self.device,
                     "user_id": u,
                     "dataloader": dl,
                     "num_channels": self.num_channels,
@@ -183,17 +184,17 @@ class ServerFedVAE(Server):
 
             z = u.model.sample_z(
                 user_num_train_samples, "uniform", uniform_width=(-1, 1)
-            )
+            ).to(self.device)
 
             # Sample y's according to each user's target distribution
             classes = np.arange(self.num_classes)
             y = torch.from_numpy(
                 np.random.choice(classes, size=user_num_train_samples, p=u.pmf)
             )
-            y_hot = one_hot_encode(y, self.num_classes)
+            y_hot = one_hot_encode(y, self.num_classes).to(self.device)
 
             # Detaching ensures that there aren't issues w/trying to calculate the KD grad WRT this net's params - not needed!
-            X = u.model.decoder(z, y_hot).detach()
+            X = u.model.decoder(z, y_hot).detach().cpu()
 
             X_vals = torch.cat((X_vals, X), 0)
             y_vals = torch.cat((y_vals, y_hot), 0)
@@ -221,6 +222,8 @@ class ServerFedVAE(Server):
 
         for epoch in range(self.decoder_epochs):
             for X_batch, y_batch, z_batch in dl:
+                X_batch, y_batch, z_batch = X_batch.to(self.device), y_batch.to(self.device), z_batch.to(self.device)
+
                 X_server = self.decoder(z_batch, y_batch)
 
                 recon_loss = reconstruction_loss(self.num_channels, X_batch, X_server)
@@ -254,7 +257,9 @@ class ServerFedVAE(Server):
         self.decoder.eval()
 
         with torch.no_grad():
-            X_sample = self.decoder(z_sample, y_hot_sample)
+            z_sample, y_hot_sample = z_sample.to(self.device), y_hot_sample.to(self.device)
+
+            X_sample = self.decoder(z_sample, y_hot_sample).detach().cpu()
             X_sample = torch.sigmoid(X_sample)
 
         # Put images and labels in wrapper pytoch dataset (e.g. override _get_item())
@@ -277,6 +282,8 @@ class ServerFedVAE(Server):
             for batch_idx, (X_batch, y_batch, _) in enumerate(
                 self.classifier_dataloader
             ):
+                X_batch, y_batch = X_batch.to(self.device), y_batch.to(self.device)
+
                 # Forward pass through model
                 output = self.server_model(X_batch)
 
@@ -312,7 +319,7 @@ class ServerFedVAE(Server):
             data_amts = []
             for u in selected_users:
                 u.train(self.local_epochs)
-                decoders.append(u.model.decoder)
+                decoders.append(copy.deepcopy(u.model.decoder).cpu())
                 data_amts.append(u.data_amt)
 
             print(f"Finished training user models for epoch {e}")
@@ -379,7 +386,8 @@ class ServerFedVAE(Server):
         y_hot = one_hot_encode(y, self.num_classes)
 
         with torch.no_grad():
-            novel_imgs = dec(z_sample, y_hot)
+            z_sample, y_hot = z_sample.to(self.device), y_hot.to(self.device)
+            novel_imgs = dec(z_sample, y_hot).cpu()
 
         self.save_images(novel_imgs, True, name, e)
 

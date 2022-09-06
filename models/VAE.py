@@ -110,14 +110,14 @@ class CVAE(nn.Module):
 
         return z
 
-    def forward(self, X, y_hot):
+    def forward(self, X, y_hot, device):
         distributions = self.encoder(X)
 
         mu = distributions[:, : self.z_dim]
         logvar = distributions[:, self.z_dim :]
 
         # Re-paramaterization trick, sample latent vector z
-        z = self.reparametrize(mu, logvar)
+        z = self.reparametrize(mu, logvar).to(device)
 
         # Decode latent vector + class info into a reconstructed image
         x_recon = self.decoder(z, y_hot)

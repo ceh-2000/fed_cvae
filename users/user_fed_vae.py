@@ -18,7 +18,7 @@ class UserFedVAE(User):
             z_dim=z_dim,
             image_size=image_size,
             version=version,
-        )
+        ).to(self.device)
 
         if base_params["use_adam"]:
             self.optimizer = Adam(self.model.parameters(), lr=base_params["local_LR"])
@@ -37,7 +37,9 @@ class UserFedVAE(User):
 
                 y_hot = one_hot_encode(y_batch, self.num_classes)
 
-                X_recon, mu, logvar = self.model(X_batch, y_hot)
+                X_batch, y_hot = X_batch.to(self.device), y_hot.to(self.device)
+
+                X_recon, mu, logvar = self.model(X_batch, y_hot, self.device)
 
                 # Calculate losses
                 recon_loss = reconstruction_loss(self.num_channels, X_batch, X_recon)

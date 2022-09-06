@@ -11,17 +11,6 @@ from servers.server_one_fed_vae import ServerOneFedVAE
 from servers.server_one_shot import ServerOneShot
 from unachievable_ideal import UnachievableIdeal
 
-
-def get_gpus():
-    num_of_gpus = torch.cuda.device_count()
-
-    devs = []
-    for d in range(num_of_gpus):
-        devs.append(f"cuda:{d}")
-
-    return devs
-
-
 def run_job(args):
     torch.manual_seed(args.seed)
 
@@ -92,7 +81,7 @@ def run_job(args):
     else:
         # Initialize the server which manages all users
         default_params = {
-            "devices": devices,
+            "device": device,
             "num_users": args.num_users,
             "user_fraction": args.user_fraction,
             "glob_epochs": args.glob_epochs,
@@ -233,8 +222,8 @@ if __name__ == "__main__":
     parser.add_argument(
         "--use_adam",
         type=int,
-        default=0,
-        help="If 1, use Adam as the local optimized, else use SGD",
+        default=1,
+        help="If 1, use Adam as the local optimizer, else use SGD",
     )
 
     # Command line arguments for specific models
@@ -345,11 +334,11 @@ if __name__ == "__main__":
     args.use_adam = bool(args.use_adam)
 
     # Get available gpus
-    devices = get_gpus()
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     print("_________________________________________________\n")
     print("GENERAL COMMAND LINE ARGUMENTS")
     print()
-    print("Number of devices:", len(devices))
+    print("Using device:", device)
     print("Dataset name:", args.dataset)
     print("Algorithm:", args.algorithm)
     print("Portion of the dataset used:", args.sample_ratio)
