@@ -6,13 +6,15 @@ from models.classifier import Classifier
 
 class User:
     def __init__(self, params):
+        self.device = params["device"]
+
         self.user_id = params["user_id"]
         self.dataloader = params["dataloader"]
 
         self.num_channels = params["num_channels"]
         self.num_classes = params["num_classes"]
 
-        self.model = Classifier(self.num_channels, self.num_classes)
+        self.model = Classifier(self.num_channels, self.num_classes).to(self.device)
         self.loss_func = CrossEntropyLoss()
 
         if params["use_adam"]:
@@ -27,6 +29,8 @@ class User:
 
         for epoch in range(local_epochs):
             for batch_idx, (X_batch, y_batch) in enumerate(self.dataloader):
+                X_batch, y_batch = X_batch.to(self.device), y_batch.to(self.device)
+
                 # Forward pass through model
                 output = self.model(X_batch)
 

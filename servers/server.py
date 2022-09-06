@@ -9,8 +9,7 @@ from users.user import User
 
 class Server:
     def __init__(self, params):
-        self.devices = params["devices"]
-        self.num_devices = len(self.devices)
+        self.device = params["device"]
 
         self.users = []
         self.num_users = params["num_users"]
@@ -27,7 +26,9 @@ class Server:
 
         self.num_channels = params["num_channels"]
         self.num_classes = params["num_classes"]
-        self.server_model = Classifier(self.num_channels, self.num_classes)
+        self.server_model = Classifier(self.num_channels, self.num_classes).to(
+            self.device
+        )
 
         self.writer = params["writer"]
 
@@ -42,6 +43,7 @@ class Server:
             dl = DataLoader(self.data_subsets[u], shuffle=True, batch_size=32)
             new_user = User(
                 {
+                    "device": self.device,
                     "user_id": u,
                     "dataloader": dl,
                     "num_channels": self.num_channels,
@@ -95,10 +97,13 @@ class Server:
 
             total_correct = 0
             for batch_idx, (X_batch, y_batch) in enumerate(self.dataloader):
+                X_batch, y_batch = X_batch.to(self.device), y_batch.to(self.device)
+
                 # Forward pass through model
-                test_logits = self.server_model(X_batch)
+                test_logits = self.server_model(X_batch).cpu()
                 pred_probs = F.softmax(input=test_logits, dim=1)
                 y_pred = torch.argmax(pred_probs, dim=1)
+                y_batch = y_batch.cpu()
                 total_correct += np.sum((y_pred == y_batch).numpy())
 
             accuracy = round(total_correct / len(self.dataloader.dataset) * 100, 2)
