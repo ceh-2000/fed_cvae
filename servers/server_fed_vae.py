@@ -272,7 +272,6 @@ class ServerFedVAE(Server):
             )
 
             X_sample = self.decoder(z_sample, y_hot_sample).detach().cpu()
-            X_sample = torch.sigmoid(X_sample)
 
         # Apply transforms to inject variations into samples for SVHN
         if self.dataset_name == "svhn" and self.should_transform:
@@ -284,15 +283,17 @@ class ServerFedVAE(Server):
                 ]
             )
 
-            X_sample_transform = torch.sigmoid(transforms(X_sample))
+            X_sample_transform = transforms(X_sample)
 
             self.save_images(
-                X_sample_transform[:10], False, "transformed_fedvae_images", 1
+                X_sample_transform[:10], True, "transformed_fedvae_images", 1
             )
 
             X_sample = torch.cat((X_sample, X_sample_transform), 0)
             y_sample = torch.cat((y_sample, y_sample), 0)
             z_sample = torch.cat((z_sample, z_sample), 0)
+
+        X_sample = torch.sigmoid(X_sample)
 
         # Put images and labels in wrapper pytoch dataset (e.g. override _get_item())
         dataset = WrapperDataset(X_sample, y_sample, z_sample)
