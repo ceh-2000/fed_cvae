@@ -293,6 +293,7 @@ class ServerFedVAE(Server):
             y_sample = torch.cat((y_sample, y_sample), 0)
             z_sample = torch.cat((z_sample, z_sample), 0)
 
+        # Only apply sigmoid for mnist and fashion
         X_sample = torch.sigmoid(X_sample)
 
         # Put images and labels in wrapper pytoch dataset (e.g. override _get_item())
