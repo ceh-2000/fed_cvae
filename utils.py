@@ -85,6 +85,7 @@ def reconstruction_loss(num_channels, x, x_recon):
         ).div(batch_size)
     # Multi-channel images
     elif num_channels == 3:
+        x_recon = torch.sigmoid(x_recon)
         recon_loss = F.mse_loss(x_recon, x, reduction="sum").div(batch_size)
     else:
         raise NotImplementedError("We only support 1 and 3 channel images.")
