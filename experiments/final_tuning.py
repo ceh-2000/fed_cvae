@@ -3,31 +3,7 @@ import numpy as np
 from utils import create_shell_files
 
 if __name__ == "__main__":
-    hosts = np.array(
-        [
-            1,
-            2,
-            3,
-            4,
-            5,
-            6,
-            7,
-            9,
-            10,
-            13,
-            14,
-            15,
-            16,
-            17,
-            18,
-            19,
-            20,
-            21,
-            22,
-            23,
-            24,
-        ]
-    )
+    hosts = np.array([19, 20, 21, 22, 23, 24])
 
     all_scripts = []
 
@@ -36,7 +12,7 @@ if __name__ == "__main__":
     num_users = 10
     glob_epochs = 1
     alpha = 0.01
-    sample_ratio = 0.5
+    sample_ratio = 1.0
     beta = 1.0
     classifier_num_train_samples = 5000
     decoder_num_train_samples = 5000
@@ -47,10 +23,10 @@ if __name__ == "__main__":
     should_weight = 1
 
     dataset_vals = ["svhn"]
-    z_dim_vals = [50, 100, 250, 500]
-    decoder_num_epochs_vals = [5, 10, 15]
-    classifier_num_epochs_vals = [5, 10, 15]
-    local_epochs_vals = [15, 20, 25, 30]
+    z_dim_vals = [25, 50, 100]
+    decoder_num_epochs_vals = [10, 15, 20, 40]
+    classifier_num_epochs_vals = [3, 5, 7, 20]
+    local_epochs_vals = [25, 40, 50, 80]
 
     for dataset in dataset_vals:
         for z_dim in z_dim_vals:

@@ -10,7 +10,7 @@ if __name__ == "__main__":
     all_scripts = []
     datasets = ["mnist", "fashion"]
     algorithms = ["fedavg", "oneshot", "onefedvae", "fedvae"]
-    default_script = f"python3 ../ps xmain.py --should_log 1 --sample_ratio 0.5 --glob_epochs 1 --alpha 0.05 --num_users 10"
+    default_script = f"python3 ../main.py --should_log 1 --sample_ratio 0.5 --glob_epochs 1 --alpha 0.05 --num_users 10"
 
     default_scripts_dict = populate_default_scripts(
         datasets, algorithms, default_script

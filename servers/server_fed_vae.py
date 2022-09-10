@@ -277,7 +277,6 @@ class ServerFedVAE(Server):
         if self.dataset_name == "svhn" and self.should_transform:
             transforms = Compose(
                 [
-                    ColorJitter(brightness=0.5, contrast=0.5, hue=0.5),
                     RandomRotation(45),
                     RandomResizedCrop(32, scale=(0.6, 1.0)),
                 ]
@@ -286,7 +285,7 @@ class ServerFedVAE(Server):
             X_sample_transform = transforms(X_sample)
 
             self.save_images(
-                X_sample_transform[:10], False, "transformed_fedvae_images", 1
+                X_sample_transform[:10], True, "transformed_fedvae_images", 1
             )
 
             X_sample = torch.cat((X_sample, X_sample_transform), 0)
@@ -294,8 +293,7 @@ class ServerFedVAE(Server):
             z_sample = torch.cat((z_sample, z_sample), 0)
 
         # Only apply sigmoid for mnist and fashion
-        if self.dataset_name != "svhn":
-            X_sample = torch.sigmoid(X_sample)
+        X_sample = torch.sigmoid(X_sample)
 
         # Put images and labels in wrapper pytoch dataset (e.g. override _get_item())
         dataset = WrapperDataset(X_sample, y_sample, z_sample)
