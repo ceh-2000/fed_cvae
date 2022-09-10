@@ -213,12 +213,9 @@ class Data:
         """
 
         # Getting indices for each class
-        if self.sample_ratio == 1:
-            targets = dataset_train.targets.numpy()
-        else:
-            targets = np.array(
-                [int(dataset_train[i][1]) for i in range(len(dataset_train))]
-            )
+        targets = np.array(
+            [int(dataset_train[i][1]) for i in range(len(dataset_train))]
+        )
 
         class_idxs = {}
 
@@ -329,7 +326,7 @@ if __name__ == "__main__":
         "svhn",
         num_users=20,
         writer=None,
-        sample_ratio=0.5,
+        sample_ratio=1.0,
         alpha=0.01,
         normalize=False,
         visualize=True,
