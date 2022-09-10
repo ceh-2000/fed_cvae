@@ -27,23 +27,25 @@ if __name__ == "__main__":
     decoder_num_epochs_vals = [10, 15, 20, 40]
     classifier_num_epochs_vals = [3, 5, 7, 20]
     local_epochs_vals = [25, 40, 50, 80]
+    transform_exp_vals = [0, 1]
 
     for dataset in dataset_vals:
         for z_dim in z_dim_vals:
             for decoder_num_epochs in decoder_num_epochs_vals:
                 for classifier_num_epochs in classifier_num_epochs_vals:
                     for local_epochs in local_epochs_vals:
-                        all_scripts.append(
-                            f"python3 ../main.py --should_log {should_log} --use_adam {use_adam} "
-                            f"--algorithm {algorithm} --dataset {dataset} --num_users {num_users} --alpha {alpha} "
-                            f"--sample_ratio {sample_ratio} --glob_epochs {glob_epochs} --local_epochs {local_epochs} "
-                            f"--z_dim {z_dim} --beta {beta} "
-                            f"--classifier_num_train_samples {classifier_num_train_samples} "
-                            f"--decoder_num_train_samples {decoder_num_train_samples} "
-                            f"--classifier_epochs {classifier_num_epochs} --decoder_epochs {decoder_num_epochs} "
-                            f"--local_LR {local_LR} --decoder_LR {decoder_LR} --should_weight {should_weight} "
-                            f"--heterogeneous_models_exp 2"
-                        )
+                        for transform_exp in transform_exp_vals:
+                            all_scripts.append(
+                                f"python3 ../main.py --should_log {should_log} --use_adam {use_adam} "
+                                f"--algorithm {algorithm} --dataset {dataset} --num_users {num_users} --alpha {alpha} "
+                                f"--sample_ratio {sample_ratio} --glob_epochs {glob_epochs} --local_epochs {local_epochs} "
+                                f"--z_dim {z_dim} --beta {beta} "
+                                f"--classifier_num_train_samples {classifier_num_train_samples} "
+                                f"--decoder_num_train_samples {decoder_num_train_samples} "
+                                f"--classifier_epochs {classifier_num_epochs} --decoder_epochs {decoder_num_epochs} "
+                                f"--local_LR {local_LR} --decoder_LR {decoder_LR} --should_weight {should_weight} "
+                                f"--transform_exp {transform_exp} --heterogeneous_models_exp 0"
+                            )
 
     # # One-shot FL tuning
     # algorithm = "oneshot"
@@ -97,28 +99,29 @@ if __name__ == "__main__":
     #                 f"--local_LR {local_LR}"
     #             )
     #
-    # # FedAvg Tuning
-    # algorithm = "fedavg"
-    # num_users = 10
-    # glob_epochs = 1
-    # alpha = 0.01
-    # sample_ratio = 0.5
-    # use_adam = 1
-    # should_log = 1
-    #
-    # dataset_vals = ["mnist", "fashion"]
-    # local_LR_vals = [0.01, 0.001, 0.0001]
-    # local_epochs_vals = [5, 7, 10]
-    #
-    # for dataset in dataset_vals:
-    #     for local_LR in local_LR_vals:
-    #         for local_epochs in local_epochs_vals:
-    #             all_scripts.append(
-    #                 f"python3 ../main.py --should_log {should_log} --use_adam {use_adam} --algorithm {algorithm} "
-    #                 f"--num_users {num_users} --glob_epochs {glob_epochs} --alpha {alpha} "
-    #                 f"--sample_ratio {sample_ratio} --dataset {dataset} --local_LR {local_LR} "
-    #                 f"--local_epochs {local_epochs}"
-    #             )
+
+    # FedAvg Tuning
+    algorithm = "fedavg"
+    num_users = 10
+    glob_epochs = 1
+    alpha = 0.01
+    sample_ratio = 1.0
+    use_adam = 1
+    should_log = 1
+
+    dataset_vals = ["svhn"]
+    local_LR_vals = [0.001]
+    local_epochs_vals = [10, 15, 20, 30]
+
+    for dataset in dataset_vals:
+        for local_LR in local_LR_vals:
+            for local_epochs in local_epochs_vals:
+                all_scripts.append(
+                    f"python3 ../main.py --should_log {should_log} --use_adam {use_adam} --algorithm {algorithm} "
+                    f"--num_users {num_users} --glob_epochs {glob_epochs} --alpha {alpha} "
+                    f"--sample_ratio {sample_ratio} --dataset {dataset} --local_LR {local_LR} "
+                    f"--local_epochs {local_epochs}"
+                )
 
     print("Number of experiments:", len(all_scripts))
 

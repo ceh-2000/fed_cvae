@@ -278,7 +278,6 @@ class ServerFedVAE(Server):
             transforms = Compose(
                 [
                     RandomRotation(45),
-                    RandomResizedCrop(32, scale=(0.6, 1.0)),
                 ]
             )
 
