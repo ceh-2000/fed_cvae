@@ -40,7 +40,7 @@ def run_job(args):
             elif args.algorithm == "fedvae":
                 cur_run_name = (
                     cur_run_name
-                    + f"_glob_epochs={args.glob_epochs}_z_dim={args.z_dim}_beta={args.beta}_decoder_LR={args.decoder_LR}_classifier_train_samples={args.classifier_num_train_samples}_classifier_epochs={args.classifier_epochs}_decoder_train_samples={args.decoder_num_train_samples}_decoder_epochs={args.decoder_epochs}"
+                    + f"_z_dim={args.z_dim}_classifier_train_samples={args.classifier_num_train_samples}_classifier_epochs={args.classifier_epochs}_decoder_train_samples={args.decoder_num_train_samples}_decoder_epochs={args.decoder_epochs}_decoder_LR={args.decoder_LR}_transform_exp={args.transform_exp}"
                 )
             elif args.algorithm == "onefedvae":
                 cur_run_name = (
