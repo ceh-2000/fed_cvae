@@ -4,7 +4,7 @@ from experiments.utils import csvs_to_dfs, to_csv
 
 if __name__ == "__main__":
     # Convert ablation results to csvs
-    experiment_dir = "../runs"
+    experiment_dir = "../num_users_runs"
 
     if not os.path.exists(experiment_dir + "/csv"):
         to_csv(experiment_dir)
