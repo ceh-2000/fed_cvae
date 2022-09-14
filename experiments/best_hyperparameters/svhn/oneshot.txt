@@ -1,4 +1,4 @@
-local_epochs=15
+local_epochs=10
 local_LR=0.001
 one_shot_sampling=all
 use_adam=1

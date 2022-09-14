@@ -4,7 +4,4 @@ z_dim=10
 beta=1.0
 classifier_num_train_samples=5000
 classifier_epochs=5
-decoder_num_train_samples=5000
-decoder_epochs=80
-decoder_LR=0.01
 use_adam=1
