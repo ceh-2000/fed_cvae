@@ -3,11 +3,11 @@ import numpy as np
 from utils import create_shell_files, populate_default_scripts
 
 if __name__ == "__main__":
-    hosts = np.array([1, 2])
+    hosts = np.array([19, 20, 21, 22, 23, 24])
     all_scripts = []
-    datasets = ["fashion"]
-    algorithms = ["oneshot"]
-    default_script = f"python3 ../main.py --should_log 1 --sample_ratio 0.5 --glob_epochs 1 --alpha 0.01"
+    datasets = ["svhn"]
+    algorithms = ["fedvae", "onefedvae", "fedavg", "oneshot"]
+    default_script = f"python3 ../main.py --should_log 1 --sample_ratio 1.0 --glob_epochs 1 --alpha 0.01"
 
     default_scripts_dict = populate_default_scripts(
         datasets, algorithms, default_script
