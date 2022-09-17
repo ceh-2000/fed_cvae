@@ -324,6 +324,7 @@ class Data:
 
 if __name__ == "__main__":
     SVHN_data = Data(
+        1693,
         "svhn",
         num_users=20,
         writer=None,
