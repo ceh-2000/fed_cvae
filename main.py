@@ -54,6 +54,7 @@ def run_job(args):
 
     # Get the data
     d = Data(
+        args.data_seed,
         args.dataset,
         args.num_users,
         writer,
@@ -208,7 +209,10 @@ if __name__ == "__main__":
         default=0,
     )
     parser.add_argument(
-        "--seed", type=int, help="Seed to ensure same results", default=1693
+        "--seed", type=int, help="Seed to ensure same model training", default=1693
+    )
+    parser.add_argument(
+        "--data_seed", type=int, help="Seed to ensure same data split", default=1693
     )
     parser.add_argument(
         "--user_fraction",
@@ -352,7 +356,8 @@ if __name__ == "__main__":
     print("Algorithm:", args.algorithm)
     print("Portion of the dataset used:", args.sample_ratio)
     print("Logging?", "yes" if args.should_log else "no")
-    print("Seed:", args.seed)
+    print("Model seed:", args.seed)
+    print("Data seed:", args.data_seed)
     print(f"Using {'Adam' if args.use_adam else 'SGD'} as the local optimizer")
 
     if args.algorithm != "central":
