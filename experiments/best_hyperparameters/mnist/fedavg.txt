@@ -1,3 +1,4 @@
+sample_ratio=0.5
 local_epochs=10
 local_LR=0.001
 use_adam=1

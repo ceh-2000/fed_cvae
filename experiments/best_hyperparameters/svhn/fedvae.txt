@@ -1,3 +1,4 @@
+sample_ratio=1.0
 local_epochs=50
 local_LR=0.001
 z_dim=10

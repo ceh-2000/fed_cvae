@@ -1,3 +1,4 @@
+sample_ratio=0.5
 local_epochs=15
 local_LR=0.001
 one_shot_sampling=all
