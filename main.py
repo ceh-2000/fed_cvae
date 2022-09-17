@@ -67,6 +67,7 @@ def run_job(args):
     # Train in a centralized manner to generate the "unachievable ideal"
     if args.algorithm == "central":
         params = {
+            "device": device,
             "glob_epoch": args.glob_epochs,
             "train_data": d.train_data,
             "test_data": d.test_data,

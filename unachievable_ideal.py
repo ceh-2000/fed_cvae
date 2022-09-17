@@ -10,6 +10,7 @@ from models.classifier import Classifier
 
 class UnachievableIdeal:
     def __init__(self, params):
+        self.device = params["device"]
         self.epochs = params["glob_epoch"]
 
         self.train_data = DataLoader(params["train_data"], shuffle=True, batch_size=32)
@@ -18,7 +19,7 @@ class UnachievableIdeal:
         self.num_channels = params["num_channels"]
         self.num_classes = params["num_classes"]
 
-        self.model = Classifier(self.num_channels, self.num_classes)
+        self.model = Classifier(self.num_channels, self.num_classes).to(self.device)
         self.loss_func = CrossEntropyLoss()
         self.optimizer = Adam(self.model.parameters(), lr=0.001)
 
@@ -30,6 +31,8 @@ class UnachievableIdeal:
         for epoch in range(self.epochs):
             self.evaluate(epoch)
             for batch_idx, (X_batch, y_batch) in enumerate(self.train_data):
+                X_batch, y_batch = X_batch.to(self.device), y_batch.to(self.device)
+
                 # Forward pass through model
                 output = self.model(X_batch)
 
@@ -47,10 +50,13 @@ class UnachievableIdeal:
 
             total_correct = 0
             for batch_idx, (X_batch, y_batch) in enumerate(self.test_data):
+                X_batch, y_batch = X_batch.to(self.device), y_batch.to(self.device)
+
                 # Forward pass through model
-                test_logits = self.model(X_batch)
+                test_logits = self.model(X_batch).cpu()
                 pred_probs = F.softmax(input=test_logits, dim=1)
                 y_pred = torch.argmax(pred_probs, dim=1)
+                y_batch = y_batch.cpu()
                 total_correct += np.sum((y_pred == y_batch).numpy())
 
             accuracy = round(total_correct / len(self.test_data.dataset) * 100, 2)

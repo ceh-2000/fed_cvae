@@ -1,0 +1,2 @@
+sample_ratio=1.0
+glob_epochs=20
