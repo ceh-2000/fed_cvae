@@ -53,7 +53,7 @@ class UnachievableIdeal:
                 X_batch, y_batch = X_batch.to(self.device), y_batch.to(self.device)
 
                 # Forward pass through model
-                test_logits = self.model(X_batch)
+                test_logits = self.model(X_batch).cpu()
                 pred_probs = F.softmax(input=test_logits, dim=1)
                 y_pred = torch.argmax(pred_probs, dim=1)
                 y_batch = y_batch.cpu()
