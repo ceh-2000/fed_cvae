@@ -15,13 +15,11 @@ from torch.utils.data import Subset, random_split
 from torchvision.datasets import CIFAR10, MNIST, SVHN, FashionMNIST
 from torchvision.transforms import Compose, Normalize, Resize, ToTensor
 
-# Setting seeds for reproducibility
-np.random.seed(1693)
-
 
 class Data:
     def __init__(
         self,
+        seed,
         dataset_name,
         num_users,
         writer,
@@ -42,6 +40,9 @@ class Data:
         :param normalize: Whether images should normalized in the transform
         :param visualize: Boolean to visualize data distribution
         """
+
+        # Setting seeds for reproducibility
+        np.random.seed(seed)
 
         self.dataset_name = dataset_name.lower()
         self.alpha = alpha
@@ -323,6 +324,7 @@ class Data:
 
 if __name__ == "__main__":
     SVHN_data = Data(
+        1693,
         "svhn",
         num_users=20,
         writer=None,
