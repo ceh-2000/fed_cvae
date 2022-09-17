@@ -5,7 +5,7 @@ import numpy as np
 from utils import create_shell_files, populate_default_scripts
 
 if __name__ == "__main__":
-    hosts = np.array([19, 20, 21, 22, 23, 24])
+    hosts = np.array([1])
 
     all_scripts = []
     datasets = ["mnist", "fashion", "svhn"]
