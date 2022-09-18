@@ -3,6 +3,7 @@ import argparse
 import torch
 from torch.utils.tensorboard import SummaryWriter
 
+from central_cvae import CentralCVAE
 from data import Data
 from servers.server_fed_avg import ServerFedAvg
 from servers.server_fed_prox import ServerFedProx
@@ -25,7 +26,9 @@ def run_job(args):
 
             # Adding in algo-specific hyperparams
             if args.algorithm == "central":
-                cur_run_name = f"runs/central_model_sampling_ratio={args.sample_ratio}_number_of_epochs={args.glob_epochs}"
+                cur_run_name = f"runs/algorithm=central_model_sampling_ratio={args.sample_ratio}_number_of_epochs={args.glob_epochs}"
+            elif args.algorithm == "central_cvae":
+                cur_run_name = f"runs/algorithm=central_cvae_model_sampling_ratio={args.sample_ratio}_number_of_epochs={args.glob_epochs}_z_dim={args.z_dim}_local_LR={args.local_LR}_beta={args.beta}"
             elif args.algorithm == "fedavg":
                 cur_run_name = cur_run_name + f"_glob_epochs={args.glob_epochs}"
             elif args.algorithm == "fedprox":
@@ -58,7 +61,7 @@ def run_job(args):
         args.dataset,
         args.num_users,
         writer,
-        args.algorithm == "central",
+        "central" in args.algorithm,
         alpha=args.alpha,
         sample_ratio=args.sample_ratio,
         visualize=True if args.alpha is not None else False,
@@ -79,6 +82,25 @@ def run_job(args):
 
         i.train()
         i.test()
+
+    elif args.algorithm == "central_cvae":
+        params = {
+            "device": device,
+            "glob_epoch": args.glob_epochs,
+            "train_data": d.train_data,
+            "test_data": d.test_data,
+            "num_channels": d.num_channels,
+            "num_classes": d.num_classes,
+            "writer": writer,
+            "z_dim": args.z_dim,
+            "image_size": d.image_size,
+            "beta": args.beta,
+            "local_LR": args.local_LR,
+        }
+
+        v = CentralCVAE(params)
+
+        v.train()
 
     # Distribute training across user devices
     else:
@@ -359,9 +381,10 @@ if __name__ == "__main__":
     print("Logging?", "yes" if args.should_log else "no")
     print("Model seed:", args.seed)
     print("Data seed:", args.data_seed)
-    print(f"Using {'Adam' if args.use_adam else 'SGD'} as the local optimizer")
+    if args.algorithm != "central_cvae":
+        print(f"Using {'Adam' if args.use_adam else 'SGD'} as the local optimizer")
 
-    if args.algorithm != "central":
+    if "central" not in args.algorithm:
         print(
             "Level of heterogeneity (alpha):",
             args.alpha if args.alpha is not None else "perfectly homogeneous",
@@ -378,10 +401,14 @@ if __name__ == "__main__":
     if args.algorithm in ["oneshot", "onefedvae"]:
         args.glob_epochs = 1
         print("Number of global epochs:", 1)
-    if args.algorithm == "central":
+    if "central" in args.algorithm:
         print("Number of epochs:", args.glob_epochs)
 
     print()
+    if args.algorithm == "central_cvae":
+        print("Latent vector dimension for VAE:", args.z_dim)
+        print("Weight on the KL divergence term (beta):", args.beta)
+        print("Local learning rate:", args.local_LR)
 
     if args.algorithm in ["fedprox", "oneshot", "fedvae", "onefedvae"]:
         print("MODEL SPECIFIC COMMAND LINE ARGUMENTS")

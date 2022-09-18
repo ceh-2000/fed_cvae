@@ -4,28 +4,11 @@ from utils import create_shell_files, populate_default_scripts
 
 if __name__ == "__main__":
     hosts = np.array([1])
-    all_scripts = []
-    datasets = ["svhn"]
-    algorithms = ["fedvae"]
-    default_script = f"python3 ../main.py --should_log 1 --num_users 10 --alpha 0.01 --glob_epochs 1 --heterogeneous_models_exp 2"
-    default_scripts_dict = populate_default_scripts(
-        datasets, algorithms, default_script
-    )
-
-    experiments = ["--transform_exp=0"]
-
-    all_seeds = [1588, 1693, 7089]
-
-    for seed in all_seeds:
-        for exp in experiments:
-            for default_script_name in default_scripts_dict:
-                cur_script = default_scripts_dict.get(default_script_name)
-                cur_name = (
-                    f"runs/{default_script_name}_{exp.replace('--', '')}_seed={seed}"
-                )
-                all_scripts.append(
-                    f"{cur_script} {exp.replace('=', ' ')} --seed {seed} --cur_run_name {cur_name}"
-                )
+    all_scripts = [
+        "python3 main.py --algorithm central_cvae --dataset mnist --sample_ratio 0.5 --glob_epochs 50 --z_dim 10 --beta 1.0 --local_LR 0.001 --should_log 1",
+        "python3 main.py --algorithm central_cvae --dataset fashion --sample_ratio 0.5 --glob_epochs 50 --z_dim 100 --beta 1.0 --local_LR 0.001 --should_log 1",
+        "python3 main.py --algorithm central_cvae --dataset svhn --sample_ratio 1.0 --glob_epochs 100 --z_dim 10 --beta 1.0 --local_LR 0.001 --should_log 1",
+    ]
 
     print("Number of experiments:", len(all_scripts))
 

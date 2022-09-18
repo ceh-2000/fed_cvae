@@ -6,8 +6,7 @@ import torch
 from torch.nn import CrossEntropyLoss
 from torch.optim import Adam
 from torch.utils.data import DataLoader
-from torchvision.transforms import (ColorJitter, Compose, RandomResizedCrop,
-                                    RandomRotation)
+from torchvision.transforms import Compose, RandomRotation
 from torchvision.utils import make_grid
 
 from models.decoder import ConditionalDecoder

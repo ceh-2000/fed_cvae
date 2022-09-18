@@ -76,6 +76,12 @@ You can adjust model specific parameters `--z_dim` to change the latent vector d
 Modify `--classifier_num_train_samples` to change the number of generated samples to train the server classifier and `--classifier_epochs` to adjust the server classifier train time.
 Modify `--decoder_num_train_samples` to change the number of generated samples to train the server decoder and `--decoder_epochs` to adjust the server decoder train time.
 
+#### Centralized CVAE
+Run the following from command line.
+```
+python3 main.py --algorithm central_cvae --dataset mnist --sample_ratio 0.1 --glob_epochs 5 --z_dim 10 --beta 1.0 --local_LR 0.001 --should_log 1
+```
+
 ### Experiments
 1. `--should_weight_exp`: Turn on (`1`) or off (`0`) weighting when averaging models.
 2. `--should_initialize_models_same`: Turn on (`1`) or off (`0`) initializing all user models with the same weights.
