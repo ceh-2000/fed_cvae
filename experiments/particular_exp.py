@@ -5,9 +5,11 @@ from utils import create_shell_files, populate_default_scripts
 if __name__ == "__main__":
     hosts = np.array([19, 20, 21])
     all_scripts = [
-        "python3 ../main.py --algorithm central_cvae --dataset mnist --sample_ratio 0.5 --glob_epochs 50 --z_dim 10 --beta 1.0 --local_LR 0.001 --should_log 1",
-        "python3 ../main.py --algorithm central_cvae --dataset fashion --sample_ratio 0.5 --glob_epochs 50 --z_dim 100 --beta 1.0 --local_LR 0.001 --should_log 1",
-        "python3 ../main.py --algorithm central_cvae --dataset svhn --sample_ratio 1.0 --glob_epochs 100 --z_dim 10 --beta 1.0 --local_LR 0.001 --should_log 1",
+        "python3 ../main.py --should_log 1 --num_users 10 --glob_epochs 1 --algorithm fedvae --dataset mnist --sample_ratio 0.5 --local_epochs 15 --local_LR 0.001 --z_dim 10 --beta 1.0 --classifier_num_train_samples 5000 --classifier_epochs 10 --decoder_num_train_samples 5000 --decoder_epochs 7 --decoder_LR 0.01 --use_adam 1 --alpha 0.01 --seed 1588 --cur_run_name runs/few_shot_seed=1588",
+        "python3 ../main.py --should_log 1 --num_users 10 --glob_epochs 1 --algorithm fedvae --dataset mnist --sample_ratio 0.5 --local_epochs 15 --local_LR 0.001 --z_dim 10 --beta 1.0 --classifier_num_train_samples 5000 --classifier_epochs 10 --decoder_num_train_samples 5000 --decoder_epochs 7 --decoder_LR 0.01 --use_adam 1 --alpha 0.01 --seed 1588 --cur_run_name runs/few_shot_seed=1588",
+        "python3 ../main.py --should_log 1 --num_users 10 --glob_epochs 1 --algorithm fedvae --dataset mnist --sample_ratio 0.5 --local_epochs 15 --local_LR 0.001 --z_dim 10 --beta 1.0 --classifier_num_train_samples 5000 --classifier_epochs 10 --decoder_num_train_samples 5000 --decoder_epochs 7 --decoder_LR 0.01 --use_adam 1 --alpha 0.01 --seed 1588 --cur_run_name runs/few_shot_seed=1588",
+        "python3 ../main.py --should_log 1 --num_users 10 --glob_epochs 1 --algorithm fedvae --dataset mnist --sample_ratio 0.5 --local_epochs 15 --local_LR 0.001 --z_dim 10 --beta 1.0 --classifier_num_train_samples 5000 --classifier_epochs 10 --decoder_num_train_samples 5000 --decoder_epochs 7 --decoder_LR 0.01 --use_adam 1 --alpha 0.01 --seed 1588 --cur_run_name runs/few_shot_seed=1588",
+        "python3 ../main.py --should_log 1 --num_users 10 --glob_epochs 1 --algorithm fedvae --dataset mnist --sample_ratio 0.5 --local_epochs 15 --local_LR 0.001 --z_dim 10 --beta 1.0 --classifier_num_train_samples 5000 --classifier_epochs 10 --decoder_num_train_samples 5000 --decoder_epochs 7 --decoder_LR 0.01 --use_adam 1 --alpha 0.01 --seed 1588 --cur_run_name runs/few_shot_seed=1588",
     ]
 
     print("Number of experiments:", len(all_scripts))
