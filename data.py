@@ -2,7 +2,7 @@
 Read in the data from a specified data source
 """
 import io
-import sys
+from collections import Counter
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -11,7 +11,7 @@ import seaborn as sns
 import torch
 import torchvision.utils
 from PIL import Image
-from torch.utils.data import Subset, random_split
+from torch.utils.data import DataLoader, Subset, random_split
 from torchvision.datasets import CIFAR10, MNIST, SVHN, FashionMNIST
 from torchvision.transforms import Compose, Normalize, Resize, ToTensor
 
@@ -323,23 +323,28 @@ class Data:
 
 
 if __name__ == "__main__":
-    SVHN_data = Data(
+    num_users = 10
+    num_classes = 10
+    alpha = 0.001
+    data = Data(
         1693,
-        "svhn",
-        num_users=20,
+        "mnist",
+        num_users=num_users,
         writer=None,
-        sample_ratio=1.0,
-        alpha=0.01,
+        sample_ratio=0.5,
+        alpha=alpha,
         normalize=False,
         visualize=True,
         central=False,
     )
-    print([len(SVHN_data.train_data[i]) for i in range(SVHN_data.num_users)])
-    print(sum([len(SVHN_data.train_data[i]) for i in range(SVHN_data.num_users)]))
+    print([len(data.train_data[i]) for i in range(data.num_users)])
+    print(sum([len(data.train_data[i]) for i in range(data.num_users)]))
 
-    from collections import Counter
+    arr = np.zeros((num_users, num_classes))
+    for n in range(num_users):
+        dl = DataLoader(data.train_data[n], batch_size=len(data.train_data[n]))
+        a_dict = Counter(next(iter(dl))[1].tolist())
+        for k in a_dict.keys():
+            arr[n][k] = a_dict.get(k)
 
-    from torch.utils.data import DataLoader
-
-    dl = DataLoader(SVHN_data.train_data[5], batch_size=len(SVHN_data.train_data[5]))
-    print(Counter(next(iter(dl))[1].tolist()))
+    np.savetxt(f"data_alpha={alpha}.csv", arr, delimiter=",")
