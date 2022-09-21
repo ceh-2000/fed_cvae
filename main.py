@@ -96,11 +96,15 @@ def run_job(args):
             "image_size": d.image_size,
             "beta": args.beta,
             "local_LR": args.local_LR,
+            "classifier_num_train_samples": args.classifier_num_train_samples,
+            "classifier_epochs": args.classifier_epochs,
+            "good_samples": args.good_samples_bool
         }
 
         v = CentralCVAE(params)
 
         v.train()
+        v.test()
 
     # Distribute training across user devices
     else:
@@ -320,6 +324,12 @@ if __name__ == "__main__":
         default=0.001,
         help="Learning rate to use for decoder KD fine-tuning",
     )
+    parser.add_argument(
+        "--good_samples_bool",
+        type=bool,
+        default=True,
+        help="Whether to generate good or poor samples from trained deocder",
+    )
 
     # Command line arguments for experiments
     parser.add_argument(
@@ -409,6 +419,7 @@ if __name__ == "__main__":
         print("Latent vector dimension for VAE:", args.z_dim)
         print("Weight on the KL divergence term (beta):", args.beta)
         print("Local learning rate:", args.local_LR)
+        print("Should we generate good samples?", "yes" if args.good_samples_bool else "no")
 
     if args.algorithm in ["fedprox", "oneshot", "fedvae", "onefedvae"]:
         print("MODEL SPECIFIC COMMAND LINE ARGUMENTS")
