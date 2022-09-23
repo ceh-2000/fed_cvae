@@ -28,6 +28,7 @@ class ServerFedVAE(Server):
         decoder_num_train_samples,
         decoder_epochs,
         decoder_LR,
+        uniform_range,
         should_weight,
         should_initialize_same,
         should_avg,
@@ -59,6 +60,7 @@ class ServerFedVAE(Server):
         self.classifier_epochs = classifier_epochs
 
         self.num_samples_per_class = 5  # Just for display purposes
+        self.uniform_range = uniform_range
 
         # Variables important for ablation experiments
         self.should_weight = should_weight
@@ -176,6 +178,8 @@ class ServerFedVAE(Server):
         y_vals = torch.Tensor()
         z_vals = torch.Tensor()
 
+        total_train_samples = 0
+        count_user = 0
         for u in users:
             u.model.eval()
 
@@ -185,8 +189,14 @@ class ServerFedVAE(Server):
             else:
                 user_num_train_samples = int(num_train_samples / self.num_users)
 
+            if count_user == self.num_users - 1:
+                user_num_train_samples = num_train_samples - total_train_samples
+            else:
+                total_train_samples += user_num_train_samples
+                count_user += 1
+
             z = u.model.sample_z(
-                user_num_train_samples, "uniform", uniform_width=(-1, 1)
+                user_num_train_samples, "uniform", uniform_width=self.uniform_range
             ).to(self.device)
 
             # Sample y's according to each user's target distribution
@@ -259,7 +269,9 @@ class ServerFedVAE(Server):
     def generate_data_from_aggregated_decoder(self):
         # Sample z's + y's from uniform distribution
         z_sample = self.users[0].model.sample_z(
-            self.classifier_num_train_samples, "uniform", uniform_width=(-1, 1)
+            self.classifier_num_train_samples,
+            "uniform",
+            uniform_width=self.uniform_range,
         )
         y_sample, y_hot_sample = self.sample_y()
 
@@ -410,7 +422,9 @@ class ServerFedVAE(Server):
         """
 
         num_samples = self.num_classes * self.num_samples_per_class
-        z_sample = self.users[0].model.sample_z(num_samples, "uniform")
+        z_sample = self.users[0].model.sample_z(
+            num_samples, "uniform", self.uniform_range
+        )
         y = torch.tensor(
             [i for i in range(self.num_classes)] * self.num_samples_per_class
         )
