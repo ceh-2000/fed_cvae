@@ -178,6 +178,8 @@ class ServerFedVAE(Server):
         y_vals = torch.Tensor()
         z_vals = torch.Tensor()
 
+        total_train_samples = 0
+        count_user = 0
         for u in users:
             u.model.eval()
 
@@ -186,6 +188,12 @@ class ServerFedVAE(Server):
                 user_num_train_samples = int(u.data_amt * num_train_samples)
             else:
                 user_num_train_samples = int(num_train_samples / self.num_users)
+
+            if count_user == self.num_users - 1:
+                user_num_train_samples = num_train_samples - total_train_samples
+            else:
+                total_train_samples += user_num_train_samples
+                count_user += 1
 
             z = u.model.sample_z(
                 user_num_train_samples, "uniform", uniform_width=self.uniform_range

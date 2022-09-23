@@ -156,6 +156,12 @@ def run_job(args):
         writer.close()
 
 
+def tuple_type(strings):
+    strings = strings.replace("(", "").replace(")", "")
+    mapped_int = map(float, strings.split(","))
+    return tuple(mapped_int)
+
+
 if __name__ == "__main__":
     ####################################################################################################################
     # Parse command line arguments
@@ -293,7 +299,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--uniform_range",
-        type=tuple,
+        type=tuple_type,
         default=(-1.0, 1.0),
         help="Range of values to use when sampling from the decoder's latent space.",
     )
