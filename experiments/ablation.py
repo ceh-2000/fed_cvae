@@ -13,7 +13,7 @@ if __name__ == "__main__":
     )
 
     experiments = [
-        "--should_weight_exp=1 --should_initialize_same_exp=0 --should_avg_exp=1 --should_fine_tune_exp=0",
+        "--should_weight_exp=1 --should_initialize_same_exp=1 --should_avg_exp=1 --should_fine_tune_exp=0",
     ]
     all_seeds = [1588, 1693, 7089, 4488, 3776]
     alpha_vals = [0.05, 0.01, 0.001]
