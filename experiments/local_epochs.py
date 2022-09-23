@@ -8,7 +8,7 @@ if __name__ == "__main__":
     hosts = np.array([1])
 
     all_scripts = []
-    datasets = ["mnist", "fashion"]
+    datasets = ["mnist", "fashion", "svhn"]
     algorithms = ["fedavg", "oneshot", "onefedvae", "fedvae"]
     default_script = (
         f"python3 ../main.py --should_log 1 --glob_epochs 1 --alpha 0.05 --num_users 10"
