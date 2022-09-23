@@ -3,10 +3,8 @@ import argparse
 import torch
 from torch.utils.tensorboard import SummaryWriter
 
-from central_cvae import CentralCVAE
 from data import Data
 from servers.server_fed_avg import ServerFedAvg
-from servers.server_fed_prox import ServerFedProx
 from servers.server_fed_vae import ServerFedVAE
 from servers.server_one_fed_vae import ServerOneFedVAE
 from servers.server_one_shot import ServerOneShot
@@ -25,31 +23,25 @@ def run_job(args):
             cur_run_name = f"runs/algorithm={args.algorithm}_dataset={args.dataset}_users={args.num_users}_local_epochs={args.local_epochs}_local_LR={args.local_LR}_alpha={args.alpha}_sample_ratio={args.sample_ratio}"
 
             # Adding in algo-specific hyperparams
-            if args.algorithm == "central":
-                cur_run_name = f"runs/algorithm=central_model_sampling_ratio={args.sample_ratio}_number_of_epochs={args.glob_epochs}"
-            elif args.algorithm == "central_cvae":
-                cur_run_name = f"runs/algorithm=central_cvae_model_sampling_ratio={args.sample_ratio}_number_of_epochs={args.glob_epochs}_z_dim={args.z_dim}_local_LR={args.local_LR}_beta={args.beta}"
-            elif args.algorithm == "fedavg":
+            if args.algorithm == "fedavg":
                 cur_run_name = cur_run_name + f"_glob_epochs={args.glob_epochs}"
-            elif args.algorithm == "fedprox":
-                cur_run_name = (
-                    cur_run_name + f"_glob_epochs={args.glob_epochs}_mu={args.mu}"
-                )
             elif args.algorithm == "oneshot":
                 cur_run_name = (
                     cur_run_name
                     + f"_sampling={args.one_shot_sampling}_K={args.K if args.one_shot_sampling != 'all' else args.num_users}"
                 )
-            elif args.algorithm == "fedvae":
-                cur_run_name = (
-                    cur_run_name
-                    + f"_z_dim={args.z_dim}_classifier_train_samples={args.classifier_num_train_samples}_classifier_epochs={args.classifier_epochs}_decoder_train_samples={args.decoder_num_train_samples}_decoder_epochs={args.decoder_epochs}_decoder_LR={args.decoder_LR}_transform_exp={args.transform_exp}"
-                )
             elif args.algorithm == "onefedvae":
                 cur_run_name = (
                     cur_run_name
-                    + f"_z_dim={args.z_dim}_beta={args.beta}_classifier_train_samples={args.classifier_num_train_samples}_classifier_epochs={args.classifier_epochs}"
+                    + f"_z_dim={args.z_dim}_beta={args.beta}_classifier_train_samples={args.classifier_num_train_samples}_classifier_epochs={args.classifier_epochs}_uniform_range={args.uniform_range}"
                 )
+            elif args.algorithm == "fedvae":
+                cur_run_name = (
+                    cur_run_name
+                    + f"_z_dim={args.z_dim}_classifier_train_samples={args.classifier_num_train_samples}_classifier_epochs={args.classifier_epochs}_decoder_train_samples={args.decoder_num_train_samples}_decoder_epochs={args.decoder_epochs}_decoder_LR={args.decoder_LR}_uniform_range={args.uniform_range}"
+                )
+            elif args.algorithm == "central":
+                cur_run_name = f"runs/algorithm=central_model_sampling_ratio={args.sample_ratio}_number_of_epochs={args.glob_epochs}"
         else:
             cur_run_name = args.cur_run_name
 
@@ -61,7 +53,7 @@ def run_job(args):
         args.dataset,
         args.num_users,
         writer,
-        "central" in args.algorithm,
+        args.algorithm == "central",
         alpha=args.alpha,
         sample_ratio=args.sample_ratio,
         visualize=True if args.alpha is not None else False,
@@ -82,25 +74,6 @@ def run_job(args):
 
         i.train()
         i.test()
-
-    elif args.algorithm == "central_cvae":
-        params = {
-            "device": device,
-            "glob_epoch": args.glob_epochs,
-            "train_data": d.train_data,
-            "test_data": d.test_data,
-            "num_channels": d.num_channels,
-            "num_classes": d.num_classes,
-            "writer": writer,
-            "z_dim": args.z_dim,
-            "image_size": d.image_size,
-            "beta": args.beta,
-            "local_LR": args.local_LR,
-        }
-
-        v = CentralCVAE(params)
-
-        v.train()
 
     # Distribute training across user devices
     else:
@@ -123,8 +96,6 @@ def run_job(args):
 
         if args.algorithm == "fedavg":
             s = ServerFedAvg(default_params)
-        elif args.algorithm == "fedprox":
-            s = ServerFedProx(default_params, args.mu)
         elif args.algorithm == "oneshot":
             s = ServerOneShot(
                 default_params,
@@ -141,6 +112,7 @@ def run_job(args):
                 args.beta,
                 args.classifier_num_train_samples,
                 args.classifier_epochs,
+                args.uniform_range,
                 args.should_weight_exp,
                 args.should_initialize_same_exp,
                 args.heterogeneous_models_exp,
@@ -156,6 +128,7 @@ def run_job(args):
                 args.decoder_num_train_samples,
                 args.decoder_epochs,
                 args.decoder_LR,
+                args.uniform_range,
                 args.should_weight_exp,
                 args.should_initialize_same_exp,
                 args.should_avg_exp,
@@ -184,6 +157,10 @@ def run_job(args):
 
 
 if __name__ == "__main__":
+    ####################################################################################################################
+    # Parse command line arguments
+    ####################################################################################################################
+
     # Extract command line arguments
     parser = argparse.ArgumentParser()
 
@@ -276,12 +253,6 @@ if __name__ == "__main__":
         default=2,
     )
     parser.add_argument(
-        "--mu",
-        type=float,
-        help="Weight on the proximal term in the local objective (FedProx)",
-        default=1.0,
-    )
-    parser.add_argument(
         "--z_dim", type=int, help="Latent vector dimension for VAE", default=50
     )
     parser.add_argument(
@@ -319,6 +290,12 @@ if __name__ == "__main__":
         type=float,
         default=0.001,
         help="Learning rate to use for decoder KD fine-tuning",
+    )
+    parser.add_argument(
+        "--uniform_range",
+        type=tuple,
+        default=(-1.0, 1.0),
+        help="Range of values to use when sampling from the decoder's latent space.",
     )
 
     # Command line arguments for experiments
@@ -369,8 +346,13 @@ if __name__ == "__main__":
     args.should_log = bool(args.should_log)
     args.use_adam = bool(args.use_adam)
 
-    # Get available gpus
+    # Get available gpu
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
+    ####################################################################################################################
+    # Output model arguments
+    ####################################################################################################################
+
     print("_________________________________________________\n")
     print("GENERAL COMMAND LINE ARGUMENTS")
     print()
@@ -381,10 +363,10 @@ if __name__ == "__main__":
     print("Logging?", "yes" if args.should_log else "no")
     print("Model seed:", args.seed)
     print("Data seed:", args.data_seed)
-    if args.algorithm != "central_cvae":
-        print(f"Using {'Adam' if args.use_adam else 'SGD'} as the local optimizer")
 
-    if "central" not in args.algorithm:
+    # FedAvg-specific parameters
+    if args.algorithm == "fedavg":
+        print(f"Using {'Adam' if args.use_adam else 'SGD'} as the local optimizer")
         print(
             "Level of heterogeneity (alpha):",
             args.alpha if args.alpha is not None else "perfectly homogeneous",
@@ -392,92 +374,136 @@ if __name__ == "__main__":
         print("Number of users for training:", args.num_users)
         print("Number of local epochs:", args.local_epochs)
         print("Local learning rate:", args.local_LR)
-    if args.algorithm in ["fedavg", "fedprox", "fedvae"]:
         print("Number of global epochs:", args.glob_epochs)
         print(
             "Fraction of users sampled for each communication round:",
             args.user_fraction,
         )
-    if args.algorithm in ["oneshot", "onefedvae"]:
+
+    # OneShot-specific parameters
+    elif args.algorithm == "oneshot":
+        print(f"Using {'Adam' if args.use_adam else 'SGD'} as the local optimizer")
+        print(
+            "Level of heterogeneity (alpha):",
+            args.alpha if args.alpha is not None else "perfectly homogeneous",
+        )
+        print("Number of users for training:", args.num_users)
+        print("Number of local epochs:", args.local_epochs)
+        print("Local learning rate:", args.local_LR)
+
         args.glob_epochs = 1
         print("Number of global epochs:", 1)
-    if "central" in args.algorithm:
+        print("One shot sampling method:", args.one_shot_sampling)
+        print(
+            "Portion of data used for training:",
+            args.user_data_split if args.one_shot_sampling == "validation" else 1,
+        )
+        print(
+            "Number of users to select for one shot ensembling:",
+            args.K if args.one_shot_sampling != "all" else "all",
+        )
+
+    # OneFedVAE-specific parameters
+    elif args.algorithm == "onefedvae":
+        print(f"Using {'Adam' if args.use_adam else 'SGD'} as the local optimizer")
+        print(
+            "Level of heterogeneity (alpha):",
+            args.alpha if args.alpha is not None else "perfectly homogeneous",
+        )
+        print("Number of users for training:", args.num_users)
+        print("Number of local epochs:", args.local_epochs)
+        print("Local learning rate:", args.local_LR)
+
+        args.glob_epochs = 1
+        print("Number of global epochs:", 1)
+
+        print("Latent vector dimension for VAE:", args.z_dim)
+        print("Weight on the KL divergence term (beta):", args.beta)
+        print(
+            "Number of samples to generate for server classifier training:",
+            args.classifier_num_train_samples,
+        )
+        print(
+            "Number of epochs to train classifier in server:",
+            args.classifier_epochs,
+        )
+        print("Range of values to use for decoder sample:", args.uniform_range)
+
+    # FedVAE-specific parameters
+    elif args.algorithm == "fedvae":
+        print(f"Using {'Adam' if args.use_adam else 'SGD'} as the local optimizer")
+        print(
+            "Level of heterogeneity (alpha):",
+            args.alpha if args.alpha is not None else "perfectly homogeneous",
+        )
+        print("Number of users for training:", args.num_users)
+        print("Number of local epochs:", args.local_epochs)
+        print("Local learning rate:", args.local_LR)
+        print("Number of global epochs:", args.glob_epochs)
+        print(
+            "Fraction of users sampled for each communication round:",
+            args.user_fraction,
+        )
+        print("Latent vector dimension for VAE:", args.z_dim)
+        print("Weight on the KL divergence term (beta):", args.beta)
+        print(
+            "Number of samples to generate for server classifier training:",
+            args.classifier_num_train_samples,
+        )
+        print(
+            "Number of epochs to train classifier in server:",
+            args.classifier_epochs,
+        )
+        print(
+            "Number of images and labels to generate for server decoder KD fine-tuning:",
+            args.decoder_num_train_samples,
+        )
+        print(
+            "Number of epochs to fine-tune the server decoder for:",
+            args.decoder_epochs,
+        )
+        print(
+            "Learning rate for server decoder fine-tuning:",
+            args.decoder_LR,
+        )
+        print("Range of values to use for decoder sample:", args.uniform_range)
+
+    # Centralized model-specific parameters
+    elif args.algorithm == "central":
+        print(f"Using {'Adam' if args.use_adam else 'SGD'} as the local optimizer")
         print("Number of epochs:", args.glob_epochs)
 
     print()
-    if args.algorithm == "central_cvae":
-        print("Latent vector dimension for VAE:", args.z_dim)
-        print("Weight on the KL divergence term (beta):", args.beta)
-        print("Local learning rate:", args.local_LR)
 
-    if args.algorithm in ["fedprox", "oneshot", "fedvae", "onefedvae"]:
-        print("MODEL SPECIFIC COMMAND LINE ARGUMENTS")
-        print()
+    ####################################################################################################################
+    # Experiment information
+    ####################################################################################################################
 
-        if args.algorithm == "oneshot":
-            print("One shot sampling method:", args.one_shot_sampling)
-            print(
-                "Portion of data used for training:",
-                args.user_data_split if args.one_shot_sampling == "validation" else 1,
-            )
-            print(
-                "Number of users to select for one shot ensembling:",
-                args.K if args.one_shot_sampling != "all" else "all",
-            )
-        elif args.algorithm == "fedprox":
-            print("Weight on the proximal objective term (mu):", args.mu)
-        elif args.algorithm in ["fedvae", "onefedvae"]:
-            print("Latent vector dimension for VAE:", args.z_dim)
-            print("Weight on the KL divergence term (beta):", args.beta)
-            print(
-                "Number of samples to generate for server classifier training:",
-                args.classifier_num_train_samples,
-            )
-            print(
-                "Number of epochs to train classifier in server:",
-                args.classifier_epochs,
-            )
-            if args.algorithm == "fedvae":
-                print(
-                    "Number of images and labels to generate for server decoder KD fine-tuning:",
-                    args.decoder_num_train_samples,
-                )
-                print(
-                    "Number of epochs to fine-tune the server decoder for:",
-                    args.decoder_epochs,
-                )
-                print(
-                    "Learning rate for server decoder fine-tuning:",
-                    args.decoder_LR,
-                )
-
-        print()
-
-        if args.cur_run_name != "":
-            print(
-                "Should we weight the server decoder aggregation and sampling?",
-                "yes" if args.should_weight_exp else "no",
-            )
-            print(
-                "Should initialize user models the same?",
-                "yes" if args.should_initialize_same_exp else "no",
-            )
-            print(
-                "Should we average the server decoder?",
-                "yes" if args.should_avg_exp else "no",
-            )
-            print(
-                "Should we fine tune the server decoder?",
-                "yes" if args.should_fine_tune_exp else "no",
-            )
-            print(
-                "Should we use heterogeneous models?",
-                "yes" if len(args.heterogeneous_models_exp) > 1 else "no",
-            )
-            print(
-                "Should we apply transforms?",
-                "yes" if args.transform_exp == 1 else "no",
-            )
+    if args.cur_run_name != "":
+        print(
+            "Should we weight the server decoder aggregation and sampling?",
+            "yes" if args.should_weight_exp else "no",
+        )
+        print(
+            "Should initialize user models the same?",
+            "yes" if args.should_initialize_same_exp else "no",
+        )
+        print(
+            "Should we average the server decoder?",
+            "yes" if args.should_avg_exp else "no",
+        )
+        print(
+            "Should we fine tune the server decoder?",
+            "yes" if args.should_fine_tune_exp else "no",
+        )
+        print(
+            "Should we use heterogeneous models?",
+            "yes" if len(args.heterogeneous_models_exp) > 1 else "no",
+        )
+        print(
+            "Should we apply transforms?",
+            "yes" if args.transform_exp == 1 else "no",
+        )
 
     print("_________________________________________________\n")
 
