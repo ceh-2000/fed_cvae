@@ -83,7 +83,7 @@ Modify `--uniform_range` to change the uniform range that the decoder uses to dr
 2. `--should_initialize_models_same`: Turn on (`1`) or off (`0`) initializing all user models with the same weights.
 3. `--should_avg_exp`: Turn on (`1`) or off (`0`) averaging all user decoders for the server decoder (FedVAE-specific).
 4. `--should_fine_tune_exp`: Turn on (`1`) or off (`0`) fine-tuning the server decoder (FedVAE-specific).
-5. `--heterogeneous_models_exp`: Choose whether to use heterogeneous models (`1`) or not (`0`). Pass in a string containing which versions of the CVAE to use. Passing in a string of length 1 yields homogeneous models. Version 0 is the standard CVAE, version 1 is a smaller alternate, and version 2 is ResNet-based. Ex. `"012"`
+5. `--heterogeneous_models_exp`: Choose whether to use heterogeneous models or not. Pass in a string containing which versions of the CVAE to use. Passing in a string of length 1 yields homogeneous models. Version 0 is the standard CVAE, version 1 is a smaller alternate, and version 2 is ResNet-based. Ex. `"012"`
 6. `--transform_exp`: Choose whether to apply transforms for FedVAE with SVHN (`1`) or not (`0`). 
 
 ### Logging
