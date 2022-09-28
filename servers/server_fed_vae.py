@@ -380,6 +380,18 @@ class ServerFedVAE(Server):
             self.qualitative_check(
                 e, self.users[0].model.decoder, "Novel images user 0 decoder"
             )
+            self.qualitative_check(
+                e, self.users[1].model.decoder, "Novel images user 1 decoder"
+            )
+            self.qualitative_check(
+                e, self.users[2].model.decoder, "Novel images user 2 decoder"
+            )
+            self.qualitative_check(
+                e, self.users[3].model.decoder, "Novel images user 3 decoder"
+            )
+            self.qualitative_check(
+                e, self.users[4].model.decoder, "Novel images user 4 decoder"
+            )
 
             # Generate a dataloader holding the generated images and labels
             self.classifier_dataloader = self.generate_data_from_aggregated_decoder()
