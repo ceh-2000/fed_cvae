@@ -196,7 +196,7 @@ class ServerFedVAE(Server):
                 count_user += 1
 
             z = u.model.sample_z(
-                user_num_train_samples, "trunc", uniform_width=self.uniform_range
+                user_num_train_samples, "truncnorm", width=self.uniform_range
             ).to(self.device)
 
             # Sample y's according to each user's target distribution
@@ -270,8 +270,8 @@ class ServerFedVAE(Server):
         # Sample z's + y's from uniform distribution
         z_sample = self.users[0].model.sample_z(
             self.classifier_num_train_samples,
-            "trunc",
-            uniform_width=self.uniform_range,
+            "truncnorm",
+            width=self.uniform_range,
         )
         y_sample, y_hot_sample = self.sample_y()
 
@@ -435,7 +435,7 @@ class ServerFedVAE(Server):
 
         num_samples = self.num_classes * self.num_samples_per_class
         z_sample = self.users[0].model.sample_z(
-            num_samples, "trunc", self.uniform_range
+            num_samples, "truncnorm", width=self.uniform_range
         )
         y = torch.tensor(
             [i for i in range(self.num_classes)] * self.num_samples_per_class

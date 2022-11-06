@@ -106,16 +106,16 @@ class CVAE(nn.Module):
         if dist == "mvn":  # multivariate normal
             z = self.mvn_dist.sample((num_samples,))
         elif dist == "truncnorm":  # truncated multivariate normal
-            truncnorm_tensor = torch.tensor(
+            truncnorm_tensor = torch.FloatTensor(
                 truncnorm.rvs(a=width[0], b=width[1], size=num_samples * self.z_dim)
             )
-            z = torch.reshape(truncnorm_tensor, (num_samples, z_dim))
+            z = torch.reshape(truncnorm_tensor, (num_samples, self.z_dim))
         elif dist == "uniform":  # uniform
             z = torch.FloatTensor(num_samples, self.z_dim).uniform_(*width)
 
         else:
             raise NotImplementedError(
-                "Only multivariate normal (mvn), truncated multivariate normal (trunc), and uniform (uniform) distributions supported."
+                "Only multivariate normal (mvn), truncated multivariate normal (truncnorm), and uniform (uniform) distributions supported."
             )
 
         return z
