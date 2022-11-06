@@ -20,69 +20,99 @@ if __name__ == "__main__":
     # FedVAE tuning (use the same values for OneFedVAE)
     algorithm = "fedvae"
     beta = 1.0
-    classifier_num_train_samples = 5000
-    decoder_num_train_samples = 5000
     use_adam = 1
+    local_epochs = 50
     local_LR = 0.001
     decoder_LR = 0.01
     should_weight = 1
     transform_exp = 0
-    classifier_num_epochs = 5
+    z_dim = 15
 
-    z_dim_vals = [10, 15, 25, 50, 100]
-    local_epoch_vals = [10, 30, 50, 70, 100]
-    decoder_num_epochs_vals = [50, 70, 80, 90, 110, 150]
+    classifier_num_train_samples_vals = [2500, 5000, 7500, 10000]
+    classifier_epochs_vals = [3, 5, 7, 10]
+    decoder_num_train_samples_vals = [2500, 5000, 7500, 10000]
+    decoder_num_epochs_vals = [30, 40, 50, 100, 120]
+
+    for dataset in dataset_vals:
+        for classifier_num_train_samples in classifier_num_train_samples_vals:
+            for classifier_num_epochs in classifier_epochs_vals:
+                for decoder_num_train_samples in decoder_num_train_samples_vals:
+                    for decoder_num_epochs in decoder_num_epochs_vals:
+                        all_scripts.append(
+                            f"python3 ../main.py --should_log {should_log} --use_adam {use_adam} "
+                            f"--algorithm {algorithm} --dataset {dataset} --num_users {num_users} --alpha {alpha} "
+                            f"--sample_ratio {sample_ratio} --glob_epochs {glob_epochs} --local_epochs {local_epochs} "
+                            f"--z_dim {z_dim} --beta {beta} "
+                            f"--classifier_num_train_samples {classifier_num_train_samples} "
+                            f"--decoder_num_train_samples {decoder_num_train_samples} "
+                            f"--classifier_epochs {classifier_num_epochs} --decoder_epochs {decoder_num_epochs} "
+                            f"--local_LR {local_LR} --decoder_LR {decoder_LR} --should_weight {should_weight} "
+                            f"--transform_exp {transform_exp} --heterogeneous_models_exp 0"
+                        )
+
+    algorithm = "onefedvae"
+    beta = 1.0
+    use_adam = 1
+    local_epochs = 50
+    local_LR = 0.001
+    should_weight = 1
+    transform_exp = 0
+
+    z_dim_vals = [10, 15, 20, 25, 50, 100]
+    local_epochs_vals = [10, 15, 20, 25, 50, 100]
+    classifier_num_train_samples_vals = [2500, 5000, 7500, 10000]
+    classifier_epochs_vals = [3, 5, 7, 10]
 
     for dataset in dataset_vals:
         for z_dim in z_dim_vals:
-            for local_epochs in local_epoch_vals:
-                for decoder_num_epochs in decoder_num_epochs_vals:
-                    all_scripts.append(
-                        f"python3 ../main.py --should_log {should_log} --use_adam {use_adam} "
-                        f"--algorithm {algorithm} --dataset {dataset} --num_users {num_users} --alpha {alpha} "
-                        f"--sample_ratio {sample_ratio} --glob_epochs {glob_epochs} --local_epochs {local_epochs} "
-                        f"--z_dim {z_dim} --beta {beta} "
-                        f"--classifier_num_train_samples {classifier_num_train_samples} "
-                        f"--decoder_num_train_samples {decoder_num_train_samples} "
-                        f"--classifier_epochs {classifier_num_epochs} --decoder_epochs {decoder_num_epochs} "
-                        f"--local_LR {local_LR} --decoder_LR {decoder_LR} --should_weight {should_weight} "
-                        f"--transform_exp {transform_exp} --heterogeneous_models_exp 0"
-                    )
-
-    # One-shot FL tuning
-    algorithm = "oneshot"
-    use_adam = 1
-
-    local_epochs_vals = [3, 5, 7, 10, 15, 20]
-    local_LR_vals = [0.01, 0.001, 0.0001]
-
-    one_shot_sampling = "all"
-    for dataset in dataset_vals:
-        for local_LR in local_LR_vals:
             for local_epochs in local_epochs_vals:
-                all_scripts.append(
-                    f"python3 ../main.py --should_log {should_log} --use_adam {use_adam} --algorithm {algorithm} "
-                    f"--num_users {num_users} --glob_epochs {glob_epochs} --local_epochs {local_epochs} --alpha {alpha} "
-                    f"--sample_ratio {sample_ratio} --one_shot_sampling {one_shot_sampling} --dataset {dataset} "
-                    f"--local_LR {local_LR}"
-                )
+                for classifier_num_train_samples in classifier_num_train_samples_vals:
+                    for classifier_num_epochs in classifier_epochs_vals:
+                        all_scripts.append(
+                            f"python3 ../main.py --should_log {should_log} --use_adam {use_adam} "
+                            f"--algorithm {algorithm} --dataset {dataset} --num_users {num_users} --alpha {alpha} "
+                            f"--sample_ratio {sample_ratio} --glob_epochs {glob_epochs} --local_epochs {local_epochs} "
+                            f"--z_dim {z_dim} --beta {beta} "
+                            f"--classifier_num_train_samples {classifier_num_train_samples} "
+                            f"--classifier_epochs {classifier_num_epochs} "
+                            f"--local_LR {local_LR} --should_weight {should_weight} "
+                            f"--transform_exp {transform_exp} --heterogeneous_models_exp 0"
+                        )
 
-    # FedAvg Tuning
-    algorithm = "fedavg"
-    use_adam = 1
-
-    local_LR_vals = [0.01, 0.001, 0.0001]
-    local_epochs_vals = [3, 5, 7, 10, 15, 20]
-
-    for dataset in dataset_vals:
-        for local_epochs in local_epochs_vals:
-            for local_LR in local_LR_vals:
-                all_scripts.append(
-                    f"python3 ../main.py --should_log {should_log} --use_adam {use_adam} --algorithm {algorithm} "
-                    f"--num_users {num_users} --glob_epochs {glob_epochs} --alpha {alpha} "
-                    f"--sample_ratio {sample_ratio} --dataset {dataset} --local_LR {local_LR} "
-                    f"--local_epochs {local_epochs}"
-                )
+    # # One-shot FL tuning
+    # algorithm = "oneshot"
+    # use_adam = 1
+    #
+    # local_epochs_vals = [3, 5, 7, 10, 15, 20]
+    # local_LR_vals = [0.01, 0.001, 0.0001]
+    #
+    # one_shot_sampling = "all"
+    # for dataset in dataset_vals:
+    #     for local_LR in local_LR_vals:
+    #         for local_epochs in local_epochs_vals:
+    #             all_scripts.append(
+    #                 f"python3 ../main.py --should_log {should_log} --use_adam {use_adam} --algorithm {algorithm} "
+    #                 f"--num_users {num_users} --glob_epochs {glob_epochs} --local_epochs {local_epochs} --alpha {alpha} "
+    #                 f"--sample_ratio {sample_ratio} --one_shot_sampling {one_shot_sampling} --dataset {dataset} "
+    #                 f"--local_LR {local_LR}"
+    #             )
+    #
+    # # FedAvg Tuning
+    # algorithm = "fedavg"
+    # use_adam = 1
+    #
+    # local_LR_vals = [0.01, 0.001, 0.0001]
+    # local_epochs_vals = [3, 5, 7, 10, 15, 20]
+    #
+    # for dataset in dataset_vals:
+    #     for local_epochs in local_epochs_vals:
+    #         for local_LR in local_LR_vals:
+    #             all_scripts.append(
+    #                 f"python3 ../main.py --should_log {should_log} --use_adam {use_adam} --algorithm {algorithm} "
+    #                 f"--num_users {num_users} --glob_epochs {glob_epochs} --alpha {alpha} "
+    #                 f"--sample_ratio {sample_ratio} --dataset {dataset} --local_LR {local_LR} "
+    #                 f"--local_epochs {local_epochs}"
+    #             )
 
     print("Number of experiments:", len(all_scripts))
 
