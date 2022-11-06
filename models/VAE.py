@@ -1,6 +1,8 @@
 import numpy as np
+import seaborn as sns
 import torch
 from matplotlib import pyplot as plt
+from scipy.stats import truncnorm
 from torch import nn
 from torch.autograd import Variable
 from torch.distributions.multivariate_normal import MultivariateNormal
@@ -9,8 +11,7 @@ from models.decoder import (ConditionalDecoder, ConditionalDecoderAlt,
                             ConditionalDecoderResNet)
 from models.encoder import (ConditionalEncoder, ConditionalEncoderAlt,
                             ConditionalEncoderResNet)
-from scipy.stats import truncnorm
-import seaborn as sns
+
 
 class CVAE(nn.Module):
     """
@@ -105,7 +106,9 @@ class CVAE(nn.Module):
         if dist == "mvn":  # multivariate normal
             z = self.mvn_dist.sample((num_samples,))
         elif dist == "truncnorm":  # truncated multivariate normal
-            truncnorm_tensor = torch.tensor(truncnorm.rvs(a=width[0], b=width[1], size=num_samples * self.z_dim))
+            truncnorm_tensor = torch.tensor(
+                truncnorm.rvs(a=width[0], b=width[1], size=num_samples * self.z_dim)
+            )
             z = torch.reshape(truncnorm_tensor, (num_samples, z_dim))
         elif dist == "uniform":  # uniform
             z = torch.FloatTensor(num_samples, self.z_dim).uniform_(*width)
@@ -138,7 +141,7 @@ if __name__ == "__main__":
     std = 1
 
     # Uniform example
-    uniform_width = (-1*std, std)
+    uniform_width = (-1 * std, std)
     uniform_tensor = torch.FloatTensor(num_samples, z_dim).uniform_(*uniform_width)
     print(uniform_tensor.shape)
 
@@ -147,7 +150,9 @@ if __name__ == "__main__":
     plt.show()
 
     # Truncated normal example
-    truncnorm_tensor = torch.tensor(truncnorm.rvs(a=-1*std, b=std, size=num_samples*z_dim))
+    truncnorm_tensor = torch.tensor(
+        truncnorm.rvs(a=-1 * std, b=std, size=num_samples * z_dim)
+    )
     truncnorm_tensor = torch.reshape(truncnorm_tensor, (num_samples, z_dim))
     print(truncnorm_tensor.shape)
 
@@ -179,4 +184,3 @@ if __name__ == "__main__":
     # print("X reconstruction:", x_recon.shape)
     # print("mu:", mu.shape)
     # print("logvar:", logvar.shape)
-
