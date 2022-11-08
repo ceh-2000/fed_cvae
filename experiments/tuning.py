@@ -27,11 +27,12 @@ if __name__ == "__main__":
     should_weight = 1
     transform_exp = 0
     z_dim = 15
+    uniform_range = (-3.0, 3.0)
 
-    classifier_num_train_samples_vals = [2500, 5000, 7500, 10000]
+    classifier_num_train_samples_vals = [2500, 5000, 7500]
     classifier_epochs_vals = [3, 5, 7, 10]
-    decoder_num_train_samples_vals = [2500, 5000, 7500, 10000]
-    decoder_num_epochs_vals = [30, 40, 50, 100, 120]
+    decoder_num_train_samples_vals = [7500, 10000, 12500]
+    decoder_num_epochs_vals = [30, 40, 50, 60]
 
     for dataset in dataset_vals:
         for classifier_num_train_samples in classifier_num_train_samples_vals:
@@ -42,7 +43,7 @@ if __name__ == "__main__":
                             f"python3 ../main.py --should_log {should_log} --use_adam {use_adam} "
                             f"--algorithm {algorithm} --dataset {dataset} --num_users {num_users} --alpha {alpha} "
                             f"--sample_ratio {sample_ratio} --glob_epochs {glob_epochs} --local_epochs {local_epochs} "
-                            f"--z_dim {z_dim} --beta {beta} "
+                            f'--z_dim {z_dim} --beta {beta} --uniform_range "{uniform_range}" '
                             f"--classifier_num_train_samples {classifier_num_train_samples} "
                             f"--decoder_num_train_samples {decoder_num_train_samples} "
                             f"--classifier_epochs {classifier_num_epochs} --decoder_epochs {decoder_num_epochs} "
@@ -53,15 +54,15 @@ if __name__ == "__main__":
     algorithm = "onefedvae"
     beta = 1.0
     use_adam = 1
-    local_epochs = 50
     local_LR = 0.001
     should_weight = 1
     transform_exp = 0
+    uniform_range = (-3.0, 3.0)
 
-    z_dim_vals = [10, 15, 20, 25, 50, 100]
-    local_epochs_vals = [10, 15, 20, 25, 50, 100]
-    classifier_num_train_samples_vals = [2500, 5000, 7500, 10000]
-    classifier_epochs_vals = [3, 5, 7, 10]
+    z_dim_vals = [10, 15, 20, 25]
+    local_epochs_vals = [25, 50, 80, 100, 120]
+    classifier_num_train_samples_vals = [2500, 5000, 7500]
+    classifier_epochs_vals = [3, 5, 7]
 
     for dataset in dataset_vals:
         for z_dim in z_dim_vals:
@@ -72,7 +73,7 @@ if __name__ == "__main__":
                             f"python3 ../main.py --should_log {should_log} --use_adam {use_adam} "
                             f"--algorithm {algorithm} --dataset {dataset} --num_users {num_users} --alpha {alpha} "
                             f"--sample_ratio {sample_ratio} --glob_epochs {glob_epochs} --local_epochs {local_epochs} "
-                            f"--z_dim {z_dim} --beta {beta} "
+                            f'--z_dim {z_dim} --beta {beta} --uniform_range "{uniform_range}" '
                             f"--classifier_num_train_samples {classifier_num_train_samples} "
                             f"--classifier_epochs {classifier_num_epochs} "
                             f"--local_LR {local_LR} --should_weight {should_weight} "

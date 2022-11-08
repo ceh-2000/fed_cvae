@@ -1,7 +1,7 @@
 sample_ratio=1.0
-local_epochs=15
+local_epochs=100
 local_LR=0.001
-z_dim=100
+z_dim=15
 beta=1.0
 classifier_num_train_samples=5000
 classifier_epochs=5

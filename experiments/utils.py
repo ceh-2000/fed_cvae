@@ -87,7 +87,10 @@ def populate_default_scripts(datasets, algorithms, default_script):
             new_script = f"{default_script} --algorithm {algorithm} --dataset {dataset}"
             for p in params:
                 key, val = p.split("=")
-                new_script = f"{new_script} --{key} {val.strip()}"
+                if key == "uniform_range":
+                    new_script = f'{new_script} --{key} "{val.strip()}"'
+                else:
+                    new_script = f"{new_script} --{key} {val.strip()}"
 
             default_scripts_dict[f"{algorithm}_dataset={dataset}"] = new_script
 

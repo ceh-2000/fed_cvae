@@ -3,11 +3,11 @@ import numpy as np
 from utils import create_shell_files, populate_default_scripts
 
 if __name__ == "__main__":
-    hosts = np.array([19, 20, 21, 22, 23, 24])
+    hosts = np.array([7, 8, 9, 10, 12])
 
     all_scripts = []
-    datasets = ["svhn"]
-    algorithms = ["fedvae", "onefedvae", "fedavg", "oneshot"]
+    datasets = ["mnist", "fashion", "svhn"]
+    algorithms = ["fedvae", "onefedvae"]
     default_script = f"python3 ../main.py --should_log 1 --num_users 10 --glob_epochs 1"
 
     default_scripts_dict = populate_default_scripts(
@@ -16,7 +16,7 @@ if __name__ == "__main__":
 
     all_seeds = [1588, 1693, 7089, 4488, 3776]
 
-    alphas = [0.1, 0.05, 0.01, 0.001]
+    alphas = [0.05, 0.01, 0.001]
 
     for seed in all_seeds:
         for alpha in alphas:
