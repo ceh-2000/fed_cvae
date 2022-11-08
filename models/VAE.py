@@ -1,4 +1,8 @@
+import numpy as np
+import seaborn as sns
 import torch
+from matplotlib import pyplot as plt
+from scipy.stats import truncnorm
 from torch import nn
 from torch.autograd import Variable
 from torch.distributions.multivariate_normal import MultivariateNormal
@@ -97,15 +101,21 @@ class CVAE(nn.Module):
         eps = Variable(std.data.new(std.size()).normal_())
         return mu + std * eps
 
-    def sample_z(self, num_samples, dist, uniform_width=(-1, 1)):
+    def sample_z(self, num_samples, dist, width=(-1, 1)):
         """Sample latent vectors"""
         if dist == "mvn":  # multivariate normal
             z = self.mvn_dist.sample((num_samples,))
+        elif dist == "truncnorm":  # truncated multivariate normal
+            truncnorm_tensor = torch.FloatTensor(
+                truncnorm.rvs(a=width[0], b=width[1], size=num_samples * self.z_dim)
+            )
+            z = torch.reshape(truncnorm_tensor, (num_samples, self.z_dim))
         elif dist == "uniform":  # uniform
-            z = torch.FloatTensor(num_samples, self.z_dim).uniform_(*uniform_width)
+            z = torch.FloatTensor(num_samples, self.z_dim).uniform_(*width)
+
         else:
             raise NotImplementedError(
-                "Only multivariate normal (mvn) and uniform (uniform) distributions supported."
+                "Only multivariate normal (mvn), truncated multivariate normal (truncnorm), and uniform (uniform) distributions supported."
             )
 
         return z
@@ -126,27 +136,51 @@ class CVAE(nn.Module):
 
 
 if __name__ == "__main__":
-    # Create new instance of model
-    img_size = 32
-    num_classes = 10
-    num_channels = 1
-    z_dim = 50
-    version = 1
+    num_samples = 500000
+    z_dim = 10
+    std = 1
 
-    model = CVAE(num_classes, num_channels, z_dim, img_size, version)
+    # Uniform example
+    uniform_width = (-1 * std, std)
+    uniform_tensor = torch.FloatTensor(num_samples, z_dim).uniform_(*uniform_width)
+    print(uniform_tensor.shape)
 
-    # Generate dummy data
-    X = torch.rand((2, 1, 32, 32))
-    y_hot = torch.Tensor(
-        [[0, 1, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 1, 0, 0, 0, 0, 0, 0, 0]]
+    # Visual check
+    sns.histplot(data=uniform_tensor[:, 0])
+    plt.show()
+
+    # Truncated normal example
+    truncnorm_tensor = torch.tensor(
+        truncnorm.rvs(a=-1 * std, b=std, size=num_samples * z_dim)
     )
+    truncnorm_tensor = torch.reshape(truncnorm_tensor, (num_samples, z_dim))
+    print(truncnorm_tensor.shape)
 
-    print("X:", X.shape)
-    print("y one-hot-encoded:", y_hot.shape)
-    print()
+    # Visual check
+    sns.histplot(data=truncnorm_tensor[:, 0])
+    plt.show()
 
-    # Run model forward pass
-    x_recon, mu, logvar = model(X, y_hot)
-    print("X reconstruction:", x_recon.shape)
-    print("mu:", mu.shape)
-    print("logvar:", logvar.shape)
+    # # Create new instance of model
+    # img_size = 32
+    # num_classes = 10
+    # num_channels = 1
+    # z_dim = 50
+    # version = 1
+    #
+    # model = CVAE(num_classes, num_channels, z_dim, img_size, version)
+    #
+    # # Generate dummy data
+    # X = torch.rand((2, 1, 32, 32))
+    # y_hot = torch.Tensor(
+    #     [[0, 1, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 1, 0, 0, 0, 0, 0, 0, 0]]
+    # )
+    #
+    # print("X:", X.shape)
+    # print("y one-hot-encoded:", y_hot.shape)
+    # print()
+    #
+    # # Run model forward pass
+    # x_recon, mu, logvar = model(X, y_hot)
+    # print("X reconstruction:", x_recon.shape)
+    # print("mu:", mu.shape)
+    # print("logvar:", logvar.shape)
