@@ -9,3 +9,4 @@ decoder_num_train_samples=5000
 decoder_epochs=80
 decoder_LR=0.01
 use_adam=1
+uniform_range=(-3.0,3.0)

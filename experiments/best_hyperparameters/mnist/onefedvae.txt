@@ -6,3 +6,4 @@ beta=1.0
 classifier_num_train_samples=5000
 classifier_epochs=10
 use_adam=1
+uniform_range=(-3.0,3.0)
