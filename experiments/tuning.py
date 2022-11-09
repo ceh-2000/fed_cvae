@@ -119,4 +119,4 @@ if __name__ == "__main__":
 
     random.shuffle(all_scripts)
 
-    create_shell_files(all_scripts, hosts, "final_tuning")
+    create_shell_files(all_scripts, hosts, "tuning")
