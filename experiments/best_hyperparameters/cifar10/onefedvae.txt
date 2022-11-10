@@ -1,9 +1,9 @@
 sample_ratio=1.0
 local_epochs=100
 local_LR=0.001
-z_dim=15
+z_dim=25
 beta=1.0
-classifier_num_train_samples=5000
+classifier_num_train_samples=7500
 classifier_epochs=5
 use_adam=1
 uniform_range=(-3.0,3.0)
