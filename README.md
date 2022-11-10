@@ -104,4 +104,5 @@ Modify `--uniform_range` to change the uniform range that the decoder uses to dr
 Notes: This is designed to distribute hyperparameter tuning across the W&M lab computers. 
 
 ### Multi-GPU Example
+Explanation of Multi-GPU setup.
 https://pytorch.org/tutorials/beginner/former_torchies/parallelism_tutorial.html
