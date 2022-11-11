@@ -116,6 +116,9 @@ def run_job(args):
                 args.should_weight_exp,
                 args.should_initialize_same_exp,
                 args.heterogeneous_models_exp,
+                args.noisy_label_dists,
+                args.noise_weight,
+                args.noise_seed
             )
         elif args.algorithm == "fedvae":
             s = ServerFedVAE(
@@ -135,6 +138,9 @@ def run_job(args):
                 args.should_fine_tune_exp,
                 args.heterogeneous_models_exp,
                 args.transform_exp,
+                args.noisy_label_dists,
+                args.noise_weight,
+                args.noise_seed
             )
         else:
             raise NotImplementedError(
@@ -348,6 +354,26 @@ if __name__ == "__main__":
         help="Whether or not to apply transforms to the training images generated in the FedVAE pipeline.",
     )
 
+    # Command line arguments for adding noise to user label distributions
+    parser.add_argument(
+        "--noisy_label_dists",
+        type=int,
+        default=0,
+        help="Whether or not to add noise to user label distributions.",
+    )
+    parser.add_argument(
+        "--noise_weight",
+        type=float,
+        default=0.01,
+        help="The proportion on number of samples to weight noise added to label distributions.",
+    )
+    parser.add_argument(
+        "--noise_seed",
+        type=int,
+        default=1693,
+        help="The seed for sampling noise for label distributions.",
+    )
+
     args = parser.parse_args()
     args.should_log = bool(args.should_log)
     args.use_adam = bool(args.use_adam)
@@ -509,6 +535,16 @@ if __name__ == "__main__":
         print(
             "Should we apply transforms?",
             "yes" if args.transform_exp == 1 else "no",
+        )
+
+    if args.noisy_label_dists and args.algorithm in ['fedvae', 'onefedvae']:
+        print(
+            "Label distribution noise weight:",
+            args.noise_weight,
+        )
+        print(
+            "Label distribution noise seed:",
+            args.noise_seed,
         )
 
     print("_________________________________________________\n")
