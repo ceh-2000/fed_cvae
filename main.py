@@ -357,9 +357,9 @@ if __name__ == "__main__":
     # Command line arguments for adding noise to user label distributions
     parser.add_argument(
         "--noisy_label_dists",
-        type=int,
-        default=0,
-        help="Whether or not to add noise to user label distributions.",
+        type=str,
+        default=None,
+        help="Controlling experiments that add noise to label distributions. One of 'noisy' or 'uniform.'",
     )
     parser.add_argument(
         "--noise_weight",
@@ -537,15 +537,18 @@ if __name__ == "__main__":
             "yes" if args.transform_exp == 1 else "no",
         )
 
-    if args.noisy_label_dists and args.algorithm in ["fedvae", "onefedvae"]:
-        print(
-            "Label distribution noise weight:",
-            args.noise_weight,
-        )
-        print(
-            "Label distribution noise seed:",
-            args.noise_seed,
-        )
+    if (args.noisy_label_dists is not None) and (args.algorithm in ["fedvae", "onefedvae"]):
+        print(f'Running {args.noisy_label_dists} label distributions experiment')
+
+        if args.noisy_label_dists == 'noisy':
+            print(
+                "Label distribution noise weight:",
+                args.noise_weight,
+            )
+            print(
+                "Label distribution noise seed:",
+                args.noise_seed,
+            )
 
     print("_________________________________________________\n")
 

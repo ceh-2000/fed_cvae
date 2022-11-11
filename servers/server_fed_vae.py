@@ -99,7 +99,7 @@ class ServerFedVAE(Server):
         vals, counts = np.unique(targets, return_counts=True)
 
         #  optionally adding noise to the counts
-        if self.noisy_label_dists:
+        if self.noisy_label_dists == 'noisy':
             scale = (
                 self.noise_weight * counts.sum()
             )  # variance of noise distribution is in proportion to number of samples
@@ -113,14 +113,16 @@ class ServerFedVAE(Server):
         for i in range(len(vals)):
             count_dict[int(vals[i])] = int(counts[i])
 
-        pmf = np.zeros(self.num_classes)
+        if self.noisy_label_dists != 'uniform':
+            pmf = np.zeros(self.num_classes)
 
-        for p in range(self.num_classes):
-            if p in count_dict:
-                pmf[p] = count_dict.get(p) / np.sum(counts)
+            for p in range(self.num_classes):
+                if p in count_dict:
+                    pmf[p] = count_dict.get(p) / np.sum(counts)
+        else:
+            pmf = np.array([1 / self.num_classes for i in range(self.num_classes)])
 
         # Handling the case where Python's precision messes with our calculations
-        # This will be a small difference, so we can safely add/subract it from wherever!
         if np.sum(pmf) != 1.0:
             pmf = pmf / np.sum(pmf)
 
