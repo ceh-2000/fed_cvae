@@ -1,12 +1,12 @@
 sample_ratio=0.5
-local_epochs=15
+local_epochs=25
 local_LR=0.001
 z_dim=100
 beta=1.0
 classifier_num_train_samples=5000
 classifier_epochs=5
 decoder_num_train_samples=5000
-decoder_epochs=7
+decoder_epochs=10
 decoder_LR=0.01
 use_adam=1
 uniform_range=(-2.0,2.0)
