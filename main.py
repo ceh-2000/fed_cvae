@@ -537,10 +537,12 @@ if __name__ == "__main__":
             "yes" if args.transform_exp == 1 else "no",
         )
 
-    if (args.noisy_label_dists is not None) and (args.algorithm in ["fedvae", "onefedvae"]):
-        print(f'Running {args.noisy_label_dists} label distributions experiment')
+    if (args.noisy_label_dists is not None) and (
+        args.algorithm in ["fedvae", "onefedvae"]
+    ):
+        print(f"Running {args.noisy_label_dists} label distributions experiment")
 
-        if args.noisy_label_dists == 'noisy':
+        if args.noisy_label_dists == "noisy":
             print(
                 "Label distribution noise weight:",
                 args.noise_weight,

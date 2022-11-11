@@ -99,7 +99,7 @@ class ServerFedVAE(Server):
         vals, counts = np.unique(targets, return_counts=True)
 
         #  optionally adding noise to the counts
-        if self.noisy_label_dists == 'noisy':
+        if self.noisy_label_dists == "noisy":
             scale = (
                 self.noise_weight * counts.sum()
             )  # variance of noise distribution is in proportion to number of samples
@@ -113,7 +113,7 @@ class ServerFedVAE(Server):
         for i in range(len(vals)):
             count_dict[int(vals[i])] = int(counts[i])
 
-        if self.noisy_label_dists != 'uniform':
+        if self.noisy_label_dists != "uniform":
             pmf = np.zeros(self.num_classes)
 
             for p in range(self.num_classes):
@@ -274,7 +274,7 @@ class ServerFedVAE(Server):
 
     def sample_y(self):
         """
-        Helper method to sample one-hot-encoded targets
+        Helper method to uniformly sample one-hot-encoded targets
 
         :return: one-hot-encoded y's
         """
