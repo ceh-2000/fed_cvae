@@ -118,7 +118,7 @@ def run_job(args):
                 args.heterogeneous_models_exp,
                 args.noisy_label_dists,
                 args.noise_weight,
-                args.noise_seed
+                args.noise_seed,
             )
         elif args.algorithm == "fedvae":
             s = ServerFedVAE(
@@ -140,7 +140,7 @@ def run_job(args):
                 args.transform_exp,
                 args.noisy_label_dists,
                 args.noise_weight,
-                args.noise_seed
+                args.noise_seed,
             )
         else:
             raise NotImplementedError(
@@ -537,7 +537,7 @@ if __name__ == "__main__":
             "yes" if args.transform_exp == 1 else "no",
         )
 
-    if args.noisy_label_dists and args.algorithm in ['fedvae', 'onefedvae']:
+    if args.noisy_label_dists and args.algorithm in ["fedvae", "onefedvae"]:
         print(
             "Label distribution noise weight:",
             args.noise_weight,

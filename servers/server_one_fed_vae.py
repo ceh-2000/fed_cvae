@@ -18,7 +18,7 @@ class ServerOneFedVAE(ServerFedVAE):
         heterogeneous_models,
         noisy_label_dists,
         noise_weight,
-        noise_seed
+        noise_seed,
     ):
         super().__init__(
             base_params,
@@ -39,7 +39,7 @@ class ServerOneFedVAE(ServerFedVAE):
             0,
             noisy_label_dists,
             noise_weight,
-            noise_seed
+            noise_seed,
         )
 
     def train(self):

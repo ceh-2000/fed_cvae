@@ -38,7 +38,7 @@ class ServerFedVAE(Server):
         should_transform,
         noisy_label_dists,
         noise_weight,
-        noise_seed
+        noise_seed,
     ):
         super().__init__(base_params)
 
@@ -100,10 +100,14 @@ class ServerFedVAE(Server):
 
         #  optionally adding noise to the counts
         if self.noisy_label_dists:
-            scale = self.noise_weight * counts.sum() # variance of noise distribution is in proportion to number of samples
-            rng = np.random.default_rng(seed = self.noise_seed)
-            noise = rng.normal(loc = 0, scale = scale, size = counts.shape)
-            counts = np.round(np.clip(counts + noise, 0, np.Inf)).astype(int) # converting back to ints to avoid precision issues
+            scale = (
+                self.noise_weight * counts.sum()
+            )  # variance of noise distribution is in proportion to number of samples
+            rng = np.random.default_rng(seed=self.noise_seed)
+            noise = rng.normal(loc=0, scale=scale, size=counts.shape)
+            counts = np.round(np.clip(counts + noise, 0, np.Inf)).astype(
+                int
+            )  # converting back to ints to avoid precision issues
 
         count_dict = {}
         for i in range(len(vals)):
@@ -118,14 +122,12 @@ class ServerFedVAE(Server):
         # Handling the case where Python's precision messes with our calculations
         # This will be a small difference, so we can safely add/subract it from wherever!
         if np.sum(pmf) != 1.0:
-            diff = np.sum(pmf) - 1.0
+            pmf = pmf / np.sum(pmf)
 
-            if diff > 0:
-                pmf[np.argmax(pmf)] -= abs(diff)
-            elif diff < 0:
-                pmf[np.argmax(pmf)] += abs(diff)
-
-        assert np.sum(pmf) == 1.0, f"Vector for user ID {u} sums to {np.sum(pmf)}"
+        try:
+            np.random.choice([i for i in range(self.num_classes)], size=100, p=pmf)
+        except:
+            raise RuntimeError("Random choice on pmf does not work.")
 
         return targets.shape[0], pmf
 
