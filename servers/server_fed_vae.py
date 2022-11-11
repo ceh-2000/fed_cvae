@@ -1,5 +1,6 @@
 import copy
 import random
+import sys
 
 import numpy as np
 import torch
@@ -35,6 +36,9 @@ class ServerFedVAE(Server):
         should_fine_tune,
         heterogeneous_models,
         should_transform,
+        noisy_label_dists,
+        noise_weight,
+        noise_seed
     ):
         super().__init__(base_params)
 
@@ -70,6 +74,11 @@ class ServerFedVAE(Server):
         self.heterogeneous_models = heterogeneous_models
         self.should_transform = should_transform
 
+        # Parameters for label distribution noise experiments
+        self.noisy_label_dists = noisy_label_dists
+        self.noise_weight = noise_weight
+        self.noise_seed = noise_seed
+
     def compute_data_amt_and_pmf(self, u):
         """
         Helper function to get probabilities for user target values
@@ -87,7 +96,15 @@ class ServerFedVAE(Server):
             )
         )
 
-        vals, counts = torch.unique(targets, return_counts=True)
+        vals, counts = np.unique(targets, return_counts=True)
+
+        #  optionally adding noise to the counts
+        if self.noisy_label_dists:
+            scale = self.noise_weight * counts.sum() # variance of noise distribution is in proportion to number of samples
+            rng = np.random.default_rng(seed = self.noise_seed)
+            noise = rng.normal(loc = 0, scale = scale, size = counts.shape)
+            counts = np.round(np.clip(counts + noise, 0, np.Inf)).astype(int) # converting back to ints to avoid precision issues
+
         count_dict = {}
         for i in range(len(vals)):
             count_dict[int(vals[i])] = int(counts[i])
@@ -96,9 +113,9 @@ class ServerFedVAE(Server):
 
         for p in range(self.num_classes):
             if p in count_dict:
-                pmf[p] = count_dict.get(p) / torch.sum(counts)
+                pmf[p] = count_dict.get(p) / np.sum(counts)
 
-        # Handling the case where Python's precision messes with our calulations
+        # Handling the case where Python's precision messes with our calculations
         # This will be a small difference, so we can safely add/subract it from wherever!
         if np.sum(pmf) != 1.0:
             diff = np.sum(pmf) - 1.0
