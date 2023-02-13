@@ -1,9 +1,9 @@
 import copy
 
-from servers.server_fed_cvae_kd import ServerFedVAE
+from servers.server_fed_cvae_kd import ServerFedCVAEKD
 
 
-class ServerOneFedVAE(ServerFedVAE):
+class ServerFedCVAEEns(ServerFedCVAEKD):
     def __init__(
         self,
         base_params,
