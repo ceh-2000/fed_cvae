@@ -1,6 +1,6 @@
 import copy
 
-from servers.server_fed_vae import ServerFedVAE
+from servers.server_fed_cvae_kd import ServerFedVAE
 
 
 class ServerOneFedVAE(ServerFedVAE):
