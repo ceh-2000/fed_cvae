@@ -8,7 +8,7 @@ This project implements a variety of Federated Learning models as well as a nove
 2. `pip`
 
 ### Set up
-Install Python 3.9 and `pip`. We recommend using the package pyenv, which is described in this article.
+Install Python 3.9 and `pip`. We recommend using the package pyenv, which is described in [this](https://realpython.com/intro-to-pyenv/) article.
 Create and enter a new virtual environment and run:
 ```
 pip3 install -r requirements.txt
@@ -17,7 +17,7 @@ This will install the necessary dependencies.
 
 ### Algorithms
 
-The datasets available for benchmarking are [MNIST](http://yann.lecun.com/exdb/mnist/), [FashionMNIST](https://github.com/zalandoresearch/fashion-mnist), and [SVHN](http://ufldl.stanford.edu/housenumbers/). All below examples use MNIST.
+The datasets available for benchmarking are [MNIST](http://yann.lecun.com/exdb/mnist/), [FashionMNIST](https://github.com/zalandoresearch/fashion-mnist), and [SVHN](http://ufldl.stanford.edu/housenumbers/). All examples below use MNIST.
 
 Change to `--dataset fashion` to use FashionMNIST. 
 Chage to `--dataset svhn` to use SVHN.
@@ -93,15 +93,3 @@ Modify `--uniform_range` to change the uniform range that the decoder uses to dr
 ### Format
 1. Run `black .` from the repo root.
 2. Run `isort .` also from the repo root.
-
-### Using the scripts in `experiments`
-1. Modify `experiments/[EXPERIMENT_NAME].py` according to your preferences.
-2. `cd experiments`
-3. Run `python3 [EXPERIMENT_NAME].py`
-4. Run `nohup sh [EXPERIMENT_NAME]_{HOST_NUMBER}.sh &`
-5. Copy the results to local machine: `scp -r ceheinbaugh@th121-1.cs.wm.edu:/home/ceheinbaugh/Desktop/fed_vae/experiments/runs/ /Users/clareheinbaugh/Desktop/fed_vae/`
-
-Notes: This is designed to distribute hyperparameter tuning across the W&M lab computers. 
-
-### Multi-GPU Example
-https://pytorch.org/tutorials/beginner/former_torchies/parallelism_tutorial.html
