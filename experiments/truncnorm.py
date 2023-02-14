@@ -9,7 +9,7 @@ if __name__ == "__main__":
 
     all_scripts = []
     datasets = ["mnist", "fashion", "svhn"]
-    algorithms = ["onefedvae", "fedvae"]
+    algorithms = ["fedcvaeens", "fedcvaekd"]
     default_script = (
         f"python3 ../main.py --should_log 1 --num_users 10 --glob_epochs 1 --alpha 0.01"
     )

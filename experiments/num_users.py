@@ -6,7 +6,7 @@ if __name__ == "__main__":
     hosts = np.array([7, 8, 10, 12])
     all_scripts = []
     datasets = ["mnist", "fashion", "svhn"]
-    algorithms = ["fedavg", "oneshot", "fedvae", "onefedvae"]
+    algorithms = ["fedavg", "oneshot", "fedcvaekd", "fedcvaeens"]
     default_script = f"python3 ../main.py --should_log 1 --glob_epochs 1 --alpha 0.01"
 
     default_scripts_dict = populate_default_scripts(

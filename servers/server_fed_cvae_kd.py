@@ -11,12 +11,12 @@ from torchvision.utils import make_grid
 
 from models.decoder import ConditionalDecoder
 from servers.server import Server
-from users.user_fed_vae import UserFedVAE
+from users.user_fed_cvae_kd import UserFedCVAE
 from utils import (WrapperDataset, average_weights, one_hot_encode,
                    reconstruction_loss)
 
 
-class ServerFedVAE(Server):
+class ServerFedCVAEKD(Server):
     def __init__(
         self,
         base_params,
@@ -133,7 +133,7 @@ class ServerFedVAE(Server):
 
             version = random.choice(version_options)
 
-            new_user = UserFedVAE(
+            new_user = UserFedCVAE(
                 {
                     "device": self.device,
                     "user_id": u,
@@ -295,7 +295,7 @@ class ServerFedVAE(Server):
             X_sample_transform = transforms(X_sample)
 
             self.save_images(
-                X_sample_transform[:10], True, "transformed_fedvae_images", 1
+                X_sample_transform[:10], True, "transformed_fedcvae_images", 1
             )
 
             X_sample = torch.cat((X_sample, X_sample_transform), 0)

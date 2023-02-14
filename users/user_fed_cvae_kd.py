@@ -7,7 +7,7 @@ from users.user import User
 from utils import kl_divergence, one_hot_encode, reconstruction_loss
 
 
-class UserFedVAE(User):
+class UserFedCVAE(User):
     def __init__(self, base_params, z_dim, image_size, beta, data_amt, pmf, version):
         super().__init__(base_params)
 

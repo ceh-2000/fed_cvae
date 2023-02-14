@@ -17,8 +17,8 @@ if __name__ == "__main__":
     should_log = 1
     dataset_vals = ["cifar10"]
 
-    # FedVAE tuning (use the same values for OneFedVAE)
-    algorithm = "fedvae"
+    # FedCVAE-KD tuning (use the same values for FedCVAE-Ens)
+    algorithm = "fedcvaekd"
     beta = 1.0
     use_adam = 1
     local_epochs = 50
@@ -51,7 +51,7 @@ if __name__ == "__main__":
                             f"--transform_exp {transform_exp} --heterogeneous_models_exp 0"
                         )
 
-    algorithm = "onefedvae"
+    algorithm = "fedcvaeens"
     beta = 1.0
     use_adam = 1
     local_LR = 0.001

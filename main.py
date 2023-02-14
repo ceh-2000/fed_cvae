@@ -5,8 +5,8 @@ from torch.utils.tensorboard import SummaryWriter
 
 from data import Data
 from servers.server_fed_avg import ServerFedAvg
-from servers.server_fed_vae import ServerFedVAE
-from servers.server_one_fed_vae import ServerOneFedVAE
+from servers.server_fed_cvae_kd import ServerFedCVAEKD
+from servers.server_fed_cvae_ens import ServerFedCVAEEns
 from servers.server_one_shot import ServerOneShot
 from unachievable_ideal import UnachievableIdeal
 
@@ -30,12 +30,12 @@ def run_job(args):
                     cur_run_name
                     + f"_sampling={args.one_shot_sampling}_K={args.K if args.one_shot_sampling != 'all' else args.num_users}"
                 )
-            elif args.algorithm == "onefedvae":
+            elif args.algorithm == "fedcvaeens":
                 cur_run_name = (
                     cur_run_name
                     + f"_z_dim={args.z_dim}_beta={args.beta}_classifier_train_samples={args.classifier_num_train_samples}_classifier_epochs={args.classifier_epochs}_uniform_range={args.uniform_range}"
                 )
-            elif args.algorithm == "fedvae":
+            elif args.algorithm == "fedcvaekd":
                 cur_run_name = (
                     cur_run_name
                     + f"_z_dim={args.z_dim}_classifier_train_samples={args.classifier_num_train_samples}_classifier_epochs={args.classifier_epochs}_decoder_train_samples={args.decoder_num_train_samples}_decoder_epochs={args.decoder_epochs}_decoder_LR={args.decoder_LR}_uniform_range={args.uniform_range}"
@@ -104,8 +104,8 @@ def run_job(args):
                 args.K,
                 args.should_initialize_same_exp,
             )
-        elif args.algorithm == "onefedvae":
-            s = ServerOneFedVAE(
+        elif args.algorithm == "fedcvaeens":
+            s = ServerFedCVAEEns(
                 default_params,
                 args.z_dim,
                 d.image_size,
@@ -117,8 +117,8 @@ def run_job(args):
                 args.should_initialize_same_exp,
                 args.heterogeneous_models_exp,
             )
-        elif args.algorithm == "fedvae":
-            s = ServerFedVAE(
+        elif args.algorithm == "fedcvaekd":
+            s = ServerFedCVAEKD(
                 default_params,
                 args.z_dim,
                 d.image_size,
@@ -264,7 +264,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--beta",
         type=float,
-        help="Weight on the KL divergence term for FedVAE",
+        help="Weight on the KL divergence term for FedCVAE-KD",
         default=1.0,
     )
     parser.add_argument(
@@ -345,7 +345,7 @@ if __name__ == "__main__":
         "--transform_exp",
         type=int,
         default=0,
-        help="Whether or not to apply transforms to the training images generated in the FedVAE pipeline.",
+        help="Whether or not to apply transforms to the training images generated in the FedCVAE-KD and FedCVAE-Ens pipeline.",
     )
 
     args = parser.parse_args()
@@ -409,8 +409,8 @@ if __name__ == "__main__":
             args.K if args.one_shot_sampling != "all" else "all",
         )
 
-    # OneFedVAE-specific parameters
-    elif args.algorithm == "onefedvae":
+    # FedCVAE-Ens-specific parameters
+    elif args.algorithm == "fedcvaeens":
         print(f"Using {'Adam' if args.use_adam else 'SGD'} as the local optimizer")
         print(
             "Level of heterogeneity (alpha):",
@@ -435,8 +435,8 @@ if __name__ == "__main__":
         )
         print("Range of values to use for decoder sample:", args.uniform_range)
 
-    # FedVAE-specific parameters
-    elif args.algorithm == "fedvae":
+    # FedCVAE-KD-specific parameters
+    elif args.algorithm == "fedcvaekd":
         print(f"Using {'Adam' if args.use_adam else 'SGD'} as the local optimizer")
         print(
             "Level of heterogeneity (alpha):",
