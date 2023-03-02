@@ -1,7 +1,7 @@
 # FedCVAE
 
 ### Description
-This repository include implementations for a variety of established Federated Learning methods as well as two novel methods, FedCVAE-KD and FedCVAE-Ens. Please see the accompanying paper ([Data-Free One-Shot Federated Learning Under Very High Statistical Heterogeneity](https://openreview.net/forum?id=_hb4vM3jspB) ICLR 2023) for further details. If you use this implementation, please cite our work as follows:
+This repository include implementations for a variety of established Federated Learning methods as well as two novel methods, FedCVAE-KD and FedCVAE-Ens. Please see the accompanying paper "[Data-Free One-Shot Federated Learning Under Very High Statistical Heterogeneity](https://openreview.net/forum?id=_hb4vM3jspB)" (ICLR 2023) for further details. If you use found our implementation helpflul, please cite our work:
 
 ```
 @inproceedings{
